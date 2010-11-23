@@ -18,8 +18,11 @@ void c_map_section::pointToScreen(int *inx, int *iny)
 c_map_section::c_map_section(void)
 {
 	tile_heights = 0;
+	tile_rainfall = 0;
 	tile_sprites = 0;
 	tile_colors = 0;
+	tile_terrain = 0;
+
 	board_width = 0;
 	board_height = 0;
 	num_tiles = 0;

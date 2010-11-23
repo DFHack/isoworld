@@ -1,11 +1,11 @@
 #pragma once
 #include "common.h"
-
+#include "texture_packer.h"
 
 class c_tile
 {
-	ALLEGRO_BITMAP * top_sprite;
-	ALLEGRO_BITMAP * bottom_sprite;
+	vector<s_sprite> top_sprites;
+	vector<s_sprite> bottom_sprites;
 	int base_pixel_height;
 
 	int cap_bottom;
@@ -13,8 +13,8 @@ class c_tile
 public:
 	void draw(float x, float y, int height, int bottom);
 	void draw_tinted(float x, float y, int height, ALLEGRO_COLOR color, int bottom);
-	void load_bitmap(ALLEGRO_BITMAP * bitmap, int bottomheight);
 	void load_ini(const char * path);
+	s_sprite get_from_ini(ALLEGRO_CONFIG * config, const char * section);
 	c_tile(void);
 	~c_tile(void);
 

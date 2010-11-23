@@ -40,7 +40,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="&quot;D:\Home\Documents\Visual Studio 2005\Projects\IsoWorld\allegro\include&quot;"
+				AdditionalIncludeDirectories="&quot;.\allegro\include&quot;"
 				PreprocessorDefinitions="WIN32;_WINDOWS;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_DEPRECATE;NDEBUG;ALLEGRO_POPUP_EXAMPLES"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -63,7 +63,7 @@
 				Name="VCLinkerTool"
 				AdditionalDependencies="allegro_dialog.lib allegro_font.lib allegro_ttf.lib allegro_image.lib allegro_primitives.lib allegro_color.lib allegro.lib allegro_main.lib"
 				LinkIncremental="2"
-				AdditionalLibraryDirectories="&quot;D:\Home\Documents\Visual Studio 2005\Projects\IsoWorld\allegro\lib&quot;"
+				AdditionalLibraryDirectories=".\allegro\lib"
 				GenerateDebugInformation="true"
 				SubSystem="1"
 				TargetMachine="1"

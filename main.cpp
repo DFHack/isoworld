@@ -52,6 +52,8 @@ s_maplist map_list;
 c_config user_config;
 
 c_minimap minimap;
+
+c_imagelist imagelist;
 /* Our thread to show the native file dialog. */
 static void *async_file_dialog_thread_func(ALLEGRO_THREAD *thread, void *arg)
 {

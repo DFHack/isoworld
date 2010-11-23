@@ -1,11 +1,21 @@
 #include "texture_packer.h"
 
+ALLEGRO_BITMAP* load_bitmap_withWarning(const char* path){
+	ALLEGRO_BITMAP* img = 0;
+	img = al_load_bitmap(path);
+	if(!img){
+		//DisplayErr("Cannot load image: %s", path);
+		exit(0);
+	}
+	al_convert_mask_to_alpha(img, al_map_rgb(255, 0, 255));
+	return img;
+}
 
-bool compare_size( ALLEGRO_IMAGE * first, ALLEGRO_IMAGE * second )
+bool compare_size( ALLEGRO_BITMAP * first, ALLEGRO_BITMAP * second )
 {
 	if(al_get_bitmap_width(first) < al_get_bitmap_width(second))
 		return true;
-	else if(al_get_bitmap_width(first) == al_get_bitmap_width(second)
+	else if(al_get_bitmap_width(first) == al_get_bitmap_width(second))
 	{
 	if(al_get_bitmap_height(first) < al_get_bitmap_height(second))
 		return true;
@@ -13,8 +23,23 @@ bool compare_size( ALLEGRO_IMAGE * first, ALLEGRO_IMAGE * second )
 	return false;
 }
 
-int get_next_power_of_2(int in)
+unsigned int c_imagelist::load_image(const char * filename)
 {
+	unsigned int num_images = image_list.size();
+	for(uint32_t i = 0; i < num_images; i++)
+	{
+		if (strcmp(filename, image_filenames[i]->c_str()) == 0)
+			return i;
+	}
+	image_list.push_back(load_bitmap_withWarning(filename));
+	image_filenames.push_back( new string(filename));
+	log_printf("Loaded Image: %s\n", filename);
+	return image_list.size() - 1;
+}
+
+ALLEGRO_BITMAP * c_imagelist::get_image(unsigned int index)
+{
+	return image_list[index];
 }
 //using System;
 //using System.Collections.Generic;
