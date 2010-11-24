@@ -1,26 +1,10 @@
 #pragma once
 
+#include <vector>
 #include "common.h"
 #include "c_tile.h"
-
-enum terrain_type
-{
-	OCEAN,
-	RIVER,
-	SWAMP,
-	GRASS,
-	DIRT,
-	SAND
-};
-
-struct s_map_block
-{
-	int height;
-	unsigned char rainfall;
-	c_tile* sprite;
-	ALLEGRO_COLOR color;
-	terrain_type terrain;
-};
+#include "c_tileset.h"
+#include "s_map_block.h"
 
 class c_map_section
 {
@@ -28,9 +12,13 @@ class c_map_section
 
 	unsigned int board_width, board_height;
 	unsigned int num_tiles;
+
 public:
 	int board_center_x;
 	int board_top_y;
+
+	vector<c_tileset> tileset_list;
+	int current_tileset;
 
 	bool set_size(int x, int y);
 	void clear_tiles(void);
@@ -40,6 +28,7 @@ public:
 	void load_colors(ALLEGRO_BITMAP * colormap);
 	void load_rainfall(ALLEGRO_BITMAP * rainmap);
 	void draw(int inx, int iny);
+	void propogate_tiles(s_maplist maplist);
 	c_map_section(void);
 	~c_map_section(void);
 };

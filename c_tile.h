@@ -1,17 +1,21 @@
 #pragma once
 #include "common.h"
-#include "texture_packer.h"
+#include "c_imagelist.h"
+
+typedef class c_tile c_tile;
+#include "s_map_block.h"
 
 class c_tile
 {
 	vector<s_sprite> top_sprites;
 	vector<s_sprite> bottom_sprites;
 	vector<s_sprite> surface_sprites;
-public:
-	void draw(float x, float y, int height, int bottom);
-	void draw_tinted(float x, float y, int height, ALLEGRO_COLOR color, int bottom);
-	void load_ini(const char * path);
+
 	s_sprite get_from_ini(ALLEGRO_CONFIG * config, const char * section);
+
+public:
+	void draw(float x, float y, int height, s_map_block * block, int bottom);
+	void load_ini(const char * path);
 	c_tile(void);
 	~c_tile(void);
 

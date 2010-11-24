@@ -4,15 +4,17 @@
 
 void c_map_section::pointToScreen(int *inx, int *iny)
 {
-	int offx = board_center_x - (TILE_WIDTH/2);
-	int offy = board_top_y + TILE_HEIGHT;
+	int offx = board_center_x;
+	int offy = board_top_y;
 	int x = *inx-*iny;
 	int y = *inx+*iny;
-	x = x * TILE_WIDTH / 2;
-	y = y * TILE_HEIGHT / 2;
+	x = x * tileset_list.at(current_tileset).tile_width / 2;
+	y = y * tileset_list.at(current_tileset).tile_height / 2;
 	x+=offx;
 	y+=offy;
 	*inx=x;*iny=y;
+
+	current_tileset = 0;
 }
 
 c_map_section::c_map_section(void)
@@ -25,6 +27,7 @@ c_map_section::c_map_section(void)
 	board_center_x = 0;
 	board_top_y = 0;
 	set_size(50, 50);
+	current_tileset = 0;
 }
 
 c_map_section::~c_map_section(void)
@@ -41,8 +44,17 @@ bool c_map_section::set_size(int x, int y)
 	clear_tiles();
 
 	block_array = new s_map_block[total_needed];
-	
+
 	num_tiles = total_needed;
+
+	for(int i = 0; i < num_tiles; i++)
+	{
+		block_array[i].color = al_map_rgb(255,255,255);
+		block_array[i].height = 0;
+		block_array[i].rainfall = 0;
+		block_array[i].sprite = 0;
+		block_array[i].terrain = GRASS;
+	}
 
 	return true;
 }
@@ -75,16 +87,18 @@ void c_map_section::draw(int inx, int iny)
 			drawx += inx;
 			drawy += iny;
 			unsigned int index = x + (board_width * y);
-
-			int bottom_l = 0;
-			int bottom_r = 0;
-			if(x+1 < board_width)
-				bottom_r = block_array[index+1].height;
-			if(y+1 < board_height)
-				bottom_l = block_array[index+board_width].height;
-			if (bottom_l < bottom_r)
-				bottom_r = bottom_l;
-			block_array[index].sprite->draw_tinted(drawx, drawy, block_array[index].height, al_map_rgba(255,255,255,255), bottom_r);
+			if(block_array[index].sprite > 0)
+			{
+				int bottom_l = 0;
+				int bottom_r = 0;
+				if(x+1 < board_width)
+					bottom_r = block_array[index+1].height;
+				if(y+1 < board_height)
+					bottom_l = block_array[index+board_width].height;
+				if (bottom_l < bottom_r)
+					bottom_r = bottom_l;
+				block_array[index].sprite->draw(drawx, drawy, block_array[index].height, &block_array[index], bottom_r);
+			}
 		}
 	}
 }
@@ -146,7 +160,7 @@ void c_map_section::load_rainfall(ALLEGRO_BITMAP * rainmap)
 				al_unmap_rgb(pixel, &red, &green, &blue);
 
 				block_array[index].rainfall =(red * 100) /256;
-				
+
 			}
 			else block_array[index].rainfall = 0;
 
@@ -170,9 +184,31 @@ void c_map_section::load_colors(ALLEGRO_BITMAP * colormap)
 				tempy =  bind_to_range(tempy , al_get_bitmap_height(colormap));
 
 				block_array[index].color = al_get_pixel(colormap, tempx, tempy);
-				
+
 			}
 			else block_array[index].color = al_map_rgb(255,255,255);
+
+		}
+	}
+}
+
+void c_map_section::propogate_tiles(s_maplist maplist)
+{
+	load_heights(maplist.elevation_map);
+	load_colors(maplist.biome_map);
+	load_rainfall(maplist.rainfall_map);
+
+	//now for the actual tile propogating.
+	for (unsigned int y = 0; y < board_width; y++)
+	{
+		for (unsigned int x = 0; x < board_height; x++)
+		{
+			unsigned int index = x + (board_width * y);
+			if(tileset_list.size() > 0)
+			{
+				block_array[index].sprite = tileset_list.at(current_tileset).get_tile(block_array[index]);	
+			}
+			else block_array[index].sprite = 0;
 
 		}
 	}

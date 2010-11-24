@@ -13,6 +13,7 @@
 #include "c_config.h"
 #include "console.h"
 #include "c_minimap.h"
+#include "c_tileset.h"
 
 using namespace std;
 
@@ -251,7 +252,6 @@ int main(void)
 	AsyncDialog *cur_dialog = NULL;
 	bool redraw = false;
 	bool close_log = false;
-	int button;
 	bool message_log = true;
 
 	if (!al_init()) {
@@ -303,7 +303,6 @@ int main(void)
 	log_printf("success.\n");
 
 	timer = al_create_timer(1.0 / 30);
-restart:
 	log_printf("Starting main loop.\n");
 	queue = al_create_event_queue();
 	al_register_event_source(queue, al_get_keyboard_event_source());
@@ -326,7 +325,11 @@ restart:
 
 	minimap.reload();
 
-	test_map.flood_fill(&test_tile, 0);
+	c_tileset temp_tileset;
+
+	test_map.tileset_list.push_back(temp_tileset);
+
+	test_map.tileset_list.at(0).load_ini("default_tileset.ini");
 
 	test_map.board_center_x = 0;
 	test_map.board_top_y = 0;
@@ -459,9 +462,7 @@ restart:
 					old_dialog->newimages = 0;
 				}
 			}
-			test_map.load_heights(map_list.elevation_map);
-			test_map.load_rainfall(map_list.rainfall_map);
-			test_map.load_colors(map_list.biome_map);
+			test_map.propogate_tiles(map_list);
 			test_map.draw(x, y + user_config.map_shift);
 			al_draw_textf(font, cur_dialog ? inactive : active, x, y, ALLEGRO_ALIGN_CENTRE, "Open");
 			minimap.draw();

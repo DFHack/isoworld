@@ -10,7 +10,6 @@
 #include <allegro5/allegro_primitives.h>
 
 #include <string>
-
 using namespace std;
 
 struct s_pathlist
@@ -42,9 +41,6 @@ struct s_maplist
 	ALLEGRO_BITMAP * salinity_map;
 	s_maplist(void);
 };
-
-#define TILE_WIDTH 16
-#define TILE_HEIGHT 8
 
 extern s_pathlist path_list;
 

@@ -1,5 +1,46 @@
 #include "c_config.h"
 
+/* Function: al_color_html_to_rgba
+*/
+void color_html_to_rgba(char const *string,
+						float *red, float *green, float *blue, float *alpha)
+{
+	char const *ptr = string;
+	uint32_t rgba;
+	if (*ptr == '#') ptr++;
+	rgba = strtol(ptr, NULL, 16);
+	if(strlen(ptr) == 8)
+	{
+		*red = (rgba >> 24) / 255.0;
+		*green = ((rgba >> 16) & 255) / 255.0;
+		*blue = ((rgba >> 8) & 255) / 255.0;
+		*alpha = (rgba & 255) / 255.0;
+	}
+	else
+	{
+		*red = (rgba >> 16) / 255.0;
+		*green = ((rgba >> 8) & 255) / 255.0;
+		*blue = (rgba & 255) / 255.0;
+		*alpha = 1.0;
+	}
+}
+
+/* Function: al_color_html
+ */
+ALLEGRO_COLOR color_html(char const *string)
+{
+   float r, g, b, a;
+   color_html_to_rgba(string, &r, &g, &b, &a);
+   return al_map_rgba_f(r, g, b, a);
+}
+
+int get_config_int(const ALLEGRO_CONFIG *config, const char *section, const char *key)
+{
+	const char * buffer = al_get_config_value(config, section, key);
+	if(buffer) return atoi(buffer);
+	else return 0;
+}
+
 c_config::c_config(void)
 {
 	res_x = 640;

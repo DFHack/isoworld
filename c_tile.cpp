@@ -1,11 +1,39 @@
 #include "c_tile.h"
+#include "c_config.h"
+#include "s_map_block.h"
 
-int get_config_int(const ALLEGRO_CONFIG *config, const char *section, const char *key)
+void draw_sprite(s_sprite sprite, s_map_block * block, float x, float y)
 {
-	const char * buffer = al_get_config_value(config, section, key);
-	if(buffer)
-		return atoi(buffer);
-	else return 0;
+	ALLEGRO_COLOR color;
+	if(sprite.color_by == NONE)
+		color = al_map_rgb(255,255,255);
+	else if(sprite.color_by == INI)
+		color = sprite.color;
+	else if(sprite.color_by == BIOME)
+		color = block->color;
+	else color = al_map_rgb(255,255,255);
+	al_draw_tinted_bitmap_region(
+		imagelist.get_image(sprite.index),
+		color,
+		sprite.x,
+		sprite.y,
+		sprite.width,
+		sprite.height,
+		x + sprite.origin_x,
+		y + sprite.origin_y,
+		0);
+
+}
+
+e_color_by get_color_selector(const char * text)
+{
+	if(strcmp(text, "none") == 0)
+		return NONE;
+	if(strcmp(text, "html") == 0)
+		return INI;
+	if(strcmp(text, "biome_map") == 0)
+		return BIOME;
+	return NONE;
 }
 c_tile::c_tile(void)
 {
@@ -15,27 +43,17 @@ c_tile::~c_tile(void)
 {
 }
 
-void c_tile::draw(float x, float y, int height, int bottom = 0)
-{
-	draw_tinted(x, y, height, al_map_rgb(255,255,255), bottom);
-}
-
-void c_tile::draw_tinted(float x, float y, int height, ALLEGRO_COLOR color, int bottom = 0)
+void c_tile::draw(float x, float y, int height, s_map_block * block, int bottom = 0)
 {
 	if ((height-bottom) <= 0)
 	{
 		for(unsigned int i = 0; i < top_sprites.size(); i++)
 		{
-			al_draw_tinted_bitmap_region(
-				imagelist.get_image(top_sprites.at(i).index),
-				color,
-				top_sprites.at(i).x,
-				top_sprites.at(i).y,
-				top_sprites.at(i).width,
-				top_sprites.at(i).height,
-				x + top_sprites.at(i).origin_x,
-				y + top_sprites.at(i).origin_y - height,
-				0);
+			draw_sprite(
+				top_sprites.at(i),
+				block,
+				x,
+				y - height);
 		}
 	}
 	else
@@ -46,46 +64,31 @@ void c_tile::draw_tinted(float x, float y, int height, ALLEGRO_COLOR color, int 
 			int bottom_section_height = (height - bottom) % bottom_sprites.at(i).column_height;
 			for( int sec = 0; sec <= num_sections; sec++)
 			{
-				al_draw_tinted_bitmap_region(
-					imagelist.get_image(bottom_sprites.at(i).index),
-					color, 
-					bottom_sprites.at(i).x, 
-					bottom_sprites.at(i).y, 
-					bottom_sprites.at(i).width, 
-					bottom_sprites.at(i).height, 
-					x + bottom_sprites.at(i).origin_x, 
-					(y + bottom_sprites.at(i).origin_y) - bottom_section_height - ((sec-1) * bottom_sprites.at(i).column_height) - bottom,
-					0);
+				draw_sprite(
+					bottom_sprites.at(i), 
+					block,
+					x, 
+					y - bottom_section_height - ((sec-1) * bottom_sprites.at(i).column_height) - bottom);
 			}
 		}
 		for(unsigned int i = 0; i < top_sprites.size(); i++)
 		{
-			al_draw_tinted_bitmap_region(
-				imagelist.get_image(top_sprites.at(i).index),
-				color,
-				top_sprites.at(i).x,
-				top_sprites.at(i).y,
-				top_sprites.at(i).width,
-				top_sprites.at(i).height,
-				x + top_sprites.at(i).origin_x,
-				y + top_sprites.at(i).origin_y - height, 0
-				);
+			draw_sprite(
+				top_sprites.at(i),
+				block,
+				x,
+				y - height);
 		}
 	}
 	if(height < 0)
 	{
 		for(unsigned int i = 0; i < surface_sprites.size(); i++)
 		{
-			al_draw_tinted_bitmap_region(
-				imagelist.get_image(surface_sprites.at(i).index),
-				color,
-				surface_sprites.at(i).x,
-				surface_sprites.at(i).y,
-				surface_sprites.at(i).width,
-				surface_sprites.at(i).height,
-				x + surface_sprites.at(i).origin_x,
-				y + surface_sprites.at(i).origin_y,
-				0);
+			draw_sprite(
+				surface_sprites.at(i),
+				block,
+				x,
+				y);
 		}
 
 	}
@@ -94,8 +97,6 @@ void c_tile::draw_tinted(float x, float y, int height, ALLEGRO_COLOR color, int 
 void c_tile::load_ini(const char *path)
 {
 	ALLEGRO_CONFIG * config = 0;
-
-	config = al_create_config();
 
 	config = al_load_config_file(path);
 
@@ -155,6 +156,14 @@ s_sprite c_tile::get_from_ini(ALLEGRO_CONFIG *config, const char * section)
 	temp.origin_y = 0 - temp.origin_y;
 
 	temp.column_height = get_config_int(config, section, "column_height");
+
+	const char * color_selection = al_get_config_value(config, section, "color_source");
+	if(color_selection)
+		temp.color_by = get_color_selector(color_selection);
+
+	const char * color = al_get_config_value(config, section, "color_html");
+	if(color)
+		temp.color = color_html(color);
 
 	return temp;
 }

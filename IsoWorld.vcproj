@@ -185,6 +185,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\c_imagelist.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\c_map_section.cpp"
 				>
 			</File>
@@ -197,15 +201,15 @@
 				>
 			</File>
 			<File
+				RelativePath=".\c_tileset.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\console.cpp"
 				>
 			</File>
 			<File
 				RelativePath=".\main.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\texture_packer.cpp"
 				>
 			</File>
 		</Filter>
@@ -216,6 +220,10 @@
 			>
 			<File
 				RelativePath=".\c_config.h"
+				>
+			</File>
+			<File
+				RelativePath=".\c_imagelist.h"
 				>
 			</File>
 			<File
@@ -231,6 +239,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\c_tileset.h"
+				>
+			</File>
+			<File
 				RelativePath=".\common.h"
 				>
 			</File>
@@ -239,7 +251,7 @@
 				>
 			</File>
 			<File
-				RelativePath=".\texture_packer.h"
+				RelativePath=".\s_map_block.h"
 				>
 			</File>
 		</Filter>
