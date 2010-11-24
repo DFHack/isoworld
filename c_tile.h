@@ -6,6 +6,7 @@ class c_tile
 {
 	vector<s_sprite> top_sprites;
 	vector<s_sprite> bottom_sprites;
+	vector<s_sprite> surface_sprites;
 public:
 	void draw(float x, float y, int height, int bottom);
 	void draw_tinted(float x, float y, int height, ALLEGRO_COLOR color, int bottom);

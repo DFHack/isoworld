@@ -85,8 +85,6 @@ void c_map_section::draw(int inx, int iny)
 			if (bottom_l < bottom_r)
 				bottom_r = bottom_l;
 			block_array[index].sprite->draw_tinted(drawx, drawy, block_array[index].height, al_map_rgba(255,255,255,255), bottom_r);
-			if(block_array[index].height < 0)
-				block_array[index].sprite->draw_tinted(drawx, drawy, 0, al_map_rgba(0,0,98,128), 0);
 		}
 	}
 }
