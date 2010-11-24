@@ -1,5 +1,17 @@
 #include "texture_packer.h"
 
+s_sprite::s_sprite(void)
+{
+	x = 0;
+	y = 0;
+	width = 0;
+	height = 0;
+	index = -1;
+	origin_x = 0;
+	origin_y = 0;
+	column_height = 0;
+}
+
 ALLEGRO_BITMAP* load_bitmap_withWarning(const char* path){
 	ALLEGRO_BITMAP* img = 0;
 	img = al_load_bitmap(path);
@@ -23,9 +35,9 @@ bool compare_size( ALLEGRO_BITMAP * first, ALLEGRO_BITMAP * second )
 	return false;
 }
 
-unsigned int c_imagelist::load_image(const char * filename)
+size_t c_imagelist::load_image(const char * filename)
 {
-	unsigned int num_images = image_list.size();
+	size_t num_images = image_list.size();
 	for(uint32_t i = 0; i < num_images; i++)
 	{
 		if (strcmp(filename, image_filenames[i]->c_str()) == 0)
@@ -40,6 +52,24 @@ unsigned int c_imagelist::load_image(const char * filename)
 ALLEGRO_BITMAP * c_imagelist::get_image(unsigned int index)
 {
 	return image_list[index];
+}
+
+c_imagelist::c_imagelist()
+{
+}
+
+void c_imagelist::unload_bitmaps()
+{
+	for(unsigned int i = 0; i < image_list.size(); i++)
+	{
+		al_destroy_bitmap(image_list.at(i));
+	}
+	image_list.clear();
+	for(unsigned int i = 0; i < image_filenames.size(); i++)
+	{
+		delete image_filenames.at(i);
+	}
+
 }
 //using System;
 //using System.Collections.Generic;

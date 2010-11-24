@@ -17,11 +17,7 @@ void c_map_section::pointToScreen(int *inx, int *iny)
 
 c_map_section::c_map_section(void)
 {
-	tile_heights = 0;
-	tile_rainfall = 0;
-	tile_sprites = 0;
-	tile_colors = 0;
-	tile_terrain = 0;
+	block_array = 0;
 
 	board_width = 0;
 	board_height = 0;
@@ -44,11 +40,7 @@ bool c_map_section::set_size(int x, int y)
 
 	clear_tiles();
 
-	tile_heights = new int[x*y];
-	tile_rainfall = new unsigned char[x*y];
-	tile_sprites = new c_tile*[x*y];
-	tile_colors = new ALLEGRO_COLOR[x*y];
-	tile_terrain = new terrain_type[x*y];
+	block_array = new s_map_block[total_needed];
 	
 	num_tiles = total_needed;
 
@@ -57,21 +49,17 @@ bool c_map_section::set_size(int x, int y)
 
 void c_map_section::clear_tiles(void)
 {
-	delete [num_tiles] tile_heights;
-	delete [num_tiles] tile_rainfall;
-	delete [num_tiles] tile_sprites;
-	delete [num_tiles] tile_colors; 
-	delete [num_tiles] tile_terrain;
+	delete [num_tiles] block_array;
 	num_tiles = 0;
 }
 void c_map_section::flood_fill(c_tile *tile, int height)
 {
-	for (int i = 0; i < (board_width * board_height); i++)
+	for (unsigned int i = 0; i < (board_width * board_height); i++)
 	{
-		tile_heights[i] = height;
-		tile_sprites[i] = tile;
-		tile_colors[i] = al_map_rgb(255,255,255);
-		tile_terrain[i] = GRASS;
+		block_array[i].height = height;
+		block_array[i].sprite = tile;
+		block_array[i].color = al_map_rgb(255,255,255);
+		block_array[i].terrain = GRASS;
 	}
 }
 
@@ -91,14 +79,14 @@ void c_map_section::draw(int inx, int iny)
 			int bottom_l = 0;
 			int bottom_r = 0;
 			if(x+1 < board_width)
-				bottom_r = tile_heights[index+1];
+				bottom_r = block_array[index+1].height;
 			if(y+1 < board_height)
-				bottom_l = tile_heights[index+board_width];
+				bottom_l = block_array[index+board_width].height;
 			if (bottom_l < bottom_r)
 				bottom_r = bottom_l;
-			tile_sprites[index]->draw_tinted(drawx, drawy, tile_heights[index], tile_colors[index], bottom_r);
-			if(tile_heights[index] < 0)
-				tile_sprites[index]->draw_tinted(drawx, drawy, 0, al_map_rgba(0,0,98,128), 0);
+			block_array[index].sprite->draw_tinted(drawx, drawy, block_array[index].height, al_map_rgba(255,255,255,255), bottom_r);
+			if(block_array[index].height < 0)
+				block_array[index].sprite->draw_tinted(drawx, drawy, 0, al_map_rgba(0,0,98,128), 0);
 		}
 	}
 }
@@ -124,15 +112,15 @@ void c_map_section::load_heights(ALLEGRO_BITMAP * heightmap)
 				al_unmap_rgb(pixel, &red, &green, &blue);
 				if(red == 0 && green == 0)
 				{
-					tile_heights[index] = blue;
+					block_array[index].height = blue;
 				}
 				else if(red == green && green == blue)
 				{
-					tile_heights[index] = blue + 25;
+					block_array[index].height = blue + 25;
 				}
-				tile_heights[index] -=99;
+				block_array[index].height -=99;
 			}
-			else tile_heights[index] = 0;
+			else block_array[index].height = 0;
 
 		}
 	}
@@ -159,10 +147,10 @@ void c_map_section::load_rainfall(ALLEGRO_BITMAP * rainmap)
 				unsigned char blue;
 				al_unmap_rgb(pixel, &red, &green, &blue);
 
-				tile_rainfall[index] =(red * 100) /256;
+				block_array[index].rainfall =(red * 100) /256;
 				
 			}
-			else tile_rainfall[index] = 0;
+			else block_array[index].rainfall = 0;
 
 		}
 	}
@@ -183,10 +171,10 @@ void c_map_section::load_colors(ALLEGRO_BITMAP * colormap)
 				tempx =  bind_to_range(tempx , al_get_bitmap_width(colormap));
 				tempy =  bind_to_range(tempy , al_get_bitmap_height(colormap));
 
-				tile_colors[index] = al_get_pixel(colormap, tempx, tempy);
+				block_array[index].color = al_get_pixel(colormap, tempx, tempy);
 				
 			}
-			else tile_colors[index] = al_map_rgb(255,255,255);
+			else block_array[index].color = al_map_rgb(255,255,255);
 
 		}
 	}

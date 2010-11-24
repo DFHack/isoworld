@@ -316,15 +316,9 @@ restart:
 	}
 	al_start_timer(timer);
 
-	ALLEGRO_BITMAP * temp;
-	temp = al_load_bitmap("tile_white.png");
-
-	if(!temp)
-		abort_example("Couldn't load image");
-
 	c_tile test_tile;
 
-	test_tile.load_bitmap(temp, 8);
+	test_tile.load_ini("default_tile.ini");
 
 	c_map_section test_map;
 
@@ -485,6 +479,8 @@ restart:
 	}
 
 	log_printf("Exiting.\n");
+
+	imagelist.unload_bitmaps();
 
 	user_config.save_values();
 	user_config.save_file();

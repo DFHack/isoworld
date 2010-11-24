@@ -6,10 +6,6 @@ class c_tile
 {
 	vector<s_sprite> top_sprites;
 	vector<s_sprite> bottom_sprites;
-	int base_pixel_height;
-
-	int cap_bottom;
-	int base_bottom;
 public:
 	void draw(float x, float y, int height, int bottom);
 	void draw_tinted(float x, float y, int height, ALLEGRO_COLOR color, int bottom);

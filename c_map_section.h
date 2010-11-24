@@ -13,13 +13,18 @@ enum terrain_type
 	SAND
 };
 
+struct s_map_block
+{
+	int height;
+	unsigned char rainfall;
+	c_tile* sprite;
+	ALLEGRO_COLOR color;
+	terrain_type terrain;
+};
+
 class c_map_section
 {
-	int * tile_heights;
-	unsigned char * tile_rainfall;
-	c_tile ** tile_sprites;
-	ALLEGRO_COLOR * tile_colors;
-	terrain_type * tile_terrain;
+	s_map_block * block_array;
 
 	unsigned int board_width, board_height;
 	unsigned int num_tiles;

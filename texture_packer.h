@@ -9,6 +9,7 @@ bool compare_size( ALLEGRO_BITMAP * first, ALLEGRO_BITMAP * second );
 
 struct s_sprite
 {
+	s_sprite(void);
 	int x;
 	int y;
 	int width;
@@ -18,6 +19,7 @@ struct s_sprite
 	int origin_y;
 	int column_height;
 };
+
 struct s_pack_box
 {
 	s_sprite image;
@@ -28,9 +30,10 @@ class c_imagelist
 	vector<ALLEGRO_BITMAP*> image_list;
 	vector<string * > image_filenames;
 public:
-	c_imagelist();
+	c_imagelist(void);
+	void unload_bitmaps(void);
 	ALLEGRO_BITMAP * get_image(unsigned int index);
-	unsigned int load_image(const char* filename);
+	size_t load_image(const char* filename);
 };
 
 extern c_imagelist imagelist;
