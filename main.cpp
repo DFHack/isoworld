@@ -315,10 +315,6 @@ int main(void)
 	}
 	al_start_timer(timer);
 
-	c_tile test_tile;
-
-	test_tile.load_ini("default_tile.ini");
-
 	c_map_section test_map;
 
 	test_map.set_size(user_config.map_width, user_config.map_height);
@@ -329,7 +325,7 @@ int main(void)
 
 	test_map.tileset_list.push_back(temp_tileset);
 
-	test_map.tileset_list.at(0).load_ini("default_tileset.ini");
+	test_map.tileset_list.at(0).load_ini("test_tileset.ini");
 
 	test_map.board_center_x = 0;
 	test_map.board_top_y = 0;

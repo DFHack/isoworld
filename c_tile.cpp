@@ -37,6 +37,8 @@ e_color_by get_color_selector(const char * text)
 }
 c_tile::c_tile(void)
 {
+	height_max = 999;
+	height_min = -999;
 }
 
 c_tile::~c_tile(void)
@@ -129,6 +131,12 @@ void c_tile::load_ini(const char *path)
 		if(temp.index >= 0)
 			surface_sprites.push_back(temp);
 	}
+
+	height_max = get_config_int(config, "SPRITE", "height_max", 500);
+	height_min = get_config_int(config, "SPRITE", "height_min", -500);
+
+	rain_max = get_config_int(config, "SPRITE", "rain_max", 500);
+	rain_min = get_config_int(config, "SPRITE", "rain_min", -500);
 }
 
 s_sprite c_tile::get_from_ini(ALLEGRO_CONFIG *config, const char * section)

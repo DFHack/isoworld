@@ -1,4 +1,4 @@
-#include "texture_packer.h"
+#include "c_imagelist.h"
 
 s_sprite::s_sprite(void)
 {

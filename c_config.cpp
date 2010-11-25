@@ -34,11 +34,11 @@ ALLEGRO_COLOR color_html(char const *string)
    return al_map_rgba_f(r, g, b, a);
 }
 
-int get_config_int(const ALLEGRO_CONFIG *config, const char *section, const char *key)
+int get_config_int(const ALLEGRO_CONFIG *config, const char *section, const char *key, int default_value)
 {
 	const char * buffer = al_get_config_value(config, section, key);
 	if(buffer) return atoi(buffer);
-	else return 0;
+	else return default_value;
 }
 
 c_config::c_config(void)

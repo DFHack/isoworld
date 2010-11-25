@@ -1,7 +1,7 @@
 #pragma once
 #include "common.h"
 
-int get_config_int(const ALLEGRO_CONFIG *config, const char *section, const char *key);
+int get_config_int(const ALLEGRO_CONFIG *config, const char *section, const char *key, int default_value = 0);
 ALLEGRO_COLOR color_html(char const *string);
 void color_html_to_rgba(char const *string,
 						float *red, float *green, float *blue, float *alpha);
