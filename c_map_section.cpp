@@ -13,8 +13,6 @@ void c_map_section::pointToScreen(int *inx, int *iny)
 	x+=offx;
 	y+=offy;
 	*inx=x;*iny=y;
-
-	current_tileset = 0;
 }
 
 c_map_section::c_map_section(void)
@@ -77,6 +75,7 @@ void c_map_section::flood_fill(c_tile *tile, int height)
 
 void c_map_section::draw(int inx, int iny)
 {
+	al_hold_bitmap_drawing(true);
 	for (unsigned int y = 0; y < board_height; y++)
 	{
 		for (unsigned int x = 0; x < board_width; x++)
@@ -97,10 +96,11 @@ void c_map_section::draw(int inx, int iny)
 					bottom_l = block_array[index+board_width].height;
 				if (bottom_l < bottom_r)
 					bottom_r = bottom_l;
-				block_array[index].sprite->draw(drawx, drawy, block_array[index].height, &block_array[index], bottom_r);
+				block_array[index].sprite->draw(drawx, drawy, snap_height(block_array[index].height), &block_array[index], snap_height(bottom_r));
 			}
 		}
 	}
+	al_hold_bitmap_drawing(false);
 }
 
 void c_map_section::load_heights(ALLEGRO_BITMAP * heightmap)
@@ -212,4 +212,51 @@ void c_map_section::propogate_tiles(s_maplist maplist)
 
 		}
 	}
+}
+
+void c_map_section::increment_tileset(void)
+{
+	current_tileset ++;
+	if(current_tileset >= tileset_list.size())
+		current_tileset = 0;
+}
+
+void c_map_section::load_tilesets(const char * index_file)
+{
+	ALLEGRO_CONFIG * config = 0;
+
+	ALLEGRO_PATH * base_path = al_get_standard_path(ALLEGRO_PROGRAM_PATH);
+
+	ALLEGRO_PATH * key = al_create_path(index_file);
+
+	al_rebase_path(base_path, key);
+
+	config = al_load_config_file(al_path_cstr(key, ALLEGRO_NATIVE_PATH_SEP));
+
+	int num_tilesets = get_config_int(config, "TILESETS", "num_tilesets");
+
+	char buffer[256];
+	for(size_t i = 0; i < num_tiles; i++)
+	{
+		sprintf(buffer, "tileset_%d", i);
+		const char * file = al_get_config_value(config, "TILESETS", buffer);
+		if(file)
+		{
+			ALLEGRO_PATH * temp = al_create_path(file);
+			al_rebase_path(key, temp);
+			c_tileset temp_tileset;
+			temp_tileset.load_ini(temp);
+			tileset_list.push_back(temp_tileset);
+			al_destroy_path(temp);
+		}
+	}
+	al_destroy_path(base_path);
+	al_destroy_path(key);
+}
+
+int c_map_section::snap_height(int in)
+{
+	if(tileset_list.at(current_tileset).snap_height <= 1)
+		return in;
+	return (in - (in % tileset_list.at(current_tileset).snap_height));
 }

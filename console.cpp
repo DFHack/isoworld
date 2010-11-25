@@ -39,3 +39,28 @@ void log_printf(char const *format, ...)
 	va_end(args);
 	al_append_native_text_log(textlog, "%s", str);
 }
+
+void DisplayErr(const char *format, ...)
+{
+	ALLEGRO_USTR *buf;
+	va_list ap;
+	const char *s;
+
+	/* Fast path for common case. */
+	if (0 == strcmp(format, "%s")) {
+		va_start(ap, format);
+		s = va_arg(ap, const char *);
+		al_show_native_message_box(al_get_current_display(), "Error", "ERROR", s, NULL, ALLEGRO_MESSAGEBOX_ERROR);
+		va_end(ap);
+		return;
+	}
+
+	va_start(ap, format);
+	buf = al_ustr_new("");
+	al_ustr_vappendf(buf, format, ap);
+	va_end(ap);
+
+	al_show_native_message_box(al_get_current_display(), "Error", "ERROR", al_cstr(buf), NULL, ALLEGRO_MESSAGEBOX_ERROR);
+
+	al_ustr_free(buf);
+}

@@ -1,4 +1,5 @@
 #include "c_imagelist.h"
+#include "console.h"
 
 s_sprite::s_sprite(void)
 {
@@ -16,7 +17,7 @@ ALLEGRO_BITMAP* load_bitmap_withWarning(const char* path){
 	ALLEGRO_BITMAP* img = 0;
 	img = al_load_bitmap(path);
 	if(!img){
-		//DisplayErr("Cannot load image: %s", path);
+		DisplayErr("Cannot load image: %s", path);
 		exit(0);
 	}
 	al_convert_mask_to_alpha(img, al_map_rgb(255, 0, 255));

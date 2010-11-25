@@ -46,6 +46,26 @@ s_maplist::s_maplist(void)
 	salinity_map = 0;
 }
 
+void saveScreenshot(){
+	//get filename
+	char filename[20] ={0};
+	FILE* fp;
+	int index = 1;
+	//search for the first screenshot# that does not exist already
+	while(true){
+		sprintf(filename, "screenshot%i.png", index);
+
+		fp = fopen(filename, "r");
+		if( fp != 0)
+			fclose(fp);
+		else
+			//file does not exist, so exit loop
+			break;
+		index++;
+	};
+	al_save_bitmap(filename, al_get_target_bitmap());
+}
+
 s_pathlist path_list;
 
 s_maplist map_list;
@@ -124,7 +144,14 @@ void load_bitmaps(s_pathlist * paths, s_maplist * maps)
 	maps->elevation_map = al_load_bitmap(al_path_cstr(paths->elevation_map, ALLEGRO_NATIVE_PATH_SEP));
 	maps->elevation_map_with_water = al_load_bitmap(al_path_cstr(paths->elevation_map_with_water, ALLEGRO_NATIVE_PATH_SEP));
 	maps->biome_map = al_load_bitmap(al_path_cstr(paths->biome_map, ALLEGRO_NATIVE_PATH_SEP));
+	maps->temperature_map = al_load_bitmap(al_path_cstr(paths->temperature_map, ALLEGRO_NATIVE_PATH_SEP));
 	maps->rainfall_map = al_load_bitmap(al_path_cstr(paths->rainfall_map, ALLEGRO_NATIVE_PATH_SEP));
+	maps->drainage_map = al_load_bitmap(al_path_cstr(paths->drainage_map, ALLEGRO_NATIVE_PATH_SEP));
+	maps->savagery_map = al_load_bitmap(al_path_cstr(paths->savagery_map, ALLEGRO_NATIVE_PATH_SEP));
+	maps->volcanism_map = al_load_bitmap(al_path_cstr(paths->volcanism_map, ALLEGRO_NATIVE_PATH_SEP));
+	maps->vegetation_map = al_load_bitmap(al_path_cstr(paths->vegetation_map, ALLEGRO_NATIVE_PATH_SEP));
+	maps->evil_map = al_load_bitmap(al_path_cstr(paths->evil_map, ALLEGRO_NATIVE_PATH_SEP));
+	maps->salinity_map = al_load_bitmap(al_path_cstr(paths->salinity_map, ALLEGRO_NATIVE_PATH_SEP));
 	al_set_new_bitmap_flags(backup);
 }
 
@@ -323,9 +350,7 @@ int main(void)
 
 	c_tileset temp_tileset;
 
-	test_map.tileset_list.push_back(temp_tileset);
-
-	test_map.tileset_list.at(0).load_ini("test_tileset.ini");
+	test_map.load_tilesets("tilesets.ini");
 
 	test_map.board_center_x = 0;
 	test_map.board_top_y = 0;
@@ -375,6 +400,14 @@ int main(void)
 				user_config.map_x-=10;
 				else 
 				user_config.map_x--;
+			}
+			else if (event.keyboard.keycode == ALLEGRO_KEY_F5 && !cur_dialog)
+			{
+				saveScreenshot();
+			}
+			else if (event.keyboard.keycode == ALLEGRO_KEY_SPACE && !cur_dialog)
+			{
+				test_map.increment_tileset();
 			}
 		}
 

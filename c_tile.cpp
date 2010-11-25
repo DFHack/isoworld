@@ -82,7 +82,7 @@ void c_tile::draw(float x, float y, int height, s_map_block * block, int bottom 
 				y - height);
 		}
 	}
-	if(height < 0)
+	if(height <= 0)
 	{
 		for(unsigned int i = 0; i < surface_sprites.size(); i++)
 		{
@@ -96,11 +96,13 @@ void c_tile::draw(float x, float y, int height, s_map_block * block, int bottom 
 	}
 }
 
-void c_tile::load_ini(const char *path)
+void c_tile::load_ini(ALLEGRO_PATH * path)
 {
 	ALLEGRO_CONFIG * config = 0;
 
-	config = al_load_config_file(path);
+	const char * thepath = al_path_cstr(path, ALLEGRO_NATIVE_PATH_SEP);
+
+	config = al_load_config_file(thepath);
 
 	char buffer[256];
 
@@ -109,16 +111,16 @@ void c_tile::load_ini(const char *path)
 	for(size_t i = 0; i < cap_layers; i++)
 	{
 		sprintf(buffer, "CAP_IMAGE_%d", i);
-		temp = get_from_ini(config, buffer);
+		temp = get_from_ini(config, buffer, path);
 		if(temp.index >= 0)
 			top_sprites.push_back(temp);
 	}
 
 	size_t column_layers = get_config_int(config, "SPRITE", "column_layers");
-	for(size_t i = 0; i < cap_layers; i++)
+	for(size_t i = 0; i < column_layers; i++)
 	{
 		sprintf(buffer, "COLUMN_IMAGE_%d", i);
-		temp = get_from_ini(config, buffer);
+		temp = get_from_ini(config, buffer, path);
 		if(temp.index >= 0)
 			bottom_sprites.push_back(temp);
 	}
@@ -127,7 +129,7 @@ void c_tile::load_ini(const char *path)
 	for(size_t i = 0; i < surface_layers; i++)
 	{
 		sprintf(buffer, "SURFACE_IMAGE_%d", i);
-		temp = get_from_ini(config, buffer);
+		temp = get_from_ini(config, buffer, path);
 		if(temp.index >= 0)
 			surface_sprites.push_back(temp);
 	}
@@ -139,7 +141,7 @@ void c_tile::load_ini(const char *path)
 	rain_min = get_config_int(config, "SPRITE", "rain_min", -500);
 }
 
-s_sprite c_tile::get_from_ini(ALLEGRO_CONFIG *config, const char * section)
+s_sprite c_tile::get_from_ini(ALLEGRO_CONFIG *config, const char * section, ALLEGRO_PATH * base_path)
 {
 	s_sprite temp;
 
@@ -149,7 +151,9 @@ s_sprite c_tile::get_from_ini(ALLEGRO_CONFIG *config, const char * section)
 		temp.index = -1;
 		return temp;
 	}
-	temp.index = imagelist.load_image(buffer_file);
+	ALLEGRO_PATH * imagepath = al_create_path(buffer_file);
+	al_rebase_path(base_path, imagepath);
+	temp.index = imagelist.load_image(al_path_cstr(imagepath, ALLEGRO_NATIVE_PATH_SEP));
 
 	temp.x = get_config_int(config, section, "x");
 	temp.y = get_config_int(config, section, "y");
@@ -172,6 +176,6 @@ s_sprite c_tile::get_from_ini(ALLEGRO_CONFIG *config, const char * section)
 	const char * color = al_get_config_value(config, section, "color_html");
 	if(color)
 		temp.color = color_html(color);
-
+	al_destroy_path(imagepath);
 	return temp;
 }

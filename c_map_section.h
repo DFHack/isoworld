@@ -29,6 +29,9 @@ public:
 	void load_rainfall(ALLEGRO_BITMAP * rainmap);
 	void draw(int inx, int iny);
 	void propogate_tiles(s_maplist maplist);
+	void load_tilesets(const char * index_file);
+	void increment_tileset(void);
+	int snap_height(int in);
 	c_map_section(void);
 	~c_map_section(void);
 };

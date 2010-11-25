@@ -3,24 +3,27 @@
 
 c_tileset::c_tileset(void)
 {
+	snap_height = 1;
 }
 
 c_tileset::~c_tileset(void)
 {
 }
 
-void c_tileset::load_ini(const char *path)
+void c_tileset::load_ini(ALLEGRO_PATH * path)
 {
 	ALLEGRO_CONFIG * config = 0;
 
-	config = al_load_config_file(path);
+	const char * figgin = al_path_cstr(path, ALLEGRO_NATIVE_PATH_SEP);
+	config = al_load_config_file(al_path_cstr(path, ALLEGRO_NATIVE_PATH_SEP));
 
 	char buffer[256];
 
 	tile_width = get_config_int(config, "TILESET_PROPERTIES", "tile_width");
 	tile_height = get_config_int(config, "TILESET_PROPERTIES", "tile_height");
+	snap_height = get_config_int(config, "TILESET_PROPERTIES", "snap_height");
 
-	int num_tiles = get_config_int(config, "TILESET_PROPERTIES", "num_tiles");
+	int num_tiles = get_config_int(config, "TILESET_PROPERTIES", "num_tiles", 1);
 
 	for(size_t i = 0; i < num_tiles; i++)
 	{
@@ -28,9 +31,12 @@ void c_tileset::load_ini(const char *path)
 		const char * file = al_get_config_value(config, "TILES", buffer);
 		if(file)
 		{
+			ALLEGRO_PATH * tilepath = al_create_path(file);
+			al_rebase_path(path, tilepath);
 			c_tile temp_tile;
-			temp_tile.load_ini(file);
+			temp_tile.load_ini(tilepath);
 			tile_set.push_back(temp_tile);
+			al_destroy_path(tilepath);
 		}
 	}
 }
