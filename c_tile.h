@@ -5,6 +5,36 @@
 typedef class c_tile c_tile;
 #include "s_map_block.h"
 
+enum e_color_by
+{
+	NONE,
+	INI,
+	BIOME
+};
+enum e_offset_type
+{
+	OFFSET_NONE,
+	OFFSET_PATH,
+	OFFSET_COUNT
+};
+
+struct s_sprite
+{
+	s_sprite(void);
+	int x;
+	int y;
+	int width;
+	int height;
+	int index;
+	int origin_x;
+	int origin_y;
+	int column_height;
+
+	e_color_by color_by;
+	ALLEGRO_COLOR color;
+	e_offset_type offset_type;
+};
+
 class c_tile
 {
 	vector<s_sprite> top_sprites;

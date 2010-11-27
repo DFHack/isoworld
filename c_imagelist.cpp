@@ -1,17 +1,6 @@
 #include "c_imagelist.h"
 #include "console.h"
 
-s_sprite::s_sprite(void)
-{
-	x = 0;
-	y = 0;
-	width = 0;
-	height = 0;
-	index = -1;
-	origin_x = 0;
-	origin_y = 0;
-	column_height = 0;
-}
 
 ALLEGRO_BITMAP* load_bitmap_withWarning(const char* path){
 	ALLEGRO_BITMAP* img = 0;

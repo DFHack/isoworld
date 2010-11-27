@@ -54,7 +54,7 @@ bool c_map_section::set_size(int x, int y)
 			block_array[i].levels[j] = 0;
 		}
 		block_array[i].sprite = 0;
-		block_array[i].terrain = GRASS;
+		block_array[i].terrain = TERRAIN_GRASS;
 	}
 
 	return true;
@@ -72,7 +72,7 @@ void c_map_section::flood_fill(c_tile *tile, int height)
 		block_array[i].height = height;
 		block_array[i].sprite = tile;
 		block_array[i].color = al_map_rgb(255,255,255);
-		block_array[i].terrain = GRASS;
+		block_array[i].terrain = TERRAIN_GRASS;
 	}
 }
 
@@ -201,12 +201,12 @@ void c_map_section::load_special_tiles(s_maplist * maplist)
 					al_unmap_rgb(pixel_elw, &red, &green, &blue);
 					if(red == 0 && green == blue)
 					{
-						block_array[index].terrain = RIVER;
+						block_array[index].terrain = TERRAIN_RIVER;
 						break;
 					}
 					else if(red == green == 0)
 					{
-						block_array[index].terrain = OCEAN;
+						block_array[index].terrain = TERRAIN_OCEAN;
 						break;
 					}
 				}
@@ -229,11 +229,11 @@ void c_map_section::load_special_tiles(s_maplist * maplist)
 						s < 0.6001
 						)
 					{
-						block_array[index].terrain = SWAMP;
+						block_array[index].terrain = TERRAIN_SWAMP;
 						break;
 					}
 				}
-				block_array[index].terrain = GRASS;
+				block_array[index].terrain = TERRAIN_GRASS;
 				break;
 			}
 		}
@@ -278,7 +278,7 @@ void c_map_section::propogate_tiles(s_maplist * maplist)
 	load_level(maplist->evil_map, LEVEL_EVIL);
 	load_level(maplist->salinity_map, LEVEL_SALINITY);
 	load_special_tiles(maplist);
-
+	generate_special_tile_borders();
 	//now for the actual tile propogating.
 	for (unsigned int y = 0; y < board_width; y++)
 	{
@@ -341,4 +341,35 @@ int c_map_section::snap_height(int in)
 	if(tileset_list.at(current_tileset).snap_height <= 1)
 		return in;
 	return (in - (in % tileset_list.at(current_tileset).snap_height));
+}
+
+void c_map_section::generate_special_tile_borders()
+{
+	for (unsigned int y = 0; y < board_width; y++)
+	{
+		for (unsigned int x = 0; x < board_height; x++)
+		{
+			for(int i = 0; i < TERRAIN_COUNT ; i++)
+			{
+				unsigned char borders = 0;
+				if(x > 0 && y > 0)
+					if(block_array[((x-1) + (board_width * (y-1)))].terrain == i) borders |= 1;
+				if(y > 0)
+					if(block_array[((x+0) + (board_width * (y-1)))].terrain == i) borders |= 2;
+				if(x < (board_width-1) && y > 0)
+					if(block_array[((x+1) + (board_width * (y-1)))].terrain == i) borders |= 4;
+				if(x < (board_width-1))
+					if(block_array[((x+1) + (board_width * (y+0)))].terrain == i) borders |= 8;
+				if(x < (board_width-1) && y < (board_height-1))
+					if(block_array[((x+1) + (board_width * (y+1)))].terrain == i) borders |= 16;
+				if(y < (board_height-1))
+					if(block_array[((x+0) + (board_width * (y+1)))].terrain == i) borders |= 32;
+				if(x > 0 && y < (board_height-1))
+					if(block_array[((x-1) + (board_width * (y+1)))].terrain == i) borders |= 64;
+				if(x > 0)
+					if(block_array[((x-1) + (board_width * (y+0)))].terrain == i) borders |= 128;
+				block_array[(x + (board_width * y))].terrain_borders[i]=borders;
+			}
+		}
+	}
 }

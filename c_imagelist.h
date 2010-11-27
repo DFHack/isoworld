@@ -8,34 +8,6 @@
 using namespace std;
 bool compare_size( ALLEGRO_BITMAP * first, ALLEGRO_BITMAP * second );
 
-enum e_color_by
-{
-	NONE,
-	INI,
-	BIOME
-};
-
-struct s_sprite
-{
-	s_sprite(void);
-	int x;
-	int y;
-	int width;
-	int height;
-	int index;
-	int origin_x;
-	int origin_y;
-	int column_height;
-
-	e_color_by color_by;
-	ALLEGRO_COLOR color;
-};
-
-struct s_pack_box
-{
-	s_sprite image;
-};
-
 class c_imagelist
 {
 	vector<ALLEGRO_BITMAP*> image_list;

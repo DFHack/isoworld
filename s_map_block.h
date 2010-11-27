@@ -5,13 +5,14 @@ typedef struct s_map_block s_map_block;
 
 enum terrain_type
 {
-	ANY,
-	OCEAN,
-	RIVER,
-	SWAMP,
-	GRASS,
-	DIRT,
-	SAND
+	TERRAIN_ANY,
+	TERRAIN_OCEAN,
+	TERRAIN_RIVER,
+	TERRAIN_SWAMP,
+	TERRAIN_GRASS,
+	TERRAIN_DIRT,
+	TERRAIN_SAND,
+	TERRAIN_COUNT
 };
 
 #define LEVEL_TEMPERATURE 0
@@ -32,4 +33,5 @@ struct s_map_block
 	c_tile * sprite;
 	ALLEGRO_COLOR color;
 	terrain_type terrain;
+	unsigned char terrain_borders[TERRAIN_COUNT];
 };

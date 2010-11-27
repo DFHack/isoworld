@@ -2,9 +2,44 @@
 #include "c_config.h"
 #include "s_map_block.h"
 
-void draw_sprite(s_sprite sprite, s_map_block * block, float x, float y, bool flip = 0)
+unsigned char get_path_offset(unsigned char in)
 {
-	int flags;
+	if(in&2 && in&8 && in&32 && in&128)
+		return 10;
+	if(in&2 && in&8 && in&128)
+		return 9;
+	if(in&2 && in&32 && in&128)
+		return 8;
+	if(in&8 && in&32 && in&128)
+		return 7;
+	if(in&2 && in&8 && in&32)
+		return 6;
+	if(in&2 && in&128)
+		return 5;
+	if(in&32 && in&128)
+		return 4;
+	if(in&8 && in&32)
+		return 3;
+	if(in&2 && in&8)
+		return 2;
+	if(in&8 && in&128)
+		return 1;
+	if(in&2 && in&32)
+		return 0;
+	if(in&2)
+		return 0;
+	if(in&8)
+		return 1;
+	if(in&32)
+		return 0;
+	if(in&128)
+		return 1;
+	return 0;
+}
+
+void draw_sprite(s_sprite sprite, s_map_block * block, float x, float y, bool flip = 0, int offset = 0)
+{
+	int flags = 0;
 	if(flip)
 		flags = ALLEGRO_FLIP_HORIZONTAL;
 	ALLEGRO_COLOR color;
@@ -18,7 +53,7 @@ void draw_sprite(s_sprite sprite, s_map_block * block, float x, float y, bool fl
 	al_draw_tinted_bitmap_region(
 		imagelist.get_image(sprite.index),
 		color,
-		sprite.x,
+		sprite.x + (sprite.width * offset),
 		sprite.y,
 		sprite.width,
 		sprite.height,
@@ -42,23 +77,47 @@ e_color_by get_color_selector(const char * text)
 terrain_type get_terrain_type(const char * text)
 {
 	if(strcmp(text, "any") == 0)
-		return ANY;
+		return TERRAIN_ANY;
 	if(strcmp(text, "ocean") == 0)
-		return OCEAN;
+		return TERRAIN_OCEAN;
 	if(strcmp(text, "river") == 0)
-		return RIVER;
+		return TERRAIN_RIVER;
 	if(strcmp(text, "swamp") == 0)
-		return SWAMP;
+		return TERRAIN_SWAMP;
 	if(strcmp(text, "marsh") == 0)
-		return SWAMP;
-	return ANY;
-
+		return TERRAIN_SWAMP;
+	return TERRAIN_ANY;
 }
+
+e_offset_type get_offset_type(const char * text)
+{
+	if(!text)
+		return OFFSET_NONE;
+	if(strcmp(text, "none") == 0)
+		return OFFSET_NONE;
+	if(strcmp(text, "path") == 0)
+		return OFFSET_PATH;
+	return OFFSET_NONE;
+}
+
+s_sprite::s_sprite(void)
+{
+	x = 0;
+	y = 0;
+	width = 0;
+	height = 0;
+	index = -1;
+	origin_x = 0;
+	origin_y = 0;
+	column_height = 0;
+	offset_type =  OFFSET_NONE;
+}
+
 c_tile::c_tile(void)
 {
 	height_max = 999;
 	height_min = -999;
-	special_terrain = ANY;
+	special_terrain = TERRAIN_ANY;
 }
 
 c_tile::~c_tile(void)
@@ -71,12 +130,21 @@ void c_tile::draw(float x, float y, int height, s_map_block * block, int bottom,
 	{
 		for(unsigned int i = 0; i < top_sprites.size(); i++)
 		{
+			int offset = 0;
+			if(top_sprites.at(i).offset_type == OFFSET_PATH)
+			{
+				offset = block->terrain_borders[block->terrain];
+				if(block->terrain == TERRAIN_RIVER)
+					offset |= block->terrain_borders[TERRAIN_OCEAN];
+				offset = get_path_offset(offset);
+			}
 			draw_sprite(
 				top_sprites.at(i),
 				block,
 				x,
 				y - height,
-				flip);
+				flip,
+				offset);
 		}
 	}
 	else
@@ -208,6 +276,11 @@ s_sprite c_tile::get_from_ini(ALLEGRO_CONFIG *config, const char * section, ALLE
 	const char * color = al_get_config_value(config, section, "color_html");
 	if(color)
 		temp.color = color_html(color);
+
+	const char * off = al_get_config_value(config, section, "offset_type");
+	if(off)
+		temp.offset_type = get_offset_type(off);
+
 	al_destroy_path(imagepath);
 	return temp;
 }

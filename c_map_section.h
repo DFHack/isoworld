@@ -31,6 +31,7 @@ public:
 	void load_colors(ALLEGRO_BITMAP * colormap);
 	void load_level(ALLEGRO_BITMAP * levelmap, int level);
 	void load_special_tiles(s_maplist * maplist);
+	void generate_special_tile_borders(void);
 	void draw(int inx, int iny);
 	void propogate_tiles(s_maplist * maplist);
 	void load_tilesets(const char * index_file);
