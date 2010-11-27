@@ -16,6 +16,7 @@ public:
 	c_tile * get_tile(s_map_block block);
 
 	vector<c_tile> tile_set;
+	c_tile grid_tile;
 	int tile_width;
 	int tile_height;
 	int snap_height;

@@ -14,7 +14,7 @@ class c_tile
 	s_sprite get_from_ini(ALLEGRO_CONFIG * config, const char * section, ALLEGRO_PATH * base_path);
 
 public:
-	void draw(float x, float y, int height, s_map_block * block, int bottom);
+	void draw(float x, float y, int height, s_map_block * block, int bottom = 0, bool flip = 0);
 	void load_ini(ALLEGRO_PATH * _path);
 	c_tile(void);
 	~c_tile(void);
@@ -24,4 +24,6 @@ public:
 
 	int rain_min;
 	int rain_max;
+
+	terrain_type special_terrain;
 };

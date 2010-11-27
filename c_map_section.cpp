@@ -49,7 +49,10 @@ bool c_map_section::set_size(int x, int y)
 	{
 		block_array[i].color = al_map_rgb(255,255,255);
 		block_array[i].height = 0;
-		block_array[i].rainfall = 0;
+		for(int j = 0; j < NUM_LEVELS; j++)
+		{
+			block_array[i].levels[j] = 0;
+		}
 		block_array[i].sprite = 0;
 		block_array[i].terrain = GRASS;
 	}
@@ -75,6 +78,7 @@ void c_map_section::flood_fill(c_tile *tile, int height)
 
 void c_map_section::draw(int inx, int iny)
 {
+	clock_t start_time = clock();
 	al_hold_bitmap_drawing(true);
 	for (unsigned int y = 0; y < board_height; y++)
 	{
@@ -86,21 +90,27 @@ void c_map_section::draw(int inx, int iny)
 			drawx += inx;
 			drawy += iny;
 			unsigned int index = x + (board_width * y);
+			int bottom_l = 0;
+			int bottom_r = 0;
+			if(x+1 < board_width)
+				bottom_r = block_array[index+1].height;
+			if(y+1 < board_height)
+				bottom_l = block_array[index+board_width].height;
+			if (bottom_l < bottom_r)
+				bottom_r = bottom_l;
+
 			if(block_array[index].sprite > 0)
 			{
-				int bottom_l = 0;
-				int bottom_r = 0;
-				if(x+1 < board_width)
-					bottom_r = block_array[index+1].height;
-				if(y+1 < board_height)
-					bottom_l = block_array[index+board_width].height;
-				if (bottom_l < bottom_r)
-					bottom_r = bottom_l;
 				block_array[index].sprite->draw(drawx, drawy, snap_height(block_array[index].height), &block_array[index], snap_height(bottom_r));
 			}
+			if(user_config.showgrid && !((x + user_config.map_x) % 16))
+				tileset_list.at(current_tileset).grid_tile.draw(drawx, drawy, snap_height(block_array[index].height), &block_array[index], snap_height(bottom_r));
+			if(user_config.showgrid && !((y + user_config.map_y) % 16))
+				tileset_list.at(current_tileset).grid_tile.draw(drawx, drawy, snap_height(block_array[index].height), &block_array[index], snap_height(bottom_r), 1);
 		}
 	}
 	al_hold_bitmap_drawing(false);
+	draw_time = clock() - start_time;
 }
 
 void c_map_section::load_heights(ALLEGRO_BITMAP * heightmap)
@@ -138,32 +148,94 @@ void c_map_section::load_heights(ALLEGRO_BITMAP * heightmap)
 	}
 }
 
-void c_map_section::load_rainfall(ALLEGRO_BITMAP * rainmap)
+void c_map_section::load_level(ALLEGRO_BITMAP * levelmap, int level)
 {
 	for (unsigned int y = 0; y < board_width; y++)
 	{
 		for (unsigned int x = 0; x < board_height; x++)
 		{
 			unsigned int index = x + (board_width * y);
-			if(rainmap)
+			if(levelmap)
 			{
 				int tempx = x + user_config.map_x;
 				int tempy = y + user_config.map_y;
 
-				tempx =  bind_to_range(tempx , al_get_bitmap_width(rainmap));
-				tempy =  bind_to_range(tempy , al_get_bitmap_height(rainmap));
+				tempx =  bind_to_range(tempx , al_get_bitmap_width(levelmap));
+				tempy =  bind_to_range(tempy , al_get_bitmap_height(levelmap));
 
-				ALLEGRO_COLOR pixel = al_get_pixel(rainmap, tempx, tempy);
+				ALLEGRO_COLOR pixel = al_get_pixel(levelmap, tempx, tempy);
 				unsigned char red;
 				unsigned char green;
 				unsigned char blue;
 				al_unmap_rgb(pixel, &red, &green, &blue);
 
-				block_array[index].rainfall =(red * 100) /256;
+				block_array[index].levels[level] =(red * 100) /256;
 
 			}
-			else block_array[index].rainfall = 0;
+			else block_array[index].levels[level] = 0;
 
+		}
+	}
+}
+
+void c_map_section::load_special_tiles(s_maplist * maplist)
+{
+	for (unsigned int y = 0; y < board_width; y++)
+	{
+		for (unsigned int x = 0; x < board_height; x++)
+		{
+			unsigned int index = x + (board_width * y);
+			while(1)
+			{
+				if(maplist->elevation_map_with_water)
+				{
+					int tempx = x + user_config.map_x;
+					int tempy = y + user_config.map_y;
+					tempx =  bind_to_range(tempx , al_get_bitmap_width(maplist->elevation_map_with_water));
+					tempy =  bind_to_range(tempy , al_get_bitmap_height(maplist->elevation_map_with_water));
+
+					ALLEGRO_COLOR pixel_elw = al_get_pixel(maplist->elevation_map_with_water, tempx, tempy);
+					unsigned char red;
+					unsigned char green;
+					unsigned char blue;
+					al_unmap_rgb(pixel_elw, &red, &green, &blue);
+					if(red == 0 && green == blue)
+					{
+						block_array[index].terrain = RIVER;
+						break;
+					}
+					else if(red == green == 0)
+					{
+						block_array[index].terrain = OCEAN;
+						break;
+					}
+				}
+				if(maplist->biome_map)
+				{
+					float r,g,b,h,s,l;
+
+					int tempx = x + user_config.map_x;
+					int tempy = y + user_config.map_y;
+					tempx =  bind_to_range(tempx , al_get_bitmap_width(maplist->biome_map));
+					tempy =  bind_to_range(tempy , al_get_bitmap_height(maplist->biome_map));
+
+					al_unmap_rgb_f(al_get_pixel(maplist->biome_map, tempx, tempy), &r, &g, &b);
+					al_color_rgb_to_hsl(r,g,b, &h, &s, &l);
+					//log_printf("r %.5f, g %.5f, b %.5f, h%.5f, s %.5f, l %.5f\n", r,g,b,h,s,l);
+					if(
+						h > 139.990 &&
+						h < 140.001 &&
+						s > 0.5990 &&
+						s < 0.6001
+						)
+					{
+						block_array[index].terrain = SWAMP;
+						break;
+					}
+				}
+				block_array[index].terrain = GRASS;
+				break;
+			}
 		}
 	}
 }
@@ -192,11 +264,20 @@ void c_map_section::load_colors(ALLEGRO_BITMAP * colormap)
 	}
 }
 
-void c_map_section::propogate_tiles(s_maplist maplist)
+void c_map_section::propogate_tiles(s_maplist * maplist)
 {
-	load_heights(maplist.elevation_map);
-	load_colors(maplist.biome_map);
-	load_rainfall(maplist.rainfall_map);
+	clock_t start_time = clock();
+	load_heights(maplist->elevation_map);
+	load_colors(maplist->biome_map);
+	load_level(maplist->temperature_map, LEVEL_TEMPERATURE);
+	load_level(maplist->rainfall_map, LEVEL_RAINFALL);
+	load_level(maplist->drainage_map, LEVEL_DRAINAGE);
+	load_level(maplist->savagery_map, LEVEL_SAVAGE);
+	load_level(maplist->volcanism_map, LEVEL_VOLCANISM);
+	load_level(maplist->vegetation_map, LEVEL_VEGETATION);
+	load_level(maplist->evil_map, LEVEL_EVIL);
+	load_level(maplist->salinity_map, LEVEL_SALINITY);
+	load_special_tiles(maplist);
 
 	//now for the actual tile propogating.
 	for (unsigned int y = 0; y < board_width; y++)
@@ -212,6 +293,7 @@ void c_map_section::propogate_tiles(s_maplist maplist)
 
 		}
 	}
+	load_time = clock() - start_time;
 }
 
 void c_map_section::increment_tileset(void)

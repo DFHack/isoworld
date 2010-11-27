@@ -152,6 +152,26 @@ void load_bitmaps(s_pathlist * paths, s_maplist * maps)
 	maps->vegetation_map = al_load_bitmap(al_path_cstr(paths->vegetation_map, ALLEGRO_NATIVE_PATH_SEP));
 	maps->evil_map = al_load_bitmap(al_path_cstr(paths->evil_map, ALLEGRO_NATIVE_PATH_SEP));
 	maps->salinity_map = al_load_bitmap(al_path_cstr(paths->salinity_map, ALLEGRO_NATIVE_PATH_SEP));
+
+	//ALLEGRO_BITMAP * temp = al_create_bitmap(al_get_bitmap_width(maps->biome_map),al_get_bitmap_height(maps->biome_map));
+	//ALLEGRO_BITMAP * back = al_get_target_bitmap();
+	//al_set_target_bitmap(temp);
+	//for(int x = 0; x < al_get_bitmap_width(maps->biome_map); x++)
+	//{
+	//	for(int y = 0; y < al_get_bitmap_height(maps->biome_map); y++)
+	//	{
+	//		ALLEGRO_COLOR pixel = al_get_pixel(maps->biome_map,x,y);
+	//		float r, g, b;
+	//		float h, s, l;
+	//		al_unmap_rgb_f(pixel, &r, &g, &b);
+	//		al_color_rgb_to_hsv(r,g,b,&h,&s,&l);
+	//		al_put_pixel(x, y, al_map_rgba_f(h,s,l,1));
+	//	}
+	//}
+	//al_set_target_bitmap(back);
+	//al_save_bitmap("hsv.png", temp);
+	//al_destroy_bitmap(temp);
+
 	al_set_new_bitmap_flags(backup);
 }
 
@@ -405,6 +425,10 @@ int main(void)
 			{
 				saveScreenshot();
 			}
+			else if (event.keyboard.keycode == ALLEGRO_KEY_G && !cur_dialog)
+			{
+				user_config.showgrid = !user_config.showgrid;
+			}
 			else if (event.keyboard.keycode == ALLEGRO_KEY_SPACE && !cur_dialog)
 			{
 				test_map.increment_tileset();
@@ -491,10 +515,12 @@ int main(void)
 					old_dialog->newimages = 0;
 				}
 			}
-			test_map.propogate_tiles(map_list);
+			test_map.propogate_tiles(&map_list);
 			test_map.draw(x, y + user_config.map_shift);
 			al_draw_textf(font, cur_dialog ? inactive : active, x, y, ALLEGRO_ALIGN_CENTRE, "Open");
 			minimap.draw();
+			al_draw_textf(font, cur_dialog ? inactive : active, 0, y, ALLEGRO_ALIGN_LEFT, "Drawtime: %dms", test_map.draw_time);
+			al_draw_textf(font, cur_dialog ? inactive : active, 0, y + al_get_font_line_height(font), ALLEGRO_ALIGN_LEFT, "Load Time: %dms", test_map.load_time);
 			al_flip_display();
 		}
 

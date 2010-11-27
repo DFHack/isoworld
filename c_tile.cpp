@@ -2,8 +2,11 @@
 #include "c_config.h"
 #include "s_map_block.h"
 
-void draw_sprite(s_sprite sprite, s_map_block * block, float x, float y)
+void draw_sprite(s_sprite sprite, s_map_block * block, float x, float y, bool flip = 0)
 {
+	int flags;
+	if(flip)
+		flags = ALLEGRO_FLIP_HORIZONTAL;
 	ALLEGRO_COLOR color;
 	if(sprite.color_by == NONE)
 		color = al_map_rgb(255,255,255);
@@ -21,7 +24,7 @@ void draw_sprite(s_sprite sprite, s_map_block * block, float x, float y)
 		sprite.height,
 		x + sprite.origin_x,
 		y + sprite.origin_y,
-		0);
+		flags);
 
 }
 
@@ -35,17 +38,34 @@ e_color_by get_color_selector(const char * text)
 		return BIOME;
 	return NONE;
 }
+
+terrain_type get_terrain_type(const char * text)
+{
+	if(strcmp(text, "any") == 0)
+		return ANY;
+	if(strcmp(text, "ocean") == 0)
+		return OCEAN;
+	if(strcmp(text, "river") == 0)
+		return RIVER;
+	if(strcmp(text, "swamp") == 0)
+		return SWAMP;
+	if(strcmp(text, "marsh") == 0)
+		return SWAMP;
+	return ANY;
+
+}
 c_tile::c_tile(void)
 {
 	height_max = 999;
 	height_min = -999;
+	special_terrain = ANY;
 }
 
 c_tile::~c_tile(void)
 {
 }
 
-void c_tile::draw(float x, float y, int height, s_map_block * block, int bottom = 0)
+void c_tile::draw(float x, float y, int height, s_map_block * block, int bottom, bool flip)
 {
 	if ((height-bottom) <= 0)
 	{
@@ -55,7 +75,8 @@ void c_tile::draw(float x, float y, int height, s_map_block * block, int bottom 
 				top_sprites.at(i),
 				block,
 				x,
-				y - height);
+				y - height,
+				flip);
 		}
 	}
 	else
@@ -70,7 +91,8 @@ void c_tile::draw(float x, float y, int height, s_map_block * block, int bottom 
 					bottom_sprites.at(i), 
 					block,
 					x, 
-					y - bottom_section_height - ((sec-1) * bottom_sprites.at(i).column_height) - bottom);
+					y - bottom_section_height - ((sec-1) * bottom_sprites.at(i).column_height) - bottom,
+					flip);
 			}
 		}
 		for(unsigned int i = 0; i < top_sprites.size(); i++)
@@ -79,7 +101,8 @@ void c_tile::draw(float x, float y, int height, s_map_block * block, int bottom 
 				top_sprites.at(i),
 				block,
 				x,
-				y - height);
+				y - height,
+				flip);
 		}
 	}
 	if(height <= 0)
@@ -90,7 +113,8 @@ void c_tile::draw(float x, float y, int height, s_map_block * block, int bottom 
 				surface_sprites.at(i),
 				block,
 				x,
-				y);
+				y,
+				flip);
 		}
 
 	}
@@ -103,7 +127,11 @@ void c_tile::load_ini(ALLEGRO_PATH * path)
 	const char * thepath = al_path_cstr(path, ALLEGRO_NATIVE_PATH_SEP);
 
 	config = al_load_config_file(thepath);
-
+	if(!config)
+	{
+		DisplayErr("Cannot load tile: %s\n", thepath);
+		exit(1);
+	}
 	char buffer[256];
 
 	s_sprite temp;
@@ -139,6 +167,10 @@ void c_tile::load_ini(ALLEGRO_PATH * path)
 
 	rain_max = get_config_int(config, "SPRITE", "rain_max", 500);
 	rain_min = get_config_int(config, "SPRITE", "rain_min", -500);
+
+	const char * terra = al_get_config_value(config, "SPRITE", "special_terrain");
+	if(terra)
+		special_terrain = get_terrain_type(terra);
 }
 
 s_sprite c_tile::get_from_ini(ALLEGRO_CONFIG *config, const char * section, ALLEGRO_PATH * base_path)

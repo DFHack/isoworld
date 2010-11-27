@@ -35,6 +35,8 @@ public:
 	bool map_autoload;
 
 	int minimap_size;
+
+	bool showgrid;
 };
 
 extern c_config user_config;

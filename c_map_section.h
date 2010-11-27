@@ -20,15 +20,19 @@ public:
 	vector<c_tileset> tileset_list;
 	int current_tileset;
 
+	clock_t draw_time;
+	clock_t load_time;
+
 	bool set_size(int x, int y);
 	void clear_tiles(void);
 	void flood_fill(c_tile * tile, int height);
 	void pointToScreen(int *inx, int *iny);
 	void load_heights(ALLEGRO_BITMAP * heightmap);
 	void load_colors(ALLEGRO_BITMAP * colormap);
-	void load_rainfall(ALLEGRO_BITMAP * rainmap);
+	void load_level(ALLEGRO_BITMAP * levelmap, int level);
+	void load_special_tiles(s_maplist * maplist);
 	void draw(int inx, int iny);
-	void propogate_tiles(s_maplist maplist);
+	void propogate_tiles(s_maplist * maplist);
 	void load_tilesets(const char * index_file);
 	void increment_tileset(void);
 	int snap_height(int in);

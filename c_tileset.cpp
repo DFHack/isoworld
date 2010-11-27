@@ -25,6 +25,15 @@ void c_tileset::load_ini(ALLEGRO_PATH * path)
 
 	int num_tiles = get_config_int(config, "TILESET_PROPERTIES", "num_tiles", 1);
 
+	const char * file = al_get_config_value(config, "TILESET_PROPERTIES", "grid_tile");
+	if(file)
+	{
+		ALLEGRO_PATH * tilepath = al_create_path(file);
+		al_rebase_path(path, tilepath);
+		grid_tile.load_ini(tilepath);
+		al_destroy_path(tilepath);
+	}
+
 	for(size_t i = 0; i < num_tiles; i++)
 	{
 		sprintf(buffer, "tile_%d", i);
@@ -49,8 +58,9 @@ c_tile * c_tileset::get_tile(s_map_block block)
 	{
 		if(tile_set.at(i).height_min <= (block.height + 99) &&
 			tile_set.at(i).height_max >= (block.height + 99) &&
-			tile_set.at(i).rain_min <= block.rainfall &&
-			tile_set.at(i).rain_max >= block.rainfall
+			tile_set.at(i).rain_min <= block.levels[LEVEL_RAINFALL] &&
+			tile_set.at(i).rain_max >= block.levels[LEVEL_RAINFALL] &&
+			(tile_set.at(i).special_terrain == ANY || tile_set.at(i).special_terrain == block.terrain)
 			)
 		{
 			return &(tile_set.at(i));
