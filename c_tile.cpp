@@ -4,37 +4,37 @@
 
 unsigned char get_path_offset(unsigned char in)
 {
-	if(in&2 && in&8 && in&32 && in&128)
+	if((in&(2|8|32|128)) == (2|8|32|128))
 		return 10;
-	if(in&2 && in&8 && in&128)
+	if((in&(2|8|128)) == (2|8|128))
 		return 9;
-	if(in&2 && in&32 && in&128)
+	if((in&(2|32|128)) == (2|32|128))
 		return 8;
-	if(in&8 && in&32 && in&128)
+	if((in&(8|32|128)) == (8|32|128))
 		return 7;
-	if(in&2 && in&8 && in&32)
+	if((in&(2|8|32)) == (2|8|32))
 		return 6;
-	if(in&2 && in&128)
+	if((in&(2|128)) == (2|128))
 		return 5;
-	if(in&32 && in&128)
+	if((in&(32|128)) == (32|128))
 		return 4;
-	if(in&8 && in&32)
+	if((in&(8|32)) == (8|32))
 		return 3;
-	if(in&2 && in&8)
+	if((in&(2|8)) == (2|8))
 		return 2;
-	if(in&8 && in&128)
+	if((in&(8|32)) == (8|32))
 		return 1;
-	if(in&2 && in&32)
+	if((in&(2|32)) == (2|32))
 		return 0;
-	if(in&2)
+	if((in&2) == 2)
 		return 0;
-	if(in&8)
+	if((in&8) == 8)
 		return 1;
-	if(in&32)
+	if((in&32) == 32)
 		return 0;
-	if(in&128)
+	if((in&128) == 128)
 		return 1;
-	return 0;
+	return 10;
 }
 
 void draw_sprite(s_sprite sprite, s_map_block * block, float x, float y, bool flip = 0, int offset = 0)
@@ -86,6 +86,22 @@ terrain_type get_terrain_type(const char * text)
 		return TERRAIN_SWAMP;
 	if(strcmp(text, "marsh") == 0)
 		return TERRAIN_SWAMP;
+	if(strcmp(text, "beach") == 0)
+		return TERRAIN_BEACH;
+	if(strcmp(text, "mountain") == 0)
+		return TERRAIN_MOUNTAIN;
+	if(strcmp(text, "grassland_temperate") == 0)
+		return TERRAIN_GRASS_TEMP;
+	if(strcmp(text, "grassland_tropical") == 0)
+		return TERRAIN_GRASS_TROP;
+	if(strcmp(text, "forest_temperate") == 0)
+		return TERRAIN_FOREST_TEMP;
+	if(strcmp(text, "forest_tropical") == 0)
+		return TERRAIN_FOREST_TROP;
+	if(strcmp(text, "mountain_tall") == 0)
+		return TERRAIN_MOUNTAIN_TALL;
+	if(strcmp(text, "road") == 0)
+		return TERRAIN_ROAD;
 	return TERRAIN_ANY;
 }
 
@@ -124,7 +140,7 @@ c_tile::~c_tile(void)
 {
 }
 
-void c_tile::draw(float x, float y, int height, s_map_block * block, int bottom, bool flip)
+void c_tile::draw(float x, float y, int height, int bottom, int surface, s_map_block * block, bool flip)
 {
 	if ((height-bottom) <= 0)
 	{
@@ -173,7 +189,7 @@ void c_tile::draw(float x, float y, int height, s_map_block * block, int bottom,
 				flip);
 		}
 	}
-	if(height <= 0)
+	if(height <= surface)
 	{
 		for(unsigned int i = 0; i < surface_sprites.size(); i++)
 		{
@@ -181,7 +197,7 @@ void c_tile::draw(float x, float y, int height, s_map_block * block, int bottom,
 				surface_sprites.at(i),
 				block,
 				x,
-				y,
+				y-surface,
 				flip);
 		}
 

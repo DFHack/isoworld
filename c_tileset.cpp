@@ -56,8 +56,8 @@ c_tile * c_tileset::get_tile(s_map_block block)
 		return 0;
 	for(int i = 0; i < tile_set.size(); i++)
 	{
-		if(tile_set.at(i).height_min <= (block.height + 99) &&
-			tile_set.at(i).height_max >= (block.height + 99) &&
+		if(tile_set.at(i).height_min <= (block.height) &&
+			tile_set.at(i).height_max >= (block.height) &&
 			tile_set.at(i).rain_min <= block.levels[LEVEL_RAINFALL] &&
 			tile_set.at(i).rain_max >= block.levels[LEVEL_RAINFALL] &&
 			(tile_set.at(i).special_terrain == TERRAIN_ANY || tile_set.at(i).special_terrain == block.terrain)

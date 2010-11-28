@@ -44,7 +44,7 @@ class c_tile
 	s_sprite get_from_ini(ALLEGRO_CONFIG * config, const char * section, ALLEGRO_PATH * base_path);
 
 public:
-	void draw(float x, float y, int height, s_map_block * block, int bottom = 0, bool flip = 0);
+	void draw(float x, float y, int height, int bottom, int surface, s_map_block * block, bool flip = 0);
 	void load_ini(ALLEGRO_PATH * _path);
 	c_tile(void);
 	~c_tile(void);
