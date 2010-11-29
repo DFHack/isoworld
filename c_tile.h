@@ -37,10 +37,6 @@ struct s_sprite
 
 class c_tile
 {
-	vector<s_sprite> top_sprites;
-	vector<s_sprite> bottom_sprites;
-	vector<s_sprite> surface_sprites;
-
 	s_sprite get_from_ini(ALLEGRO_CONFIG * config, const char * section, ALLEGRO_PATH * base_path);
 
 public:
@@ -48,12 +44,20 @@ public:
 	void load_ini(ALLEGRO_PATH * _path);
 	c_tile(void);
 	~c_tile(void);
+	inline bool c_tile::operator < (const c_tile & a){return this->priority < a.priority;};
+
+	vector<s_sprite> top_sprites;
+	vector<s_sprite> bottom_sprites;
+	vector<s_sprite> surface_sprites;
+
 
 	int height_max;
 	int height_min;
 
 	int rain_min;
 	int rain_max;
+
+	int priority;
 
 	terrain_type special_terrain;
 };

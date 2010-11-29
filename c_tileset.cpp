@@ -23,8 +23,6 @@ void c_tileset::load_ini(ALLEGRO_PATH * path)
 	tile_height = get_config_int(config, "TILESET_PROPERTIES", "tile_height");
 	snap_height = get_config_int(config, "TILESET_PROPERTIES", "snap_height");
 
-	int num_tiles = get_config_int(config, "TILESET_PROPERTIES", "num_tiles", 1);
-
 	const char * file = al_get_config_value(config, "TILESET_PROPERTIES", "grid_tile");
 	if(file)
 	{
@@ -34,19 +32,37 @@ void c_tileset::load_ini(ALLEGRO_PATH * path)
 		al_destroy_path(tilepath);
 	}
 
-	for(size_t i = 0; i < num_tiles; i++)
+	const char * dir = al_get_config_value(config, "TILESET_PROPERTIES", "tile_dir");
+	if(dir)
 	{
-		sprintf(buffer, "tile_%d", i);
-		const char * file = al_get_config_value(config, "TILES", buffer);
-		if(file)
+		ALLEGRO_PATH * tile_dir = al_create_path(dir);
+		al_rebase_path(path, tile_dir);
+		ALLEGRO_FS_ENTRY * fs_dir = al_create_fs_entry(al_path_cstr(tile_dir, ALLEGRO_NATIVE_PATH_SEP));
+		if(al_open_directory(fs_dir))
 		{
-			ALLEGRO_PATH * tilepath = al_create_path(file);
-			al_rebase_path(path, tilepath);
-			c_tile temp_tile;
-			temp_tile.load_ini(tilepath);
-			tile_set.push_back(temp_tile);
-			al_destroy_path(tilepath);
+			ALLEGRO_FS_ENTRY * fs_tile;
+			while(fs_tile = al_read_directory(fs_dir))
+			{
+				ALLEGRO_PATH * tile_path = al_create_path(al_get_fs_entry_name(fs_tile));
+				if(strcmp(al_get_path_extension(tile_path), ".ini") == 0)
+				{
+					c_tile temp_tile;
+					temp_tile.load_ini(tile_path);
+					if(!(
+						temp_tile.bottom_sprites.empty() &&
+						temp_tile.surface_sprites.empty() &&
+						temp_tile.top_sprites.empty())
+						)
+						tile_set.push_back(temp_tile);
+				}
+				al_destroy_path(tile_path);
+				al_destroy_fs_entry(fs_tile);
+			}
+			al_destroy_fs_entry(fs_tile);
+			al_close_directory(fs_dir);
 		}
+		al_destroy_fs_entry(fs_dir);
+		sort(tile_set.begin(), tile_set.end());
 	}
 }
 

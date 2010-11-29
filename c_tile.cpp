@@ -1,38 +1,39 @@
 #include "c_tile.h"
 #include "c_config.h"
 #include "s_map_block.h"
+#include "console.h"
 
 unsigned char get_path_offset(unsigned char in)
 {
 	if((in&(2|8|32|128)) == (2|8|32|128))
 		return 10;
-	if((in&(2|8|128)) == (2|8|128))
+	else if((in&(2|8|128)) == (2|8|128))
 		return 9;
-	if((in&(2|32|128)) == (2|32|128))
+	else if((in&(2|32|128)) == (2|32|128))
 		return 8;
-	if((in&(8|32|128)) == (8|32|128))
+	else if((in&(8|32|128)) == (8|32|128))
 		return 7;
-	if((in&(2|8|32)) == (2|8|32))
+	else if((in&(2|8|32)) == (2|8|32))
 		return 6;
-	if((in&(2|128)) == (2|128))
+	else if((in&(2|128)) == (2|128))
 		return 5;
-	if((in&(32|128)) == (32|128))
+	else if((in&(32|128)) == (32|128))
 		return 4;
-	if((in&(8|32)) == (8|32))
+	else if((in&(8|32)) == (8|32))
 		return 3;
-	if((in&(2|8)) == (2|8))
+	else if((in&(2|8)) == (2|8))
 		return 2;
-	if((in&(8|32)) == (8|32))
+	else if((in&(8|32)) == (8|32))
 		return 1;
-	if((in&(2|32)) == (2|32))
+	else if((in&(2|32)) == (2|32))
 		return 0;
-	if((in&2) == 2)
+	else if((in&2) == 2)
 		return 0;
-	if((in&8) == 8)
+	else if((in&8) == 8)
 		return 1;
-	if((in&32) == 32)
+	else if((in&32) == 32)
 		return 0;
-	if((in&128) == 128)
+	else if((in&128) == 128)
 		return 1;
 	return 10;
 }
@@ -78,18 +79,18 @@ terrain_type get_terrain_type(const char * text)
 {
 	if(strcmp(text, "any") == 0)
 		return TERRAIN_ANY;
+	if(strcmp(text, "none") == 0)
+		return TERRAIN_NONE;
 	if(strcmp(text, "ocean") == 0)
 		return TERRAIN_OCEAN;
 	if(strcmp(text, "river") == 0)
 		return TERRAIN_RIVER;
+	if(strcmp(text, "brook") == 0)
+		return TERRAIN_STREAM;
 	if(strcmp(text, "swamp") == 0)
 		return TERRAIN_SWAMP;
 	if(strcmp(text, "marsh") == 0)
 		return TERRAIN_SWAMP;
-	if(strcmp(text, "beach") == 0)
-		return TERRAIN_BEACH;
-	if(strcmp(text, "mountain") == 0)
-		return TERRAIN_MOUNTAIN;
 	if(strcmp(text, "grassland_temperate") == 0)
 		return TERRAIN_GRASS_TEMP;
 	if(strcmp(text, "grassland_tropical") == 0)
@@ -98,8 +99,27 @@ terrain_type get_terrain_type(const char * text)
 		return TERRAIN_FOREST_TEMP;
 	if(strcmp(text, "forest_tropical") == 0)
 		return TERRAIN_FOREST_TROP;
+	if(strcmp(text, "badlands") == 0)
+		return TERRAIN_BADLANDS;
+	if(strcmp(text, "rock") == 0)
+		return TERRAIN_ROCK;
+	if(strcmp(text, "beach") == 0)
+		return TERRAIN_BEACH;
+	if(strcmp(text, "taiga") == 0)
+		return TERRAIN_TAIGA;
+	if(strcmp(text, "glacier") == 0)
+		return TERRAIN_GLACIER;
+	if(strcmp(text, "tundra") == 0)
+		return TERRAIN_TUNDRA;
+	if(strcmp(text, "mountain") == 0)
+		return TERRAIN_MOUNTAIN;
 	if(strcmp(text, "mountain_tall") == 0)
 		return TERRAIN_MOUNTAIN_TALL;
+
+	if(strcmp(text, "village") == 0)
+		return TERRAIN_VILLAGE;
+	if(strcmp(text, "farm_planted") == 0)
+		return TERRAIN_FARM_PLANTED;
 	if(strcmp(text, "road") == 0)
 		return TERRAIN_ROAD;
 	return TERRAIN_ANY;
@@ -126,6 +146,7 @@ s_sprite::s_sprite(void)
 	origin_x = 0;
 	origin_y = 0;
 	column_height = 0;
+	color_by=NONE;
 	offset_type =  OFFSET_NONE;
 }
 
@@ -134,6 +155,7 @@ c_tile::c_tile(void)
 	height_max = 999;
 	height_min = -999;
 	special_terrain = TERRAIN_ANY;
+	priority = 0;
 }
 
 c_tile::~c_tile(void)
@@ -150,8 +172,6 @@ void c_tile::draw(float x, float y, int height, int bottom, int surface, s_map_b
 			if(top_sprites.at(i).offset_type == OFFSET_PATH)
 			{
 				offset = block->terrain_borders[block->terrain];
-				if(block->terrain == TERRAIN_RIVER)
-					offset |= block->terrain_borders[TERRAIN_OCEAN];
 				offset = get_path_offset(offset);
 			}
 			draw_sprite(
@@ -169,36 +189,59 @@ void c_tile::draw(float x, float y, int height, int bottom, int surface, s_map_b
 		{
 			int num_sections = (height - bottom) / bottom_sprites.at(i).column_height;
 			int bottom_section_height = (height - bottom) % bottom_sprites.at(i).column_height;
+			if(bottom_section_height)
+				num_sections++;
 			for( int sec = 0; sec <= num_sections; sec++)
 			{
+				int offset = 0;
+				if(bottom_sprites.at(i).offset_type == OFFSET_PATH)
+				{
+					offset = block->terrain_borders[block->terrain];
+					offset = get_path_offset(offset);
+				}
 				draw_sprite(
 					bottom_sprites.at(i), 
 					block,
 					x, 
-					y - bottom_section_height - ((sec-1) * bottom_sprites.at(i).column_height) - bottom,
-					flip);
+					y - height + (sec * bottom_sprites.at(i).column_height),
+					flip,
+					offset);
 			}
 		}
 		for(unsigned int i = 0; i < top_sprites.size(); i++)
 		{
+			int offset = 0;
+			if(top_sprites.at(i).offset_type == OFFSET_PATH)
+			{
+				offset = block->terrain_borders[block->terrain];
+				offset = get_path_offset(offset);
+			}
 			draw_sprite(
 				top_sprites.at(i),
 				block,
 				x,
 				y - height,
-				flip);
+				flip,
+				offset);
 		}
 	}
 	if(height <= surface)
 	{
 		for(unsigned int i = 0; i < surface_sprites.size(); i++)
 		{
+			int offset = 0;
+			if(surface_sprites.at(i).offset_type == OFFSET_PATH)
+			{
+				offset = block->terrain_borders[block->terrain];
+				offset = get_path_offset(offset);
+			}
 			draw_sprite(
 				surface_sprites.at(i),
 				block,
 				x,
 				y-surface,
-				flip);
+				flip,
+				offset);
 		}
 
 	}
@@ -209,7 +252,7 @@ void c_tile::load_ini(ALLEGRO_PATH * path)
 	ALLEGRO_CONFIG * config = 0;
 
 	const char * thepath = al_path_cstr(path, ALLEGRO_NATIVE_PATH_SEP);
-
+	log_printf("Loading tile at: %s\n", thepath);
 	config = al_load_config_file(thepath);
 	if(!config)
 	{
@@ -251,6 +294,8 @@ void c_tile::load_ini(ALLEGRO_PATH * path)
 
 	rain_max = get_config_int(config, "SPRITE", "rain_max", 500);
 	rain_min = get_config_int(config, "SPRITE", "rain_min", -500);
+
+	priority = get_config_int(config, "SPRITE", "priority", 0);
 
 	const char * terra = al_get_config_value(config, "SPRITE", "special_terrain");
 	if(terra)

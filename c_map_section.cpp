@@ -86,9 +86,9 @@ void c_map_section::draw(int inx, int iny)
 {
 	clock_t start_time = clock();
 	al_hold_bitmap_drawing(true);
-	for (unsigned int y = 0; y < (board_height); y++)
+	for (unsigned int y = 1; y < (board_height-1); y++)
 	{
-		for (unsigned int x = 0; x < (board_width); x++)
+		for (unsigned int x = 1; x < (board_width-1); x++)
 		{
 			int drawx = x;
 			int drawy = y;
@@ -115,8 +115,8 @@ void c_map_section::draw(int inx, int iny)
 				tileset_list.at(current_tileset).grid_tile.draw(drawx, drawy, snap_height(block_array[index].height), snap_height(bottom_r), snap_height(block_array[index].water_height), &block_array[index], 1);
 			unsigned char R, G, B;
 			al_unmap_rgb(block_array[index].color, &R, &G, &B);
-			if(x==0 && y==0)
-				log_printf("%d,%d,%d H:%d, T:%d\n", R,G,B, block_array[index].height , block_array[index].terrain);
+			//if(x==(board_width-2) && y==(board_height-2))
+			//	log_printf("%d,%d,%d H:%d, T:%d B:%d\n", R,G,B, block_array[index].height , block_array[index].terrain, block_array[index].terrain_borders[block_array[index].terrain]);
 		}
 	}
 	al_hold_bitmap_drawing(false);
@@ -197,11 +197,6 @@ void c_map_section::load_special_tiles(s_maplist * maplist)
 			unsigned int index = x + (board_width * y);
 			while(1)
 			{
-				if(block_array[index].height == 99)
-				{
-					block_array[index].terrain = TERRAIN_BEACH;
-					break;
-				}
 				if(maplist->elevation_map_with_water)
 				{
 					int tempx = x + user_config.map_x;
@@ -217,7 +212,10 @@ void c_map_section::load_special_tiles(s_maplist * maplist)
 					block_array[index].water_height = -9999;
 					if(red == 0 && green == blue)
 					{
-						block_array[index].terrain = TERRAIN_RIVER;
+						if(block_array[index].color.g > 0.0001)
+							block_array[index].terrain = TERRAIN_STREAM;
+						else 
+							block_array[index].terrain = TERRAIN_RIVER;
 						block_array[index].height = blue;
 						block_array[index].water_height = blue;
 						break;
@@ -235,6 +233,12 @@ void c_map_section::load_special_tiles(s_maplist * maplist)
 				R=cR;
 				G=cG;
 				B=cB;
+				if(block_array[index].height == 99)
+				{
+					block_array[index].terrain = TERRAIN_BEACH;
+					break;
+				}
+
 				//if(x == 0 && y == 0)
 				//	log_printf("r %d, g %d, b %d, h%d\n", R,G,B, block_array[index].height );
 				if(
@@ -620,23 +624,44 @@ void c_map_section::generate_special_tile_borders()
 			{
 				unsigned char borders = 0;
 				if((x > 0) && (y > 0))
+				{
 					if(block_array[((x-1) + (board_width * (y-1)))].terrain == i) borders |= 1;
+				}
 				if(y > 0)
+				{
 					if(block_array[((x+0) + (board_width * (y-1)))].terrain == i) borders |= 2;
+				}
 				if(x < (board_width-1) && y > 0)
+				{
 					if(block_array[((x+1) + (board_width * (y-1)))].terrain == i) borders |= 4;
+				}
 				if(x < (board_width-1))
+				{
 					if(block_array[((x+1) + (board_width * (y+0)))].terrain == i) borders |= 8;
+				}
 				if(x < (board_width-1) && y < (board_height-1))
+				{
 					if(block_array[((x+1) + (board_width * (y+1)))].terrain == i) borders |= 16;
+				}
 				if(y < (board_height-1))
+				{
 					if(block_array[((x+0) + (board_width * (y+1)))].terrain == i) borders |= 32;
+				}
 				if(x > 0 && y < (board_height-1))
+				{
 					if(block_array[((x-1) + (board_width * (y+1)))].terrain == i) borders |= 64;
+				}
 				if(x > 0)
+				{
 					if(block_array[((x-1) + (board_width * (y+0)))].terrain == i) borders |= 128;
+				}
 				block_array[(x + (board_width * y))].terrain_borders[i]=borders;
 			}
+			block_array[(x + (board_width * y))].terrain_borders[TERRAIN_RIVER] |= block_array[(x + (board_width * y))].terrain_borders[TERRAIN_OCEAN];
+			block_array[(x + (board_width * y))].terrain_borders[TERRAIN_RIVER] |= block_array[(x + (board_width * y))].terrain_borders[TERRAIN_STREAM];
+
+			block_array[(x + (board_width * y))].terrain_borders[TERRAIN_STREAM] |= block_array[(x + (board_width * y))].terrain_borders[TERRAIN_OCEAN];
+			block_array[(x + (board_width * y))].terrain_borders[TERRAIN_STREAM] |= block_array[(x + (board_width * y))].terrain_borders[TERRAIN_RIVER];
 		}
 	}
 }

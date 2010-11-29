@@ -74,9 +74,9 @@ void c_config::save_values(void)
 	sprintf(buffer, "%d", map_y);
 	al_set_config_value(default_config, "MAP", "y_location", buffer);
 
-	sprintf(buffer, "%d", map_width);
+	sprintf(buffer, "%d", map_width-2);
 	al_set_config_value(default_config, "MAP", "width", buffer);
-	sprintf(buffer, "%d", map_height);
+	sprintf(buffer, "%d", map_height-2);
 	al_set_config_value(default_config, "MAP", "height", buffer);
 
 	al_set_config_value(default_config, "MAP", "path", map_path.c_str());
@@ -101,8 +101,8 @@ void c_config::retrieve_values(void)
 	map_x = atoi(al_get_config_value(default_config, "MAP", "x_location"));
 	map_y = atoi(al_get_config_value(default_config, "MAP", "y_location"));
 
-	map_width = atoi(al_get_config_value(default_config, "MAP", "width"));
-	map_height = atoi(al_get_config_value(default_config, "MAP", "height"));
+	map_width = atoi(al_get_config_value(default_config, "MAP", "width"))+2;
+	map_height = atoi(al_get_config_value(default_config, "MAP", "height"))+2;
 
 	map_path = al_get_config_value(default_config, "MAP", "path");
 
