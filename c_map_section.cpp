@@ -724,14 +724,14 @@ double c_map_section::get_average_heights(int distance, int x, int y)
 	double result=0.0;
 	for(int i = x-distance; i <= x+distance; i++)
 	{
-		double real_distance= sqrt((double)((i*i)+(distance*distance)));
+		double real_distance= sqrt((double)((i-x)*(i-x)+(distance*distance)));
 		result += ((block_array[coords_to_index( i, y-distance)].water_height-block_array[coords_to_index( x, y)].water_height)/real_distance);
 		result += ((block_array[coords_to_index( i, y+distance)].water_height-block_array[coords_to_index( x, y)].water_height)/real_distance);
 		count += 2;
 	}
 	for(int i = (y-distance)+1; i < y+distance; i++)
 	{
-		double real_distance= sqrt((double)((i*i)+(distance*distance)));
+		double real_distance= sqrt((double)(((i-y)*(i-y))+(distance*distance)));
 		result += ((block_array[coords_to_index( x-distance, i)].water_height-block_array[coords_to_index( x, y)].water_height)/real_distance);
 		result += ((block_array[coords_to_index( x+distance, i)].water_height-block_array[coords_to_index( x, y)].water_height)/real_distance);
 		count +=2;
