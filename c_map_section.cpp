@@ -158,6 +158,20 @@ void c_map_section::load_heights(ALLEGRO_BITMAP * heightmap)
 	}
 }
 
+void c_map_section::generate_noise(void)
+{
+	for (unsigned int y = 0; y < board_width; y++)
+	{
+		for (unsigned int x = 0; x < board_height; x++)
+		{
+			unsigned int index = x + (board_width * y);
+				int tempx = x + user_config.map_x;
+				int tempy = y + user_config.map_y;
+				block_array[index].random = (findnoise2(tempx, tempy)+1) / 2;
+		}
+	}
+}
+
 void c_map_section::load_level(ALLEGRO_BITMAP * levelmap, int level)
 {
 	for (unsigned int y = 0; y < board_width; y++)
@@ -550,6 +564,7 @@ void c_map_section::propogate_tiles(s_maplist * maplist)
 	load_level(maplist->salinity_map, LEVEL_SALINITY);
 	load_special_tiles(maplist);
 	generate_special_tile_borders();
+	generate_noise();
 	//now for the actual tile propogating.
 	for (unsigned int y = 0; y < board_width; y++)
 	{
@@ -662,6 +677,9 @@ void c_map_section::generate_special_tile_borders()
 
 			block_array[(x + (board_width * y))].terrain_borders[TERRAIN_STREAM] |= block_array[(x + (board_width * y))].terrain_borders[TERRAIN_OCEAN];
 			block_array[(x + (board_width * y))].terrain_borders[TERRAIN_STREAM] |= block_array[(x + (board_width * y))].terrain_borders[TERRAIN_RIVER];
+
+			block_array[(x + (board_width * y))].terrain_borders[TERRAIN_FORT_WALL] |= block_array[(x + (board_width * y))].terrain_borders[TERRAIN_FORT_GATE];
+			block_array[(x + (board_width * y))].terrain_borders[TERRAIN_FORT_GATE] |= block_array[(x + (board_width * y))].terrain_borders[TERRAIN_FORT_WALL];
 		}
 	}
 }

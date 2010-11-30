@@ -3,7 +3,7 @@
 #include "s_map_block.h"
 #include "console.h"
 
-unsigned char get_path_offset(unsigned char in)
+int get_border_offset_path(unsigned char in)
 {
 	if((in&(2|8|32|128)) == (2|8|32|128))
 		return 10;
@@ -35,11 +35,55 @@ unsigned char get_path_offset(unsigned char in)
 		return 0;
 	else if((in&128) == 128)
 		return 1;
-	return 10;
+	return -1;
+}
+
+int get_border_offset_six(unsigned char in)
+{
+	if((in&(2|32)) == (2|32))
+		return 0;
+	else if((in&(8|128)) == (8|128))
+		return 1;
+	else if((in&(8|32)) == (8|32))
+		return 2;
+	else if((in&(32|128)) == (32|128))
+		return 3;
+	else if((in&(2|8)) == (2|8))
+		return 4;
+	else if((in&(2|128)) == (2|128))
+		return 5;
+	else if((in&2) == 2)
+		return 0;
+	else if((in&8) == 8)
+		return 1;
+	else if((in&32) == 32)
+		return 0;
+	else if((in&128) == 128)
+		return 1;
+	return -1;
+}
+
+int get_border_offset_pair(unsigned char in)
+{
+	if((in&(2|32)) == (2|32))
+		return 0;
+	else if((in&(8|128)) == (8|128))
+		return 1;
+	else if((in&2) == 2)
+		return 0;
+	else if((in&8) == 8)
+		return 1;
+	else if((in&32) == 32)
+		return 0;
+	else if((in&128) == 128)
+		return 1;
+	return -1;
 }
 
 void draw_sprite(s_sprite sprite, s_map_block * block, float x, float y, bool flip = 0, int offset = 0)
 {
+	if(offset < 0)
+		return;
 	int flags = 0;
 	if(flip)
 		flags = ALLEGRO_FLIP_HORIZONTAL;
@@ -120,6 +164,18 @@ terrain_type get_terrain_type(const char * text)
 		return TERRAIN_VILLAGE;
 	if(strcmp(text, "farm_planted") == 0)
 		return TERRAIN_FARM_PLANTED;
+	if(strcmp(text, "farm_fallow") == 0)
+		return TERRAIN_FARM_FALLOW;
+	if(strcmp(text, "farm_pasture") == 0)
+		return TERRAIN_FARM_PASTURE;
+	if(strcmp(text, "fort_keep") == 0)
+		return TERRAIN_FORT_KEEP;
+	if(strcmp(text, "fort_wall") == 0)
+		return TERRAIN_FORT_WALL;
+	if(strcmp(text, "fort_gate") == 0)
+		return TERRAIN_FORT_GATE;
+	if(strcmp(text, "fort_court") == 0)
+		return TERRAIN_FORT_COURT;
 	if(strcmp(text, "road") == 0)
 		return TERRAIN_ROAD;
 	return TERRAIN_ANY;
@@ -133,7 +189,31 @@ e_offset_type get_offset_type(const char * text)
 		return OFFSET_NONE;
 	if(strcmp(text, "path") == 0)
 		return OFFSET_PATH;
+	if(strcmp(text, "pair") == 0)
+		return OFFSET_PAIR;
+	if(strcmp(text, "six") == 0)
+		return OFFSET_SIX;
+	if(strcmp(text, "random") == 0)
+		return OFFSET_RANDOM;
 	return OFFSET_NONE;
+}
+
+int get_offset(e_offset_type type, char borders, s_map_block * block, unsigned char amount)
+{
+	if(type == OFFSET_PATH)
+		return get_border_offset_path(borders);
+	else if(type == OFFSET_PAIR)
+		return get_border_offset_pair(borders);
+	else if(type == OFFSET_SIX)
+		return get_border_offset_six(borders);
+	else if(type == OFFSET_RANDOM)
+	{
+		int off = amount*block->random;
+		if(off >= amount)
+			off=0;
+		return off;
+	}
+	return 0;
 }
 
 s_sprite::s_sprite(void)
@@ -148,6 +228,7 @@ s_sprite::s_sprite(void)
 	column_height = 0;
 	color_by=NONE;
 	offset_type =  OFFSET_NONE;
+	offset_amount = 0;
 }
 
 c_tile::c_tile(void)
@@ -168,12 +249,7 @@ void c_tile::draw(float x, float y, int height, int bottom, int surface, s_map_b
 	{
 		for(unsigned int i = 0; i < top_sprites.size(); i++)
 		{
-			int offset = 0;
-			if(top_sprites.at(i).offset_type == OFFSET_PATH)
-			{
-				offset = block->terrain_borders[block->terrain];
-				offset = get_path_offset(offset);
-			}
+			int offset = get_offset(top_sprites.at(i).offset_type, block->terrain_borders[block->terrain], block, top_sprites.at(i).offset_amount);
 			draw_sprite(
 				top_sprites.at(i),
 				block,
@@ -193,12 +269,7 @@ void c_tile::draw(float x, float y, int height, int bottom, int surface, s_map_b
 				num_sections++;
 			for( int sec = 0; sec <= num_sections; sec++)
 			{
-				int offset = 0;
-				if(bottom_sprites.at(i).offset_type == OFFSET_PATH)
-				{
-					offset = block->terrain_borders[block->terrain];
-					offset = get_path_offset(offset);
-				}
+				int offset = get_offset(bottom_sprites.at(i).offset_type, block->terrain_borders[block->terrain], block, bottom_sprites.at(i).offset_amount);
 				draw_sprite(
 					bottom_sprites.at(i), 
 					block,
@@ -210,12 +281,7 @@ void c_tile::draw(float x, float y, int height, int bottom, int surface, s_map_b
 		}
 		for(unsigned int i = 0; i < top_sprites.size(); i++)
 		{
-			int offset = 0;
-			if(top_sprites.at(i).offset_type == OFFSET_PATH)
-			{
-				offset = block->terrain_borders[block->terrain];
-				offset = get_path_offset(offset);
-			}
+			int offset = get_offset(top_sprites.at(i).offset_type, block->terrain_borders[block->terrain], block, top_sprites.at(i).offset_amount);
 			draw_sprite(
 				top_sprites.at(i),
 				block,
@@ -229,12 +295,7 @@ void c_tile::draw(float x, float y, int height, int bottom, int surface, s_map_b
 	{
 		for(unsigned int i = 0; i < surface_sprites.size(); i++)
 		{
-			int offset = 0;
-			if(surface_sprites.at(i).offset_type == OFFSET_PATH)
-			{
-				offset = block->terrain_borders[block->terrain];
-				offset = get_path_offset(offset);
-			}
+			int offset = get_offset(surface_sprites.at(i).offset_type, block->terrain_borders[block->terrain], block, surface_sprites.at(i).offset_amount);
 			draw_sprite(
 				surface_sprites.at(i),
 				block,
@@ -341,6 +402,8 @@ s_sprite c_tile::get_from_ini(ALLEGRO_CONFIG *config, const char * section, ALLE
 	const char * off = al_get_config_value(config, section, "offset_type");
 	if(off)
 		temp.offset_type = get_offset_type(off);
+
+	temp.offset_amount = get_config_int(config, section, "offset_amount");
 
 	al_destroy_path(imagepath);
 	return temp;

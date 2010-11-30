@@ -42,6 +42,20 @@ struct s_maplist
 	s_maplist(void);
 };
 
+//inline double findnoise(double x)
+//{			 
+// int x = (x<<13) ^ x;
+// return (double)( 1.0 - ( (x * (x * x * 15731 + 789221) + 1376312589) & Ox7fffffff) / 1073741824.0);	
+//}
+
+inline double findnoise2(double x,double y)
+{
+ int n=(int)x+(int)y*57;
+ n=(n<<13)^n;
+ int nn=(n*(n*n*60493+19990303)+1376312589)&0x7fffffff;
+ return 1.0-((double)nn/1073741824.0);
+}
+
 extern s_pathlist path_list;
 
 extern s_maplist map_list;

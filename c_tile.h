@@ -15,6 +15,9 @@ enum e_offset_type
 {
 	OFFSET_NONE,
 	OFFSET_PATH,
+	OFFSET_PAIR,
+	OFFSET_SIX,
+	OFFSET_RANDOM,
 	OFFSET_COUNT
 };
 
@@ -33,6 +36,7 @@ struct s_sprite
 	e_color_by color_by;
 	ALLEGRO_COLOR color;
 	e_offset_type offset_type;
+	unsigned char offset_amount;
 };
 
 class c_tile
