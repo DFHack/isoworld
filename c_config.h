@@ -37,6 +37,11 @@ public:
 	int minimap_size;
 
 	bool showgrid;
+
+	//ao lighting
+	bool use_ao;
+	double tile_distance;
+	unsigned int ray_distance;
 };
 
 extern c_config user_config;

@@ -429,6 +429,15 @@ int main(void)
 			{
 				user_config.showgrid = !user_config.showgrid;
 			}
+			else if (event.keyboard.keycode == ALLEGRO_KEY_Q && !cur_dialog)
+			{
+				if(user_config.ray_distance > 1)
+					user_config.ray_distance --;
+			}
+			else if (event.keyboard.keycode == ALLEGRO_KEY_W && !cur_dialog)
+			{
+				user_config.ray_distance++;
+			}
 			else if (event.keyboard.keycode == ALLEGRO_KEY_SPACE && !cur_dialog)
 			{
 				test_map.increment_tileset();

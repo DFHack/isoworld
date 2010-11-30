@@ -80,6 +80,15 @@ int get_border_offset_pair(unsigned char in)
 	return -1;
 }
 
+ALLEGRO_COLOR mix_colors( ALLEGRO_COLOR lhs, ALLEGRO_COLOR rhs)
+{
+	lhs.a *= rhs.a;
+	lhs.r *= rhs.r;
+	lhs.g *= rhs.g;
+	lhs.b *= rhs.b;
+	return lhs;
+}
+
 void draw_sprite(s_sprite sprite, s_map_block * block, float x, float y, bool flip = 0, int offset = 0)
 {
 	if(offset < 0)
@@ -89,12 +98,12 @@ void draw_sprite(s_sprite sprite, s_map_block * block, float x, float y, bool fl
 		flags = ALLEGRO_FLIP_HORIZONTAL;
 	ALLEGRO_COLOR color;
 	if(sprite.color_by == NONE)
-		color = al_map_rgb(255,255,255);
+		color = block->light;
 	else if(sprite.color_by == INI)
-		color = sprite.color;
+		color = mix_colors(sprite.color, block->light) ;
 	else if(sprite.color_by == BIOME)
-		color = block->color;
-	else color = al_map_rgb(255,255,255);
+		color = mix_colors(block->color, block->light);
+	else color = block->light;
 	al_draw_tinted_bitmap_region(
 		imagelist.get_image(sprite.index),
 		color,

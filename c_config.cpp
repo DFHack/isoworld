@@ -53,6 +53,10 @@ c_config::c_config(void)
 	map_autoload = 1;
 	default_config = al_create_config();
 	minimap_size = 128;
+
+	use_ao = 1;
+	tile_distance = 8;
+	ray_distance = 3;
 }
 
 c_config::~c_config(void)
@@ -90,6 +94,14 @@ void c_config::save_values(void)
 	sprintf(buffer, "%d", minimap_size);
 	al_set_config_value(default_config, "MINIMAP", "size", buffer);
 
+	sprintf(buffer, "%s", use_ao?"yes":"no");
+	al_set_config_value(default_config, "AMBIENT_OCCLUSION", "use_ambient_occlusion", buffer);
+
+	sprintf(buffer, "%f", tile_distance);
+	al_set_config_value(default_config, "AMBIENT_OCCLUSION", "relative_tile_width", buffer);
+
+	sprintf(buffer, "%d", ray_distance);
+	al_set_config_value(default_config, "AMBIENT_OCCLUSION", "ray_cast_distance", buffer);
 
 }
 
@@ -111,6 +123,15 @@ void c_config::retrieve_values(void)
 	map_shift = atoi(al_get_config_value(default_config, "MAP", "vertical_shift"));
 
 	minimap_size = atoi(al_get_config_value(default_config, "MINIMAP", "size"));
+
+	const char * aotext = al_get_config_value(default_config, "AMBIENT_OCCLUSION", "use_ambient_occlusion");
+	if(strcmp("yes", aotext) == 0)
+		use_ao = 1;
+
+	tile_distance = atof(al_get_config_value(default_config, "AMBIENT_OCCLUSION", "relative_tile_width"));
+
+	ray_distance = atoi(al_get_config_value(default_config, "AMBIENT_OCCLUSION", "ray_cast_distance"));
+
 }
 
 bool c_config::save_file(void)

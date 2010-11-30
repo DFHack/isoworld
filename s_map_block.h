@@ -64,4 +64,5 @@ struct s_map_block
 	terrain_type terrain;
 	unsigned char terrain_borders[TERRAIN_COUNT];
 	double random;
+	ALLEGRO_COLOR light;
 };

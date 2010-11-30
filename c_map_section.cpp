@@ -3,6 +3,28 @@
 #include "common.h"
 #include <cmath>
 
+int get_map_height(int x, int y)
+{
+	if(map_list.elevation_map_with_water)
+	{
+		int tempx = x + user_config.map_x;
+		int tempy = y + user_config.map_y;
+		tempx =  bind_to_range(tempx , al_get_bitmap_width(map_list.elevation_map_with_water));
+		tempy =  bind_to_range(tempy , al_get_bitmap_height(map_list.elevation_map_with_water));
+
+		ALLEGRO_COLOR pixel_elw = al_get_pixel(map_list.elevation_map_with_water, tempx, tempy);
+		unsigned char red;
+		unsigned char green;
+		unsigned char blue;
+		al_unmap_rgb(pixel_elw, &red, &green, &blue);
+		if(red == green && green == blue)
+			return blue + 25;
+		if(red == 0 && green == blue)
+			return blue;
+		else
+			return blue+25;
+	}
+}
 bool approx_f(float a, float b, float accuracy)
 {
 	return (abs(a-b) <= accuracy);
@@ -82,6 +104,15 @@ void c_map_section::flood_fill(c_tile *tile, int height)
 	}
 }
 
+unsigned int c_map_section::coords_to_index(int x, int y)
+{
+	if(x < 0) x=0;
+	if(y < 0) y=0;
+	if(x >= board_width) x = board_width-1;
+	if(y >= board_height) y = board_height-1;
+	return x + (board_width * y);
+}
+
 void c_map_section::draw(int inx, int iny)
 {
 	clock_t start_time = clock();
@@ -95,7 +126,7 @@ void c_map_section::draw(int inx, int iny)
 			pointToScreen(&drawx, &drawy);
 			drawx += inx;
 			drawy += iny;
-			unsigned int index = x + (board_width * y);
+			unsigned int index = coords_to_index(x, y);
 			int bottom_l = 0;
 			int bottom_r = 0;
 			if(x+2 < board_width)
@@ -113,8 +144,8 @@ void c_map_section::draw(int inx, int iny)
 				tileset_list.at(current_tileset).grid_tile.draw(drawx, drawy, snap_height(block_array[index].height), snap_height(bottom_r), snap_height(block_array[index].water_height), &block_array[index]);
 			if(user_config.showgrid && !((y + user_config.map_y) % 16))
 				tileset_list.at(current_tileset).grid_tile.draw(drawx, drawy, snap_height(block_array[index].height), snap_height(bottom_r), snap_height(block_array[index].water_height), &block_array[index], 1);
-			unsigned char R, G, B;
-			al_unmap_rgb(block_array[index].color, &R, &G, &B);
+			//unsigned char R, G, B;
+			//al_unmap_rgb(block_array[index].color, &R, &G, &B);
 			//if(x==(board_width-2) && y==(board_height-2))
 			//	log_printf("%d,%d,%d H:%d, T:%d B:%d\n", R,G,B, block_array[index].height , block_array[index].terrain, block_array[index].terrain_borders[block_array[index].terrain]);
 		}
@@ -129,7 +160,7 @@ void c_map_section::load_heights(ALLEGRO_BITMAP * heightmap)
 	{
 		for (unsigned int x = 0; x < board_height; x++)
 		{
-			unsigned int index = x + (board_width * y);
+			unsigned int index = coords_to_index( x, y);
 			if(heightmap)
 			{
 				int tempx = x + user_config.map_x;
@@ -153,7 +184,7 @@ void c_map_section::load_heights(ALLEGRO_BITMAP * heightmap)
 				block_array[index].height;
 			}
 			else block_array[index].height = 0;
-
+			block_array[index].water_height = block_array[index].height;
 		}
 	}
 }
@@ -165,9 +196,9 @@ void c_map_section::generate_noise(void)
 		for (unsigned int x = 0; x < board_height; x++)
 		{
 			unsigned int index = x + (board_width * y);
-				int tempx = x + user_config.map_x;
-				int tempy = y + user_config.map_y;
-				block_array[index].random = (findnoise2(tempx, tempy)+1) / 2;
+			int tempx = x + user_config.map_x;
+			int tempy = y + user_config.map_y;
+			block_array[index].random = (findnoise2(tempx, tempy)+1) / 2;
 		}
 	}
 }
@@ -223,7 +254,7 @@ void c_map_section::load_special_tiles(s_maplist * maplist)
 					unsigned char green;
 					unsigned char blue;
 					al_unmap_rgb(pixel_elw, &red, &green, &blue);
-					block_array[index].water_height = -9999;
+					block_array[index].water_height = block_array[index].height;
 					if(red == 0 && green == blue)
 					{
 						if(block_array[index].color.g > 0.0001)
@@ -256,9 +287,9 @@ void c_map_section::load_special_tiles(s_maplist * maplist)
 				//if(x == 0 && y == 0)
 				//	log_printf("r %d, g %d, b %d, h%d\n", R,G,B, block_array[index].height );
 				if(
-					(approx_f(((R / 2.0) + 153.0), block_array[index].height, 1.0)) &&
-					(approx_f(((G / 2.0) + 153.0), block_array[index].height, 1.0)) &&
-					(approx_f(((B / 2.0) + 153.0), block_array[index].height, 1.0)) &&
+					(approx_f(((R / 2.0f) + 153.0f), block_array[index].height, 1.0f)) &&
+					(approx_f(((G / 2.0f) + 153.0f), block_array[index].height, 1.0f)) &&
+					(approx_f(((B / 2.0f) + 153.0f), block_array[index].height, 1.0f)) &&
 					block_array[index].height > 200
 					)
 				{
@@ -266,9 +297,9 @@ void c_map_section::load_special_tiles(s_maplist * maplist)
 					break;
 				}
 				if(
-					(approx_f(((R)*2/3 + 50.0), block_array[index].height, 1.0)) &&
-					(approx_f(((G*7/6)*2/3 + 50.0), block_array[index].height, 1.0)) &&
-					(approx_f(((B*6/5)*2/3 + 50.0), block_array[index].height, 1.0)) &&
+					(approx_f(((R)*2/3 + 50.0f), block_array[index].height, 1.0f)) &&
+					(approx_f(((G*7/6)*2/3 + 50.0f), block_array[index].height, 1.0f)) &&
+					(approx_f(((B*6/5)*2/3 + 50.0f), block_array[index].height, 1.0f)) &&
 					block_array[index].height <= 200
 					)
 				{
@@ -276,9 +307,9 @@ void c_map_section::load_special_tiles(s_maplist * maplist)
 					break;
 				}
 				if(
-					(approx_f(((R)*2/3 + 50.0), 150.0, 1.0)) &&
-					(approx_f(((G*7/6)*2/3 + 50.0), 150, 1.0)) &&
-					(approx_f(((B*6/5)*2/3 + 50.0), 150, 1.0)) &&
+					(approx_f(((R)*2/3 + 50.0f), 150.0, 1.0f)) &&
+					(approx_f(((G*7/6)*2/3 + 50.0f), 150, 1.0f)) &&
+					(approx_f(((B*6/5)*2/3 + 50.0f), 150, 1.0f)) &&
 					block_array[index].height <= 200
 					)
 				{
@@ -286,153 +317,153 @@ void c_map_section::load_special_tiles(s_maplist * maplist)
 					break;
 				}
 				if(
-					(approx_f(((R*3)/4 + 90.0), block_array[index].height, 1.0)) &&
-					(approx_f(((G)/4 + 90.0), block_array[index].height, 1.0)) &&
-					(approx_f(((B)/4 + 90.0), block_array[index].height, 1.0))
+					(approx_f(((R*3)/4 + 90.0f), block_array[index].height, 1.0f)) &&
+					(approx_f(((G)/4 + 90.0f), block_array[index].height, 1.0f)) &&
+					(approx_f(((B)/4 + 90.0f), block_array[index].height, 1.0f))
 					)
 				{
 					block_array[index].terrain = TERRAIN_GLACIER;
 					break;
 				}
 				if(
-					(approx_f(((R*3/2)/4 + 90.0), block_array[index].height, 1.0)) &&
-					(approx_f(((G)/4 + 90.0), block_array[index].height, 1.0)) &&
-					(approx_f(((B)/4 + 90.0), block_array[index].height, 1.0))
+					(approx_f(((R*3/2)/4 + 90.0f), block_array[index].height, 1.0f)) &&
+					(approx_f(((G)/4 + 90.0f), block_array[index].height, 1.0f)) &&
+					(approx_f(((B)/4 + 90.0f), block_array[index].height, 1.0f))
 					)
 				{
 					block_array[index].terrain = TERRAIN_TUNDRA;
 					break;
 				}
 				if(
-					(approx_f(((R*4)/4 + 90.0), block_array[index].height, 1.0)) &&
-					(approx_f(((G)/4 + 90.0), block_array[index].height, 1.0)) &&
-					(approx_f(((B*2)/4 + 90.0), block_array[index].height, 1.0))
+					(approx_f(((R*4)/4 + 90.0f), block_array[index].height, 1.0f)) &&
+					(approx_f(((G)/4 + 90.0f), block_array[index].height, 1.0f)) &&
+					(approx_f(((B*2)/4 + 90.0f), block_array[index].height, 1.0f))
 					)
 				{
 					block_array[index].terrain = TERRAIN_SWAMP;
 					break;
 				}
 				if(
-					(approx_f(R, 0, 1.0)) &&
-					(approx_f(((G*3)/4 + 90.0), block_array[index].height, 1.0)) &&
-					(approx_f(((B*5)/4 + 90.0), block_array[index].height, 1.0))
+					(approx_f(R, 0, 1.0f)) &&
+					(approx_f(((G*3)/4 + 90.0f), block_array[index].height, 1.0f)) &&
+					(approx_f(((B*5)/4 + 90.0f), block_array[index].height, 1.0f))
 					)
 				{
 					block_array[index].terrain = TERRAIN_TAIGA;
 					break;
 				}
 				if(
-					(approx_f(R, 0, 1.0)) &&
-					(approx_f(((G*3)/4 + 90.0), block_array[index].height, 1.0)) &&
-					(approx_f(((B*6)/4 + 90.0), block_array[index].height, 1.0))
+					(approx_f(R, 0, 1.0f)) &&
+					(approx_f(((G*3)/4 + 90.0f), block_array[index].height, 1.0f)) &&
+					(approx_f(((B*6)/4 + 90.0f), block_array[index].height, 1.0f))
 					)
 				{
 					block_array[index].terrain = TERRAIN_FOREST_TEMP;
 					break;
 				}
 				if(
-					(approx_f(R, 0, 1.0)) &&
-					(approx_f(((G*3)/4 + 90.0), block_array[index].height, 1.0)) &&
-					(approx_f(B, 0, 1.0))
+					(approx_f(R, 0, 1.0f)) &&
+					(approx_f(((G*3)/4 + 90.0f), block_array[index].height, 1.0f)) &&
+					(approx_f(B, 0, 1.0f))
 					)
 				{
 					block_array[index].terrain = TERRAIN_FOREST_TROP;
 					break;
 				}
 				if(
-					(approx_f(R, 0, 1.0)) &&
-					(approx_f(((G)/4 + 90.0), block_array[index].height, 1.0)) &&
-					(approx_f(((B*6)/4 + 90.0), block_array[index].height, 1.0))
+					(approx_f(R, 0, 1.0f)) &&
+					(approx_f(((G)/4 + 90.0f), block_array[index].height, 1.0f)) &&
+					(approx_f(((B*6)/4 + 90.0f), block_array[index].height, 1.0f))
 					)
 				{
 					block_array[index].terrain = TERRAIN_GRASS_TEMP;
 					break;
 				}
 				if(
-					(approx_f(((R)/4 + 90.0), block_array[index].height, 1.0)) &&
-					(approx_f(((G*6/5)/4 + 90.0), block_array[index].height, 1.0)) &&
-					(approx_f(B, 0, 1.0))
+					(approx_f(((R)/4 + 90.0f), block_array[index].height, 1.0f)) &&
+					(approx_f(((G*6/5)/4 + 90.0f), block_array[index].height, 1.0f)) &&
+					(approx_f(B, 0, 1.0f))
 					)
 				{
 					block_array[index].terrain = TERRAIN_GRASS_TROP;
 					break;
 				}
 				if(
-					(approx_f(((R)/4 + 90.0), block_array[index].height, 1.0)) &&
-					(approx_f(((G*3)/4 + 90.0), block_array[index].height, 1.0)) &&
-					(approx_f(((B*5)/4 + 90.0), block_array[index].height, 1.0))
+					(approx_f(((R)/4 + 90.0f), block_array[index].height, 1.0f)) &&
+					(approx_f(((G*3)/4 + 90.0f), block_array[index].height, 1.0f)) &&
+					(approx_f(((B*5)/4 + 90.0f), block_array[index].height, 1.0f))
 					)
 				{
 					block_array[index].terrain = TERRAIN_BADLANDS;
 					break;
 				}
 				if(
-					(approx_f(((R)/4 + 90.0), block_array[index].height, 1.0)) &&
-					(approx_f(((G*2)/4 + 90.0), block_array[index].height, 1.0)) &&
-					(approx_f(((B*4)/4 + 90.0), block_array[index].height, 1.0))
+					(approx_f(((R)/4 + 90.0f), block_array[index].height, 1.0f)) &&
+					(approx_f(((G*2)/4 + 90.0f), block_array[index].height, 1.0f)) &&
+					(approx_f(((B*4)/4 + 90.0f), block_array[index].height, 1.0f))
 					)
 				{
 					block_array[index].terrain = TERRAIN_ROCK;
 					break;
 				}
 				if(
-					(approx_f(((R)/4 + 90.0), block_array[index].height, 1.0)) &&
-					(approx_f(((G)/4 + 90.0), block_array[index].height, 1.0)) &&
-					(approx_f(((B)/4 + 90.0), block_array[index].height, 1.0))
+					(approx_f(((R)/4 + 90.0f), block_array[index].height, 1.0f)) &&
+					(approx_f(((G)/4 + 90.0f), block_array[index].height, 1.0f)) &&
+					(approx_f(((B)/4 + 90.0f), block_array[index].height, 1.0f))
 					)
 				{
 					block_array[index].terrain = TERRAIN_VILLAGE;
 					break;
 				}
 				if(
-					(approx_f(((R)/4 + 90.0), block_array[index].height, 1.0)) &&
-					(approx_f(((G)/4 + 90.0), block_array[index].height, 1.0)) &&
-					(approx_f(B, 0, 1.0))
+					(approx_f(((R)/4 + 90.0f), block_array[index].height, 1.0f)) &&
+					(approx_f(((G)/4 + 90.0f), block_array[index].height, 1.0f)) &&
+					(approx_f(B, 0, 1.0f))
 					)
 				{
 					block_array[index].terrain = TERRAIN_FARM_PLANTED;
 					break;
 				}
 				if(
-					(approx_f(R, 0, 1.0)) &&
-					(approx_f(((G)/4 + 90.0), block_array[index].height, 1.0)) &&
-					(approx_f(B, 0, 1.0))
+					(approx_f(R, 0, 1.0f)) &&
+					(approx_f(((G)/4 + 90.0f), block_array[index].height, 1.0f)) &&
+					(approx_f(B, 0, 1.0f))
 					)
 				{
 					block_array[index].terrain = TERRAIN_FARM_PLANTED;
 					break;
 				}
 				if(
-					(approx_f(R, block_array[index].height, 1.0)) &&
-					(approx_f(G, block_array[index].height, 1.0)) &&
-					(approx_f(B, block_array[index].height, 1.0))
+					(approx_f(R, block_array[index].height, 1.0f)) &&
+					(approx_f(G, block_array[index].height, 1.0f)) &&
+					(approx_f(B, block_array[index].height, 1.0f))
 					)
 				{
 					block_array[index].terrain = TERRAIN_FORT_KEEP;
 					break;
 				}
 				if(
-					(approx_f(R*2, block_array[index].height, 1.0)) &&
-					(approx_f(G*2, block_array[index].height, 1.0)) &&
-					(approx_f(B*2, block_array[index].height, 1.0))
+					(approx_f(R*2, block_array[index].height, 1.0f)) &&
+					(approx_f(G*2, block_array[index].height, 1.0f)) &&
+					(approx_f(B*2, block_array[index].height, 1.0f))
 					)
 				{
 					block_array[index].terrain = TERRAIN_FORT_GATE;
 					break;
 				}
 				if(
-					(approx_f(R*3/2, block_array[index].height, 1.0)) &&
-					(approx_f(G*3/2, block_array[index].height, 1.0)) &&
-					(approx_f(B*3/2, block_array[index].height, 1.0))
+					(approx_f(R*3/2, block_array[index].height, 1.0f)) &&
+					(approx_f(G*3/2, block_array[index].height, 1.0f)) &&
+					(approx_f(B*3/2, block_array[index].height, 1.0f))
 					)
 				{
 					block_array[index].terrain = TERRAIN_FORT_WALL;
 					break;
 				}
 				if(
-					(approx_f(R, 0, 1.0)) &&
-					(approx_f(G*2, block_array[index].height, 1.0)) &&
-					(approx_f(B, 0, 1.0))
+					(approx_f(R, 0, 1.0f)) &&
+					(approx_f(G*2, block_array[index].height, 1.0f)) &&
+					(approx_f(B, 0, 1.0f))
 					)
 				{
 					block_array[index].terrain = TERRAIN_FORT_COURT;
@@ -524,7 +555,6 @@ void c_map_section::load_special_tiles(s_maplist * maplist)
 		}
 	}
 }
-
 void c_map_section::load_colors(ALLEGRO_BITMAP * colormap)
 {
 	for (unsigned int y = 0; y < board_width; y++)
@@ -565,6 +595,7 @@ void c_map_section::propogate_tiles(s_maplist * maplist)
 	load_special_tiles(maplist);
 	generate_special_tile_borders();
 	generate_noise();
+	generate_ambient_lighting();
 	//now for the actual tile propogating.
 	for (unsigned int y = 0; y < board_width; y++)
 	{
@@ -680,6 +711,54 @@ void c_map_section::generate_special_tile_borders()
 
 			block_array[(x + (board_width * y))].terrain_borders[TERRAIN_FORT_WALL] |= block_array[(x + (board_width * y))].terrain_borders[TERRAIN_FORT_GATE];
 			block_array[(x + (board_width * y))].terrain_borders[TERRAIN_FORT_GATE] |= block_array[(x + (board_width * y))].terrain_borders[TERRAIN_FORT_WALL];
+		}
+	}
+}
+
+
+double c_map_section::get_average_heights(int distance, int x, int y)
+{
+	if(distance < 1)
+		return 0;
+	int count=0;
+	double result=0.0;
+	for(int i = x-distance; i <= x+distance; i++)
+	{
+		double real_distance= sqrt((double)((i*i)+(distance*distance)));
+		result += ((block_array[coords_to_index( i, y-distance)].water_height-block_array[coords_to_index( x, y)].water_height)/real_distance);
+		result += ((block_array[coords_to_index( i, y+distance)].water_height-block_array[coords_to_index( x, y)].water_height)/real_distance);
+		count += 2;
+	}
+	for(int i = (y-distance)+1; i < y+distance; i++)
+	{
+		double real_distance= sqrt((double)((i*i)+(distance*distance)));
+		result += ((block_array[coords_to_index( x-distance, i)].water_height-block_array[coords_to_index( x, y)].water_height)/real_distance);
+		result += ((block_array[coords_to_index( x+distance, i)].water_height-block_array[coords_to_index( x, y)].water_height)/real_distance);
+		count +=2;
+	}
+	return max((result/count), 0.0);
+}
+
+void c_map_section::generate_ambient_lighting()
+{
+	for (unsigned int y = 0; y < board_height; y++)
+	{
+		for (unsigned int x = 0; x < board_width; x++)
+		{
+			const unsigned int index = coords_to_index( x, y);
+			double height = block_array[index].water_height;
+
+			double height_difference = 0.0;
+
+			for(int i = 1; i < user_config.ray_distance; i++)
+			{
+				double diff = get_average_heights(i, x, y);
+				height_difference = max(diff, height_difference);
+			}
+
+			double light_level = 1.0 - (atan(height_difference/user_config.tile_distance) / (ALLEGRO_PI/2.0));
+
+			block_array[index].light = al_map_rgb_f(light_level, light_level, light_level);
 		}
 	}
 }
