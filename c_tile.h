@@ -17,6 +17,7 @@ enum e_offset_type
 	OFFSET_PATH,
 	OFFSET_PAIR,
 	OFFSET_SIX,
+	OFFSET_FOUR,
 	OFFSET_RANDOM,
 	OFFSET_COUNT
 };
@@ -37,6 +38,7 @@ struct s_sprite
 	ALLEGRO_COLOR color;
 	e_offset_type offset_type;
 	unsigned char offset_amount;
+	terrain_type border_terrain;
 };
 
 class c_tile
@@ -53,6 +55,7 @@ public:
 	vector<s_sprite> top_sprites;
 	vector<s_sprite> bottom_sprites;
 	vector<s_sprite> surface_sprites;
+	vector<s_sprite> intermediate_sprites;
 
 
 	int height_max;
