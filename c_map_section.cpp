@@ -240,305 +240,25 @@ void c_map_section::load_special_tiles(s_maplist * maplist)
 		for (unsigned int x = 0; x < board_height; x++)
 		{
 			unsigned int index = x + (board_width * y);
-			while(1)
+			if(maplist->elevation_map_with_water)
 			{
-				if(maplist->elevation_map_with_water)
-				{
-					int tempx = x + user_config.map_x;
-					int tempy = y + user_config.map_y;
-					tempx =  bind_to_range(tempx , al_get_bitmap_width(maplist->elevation_map_with_water));
-					tempy =  bind_to_range(tempy , al_get_bitmap_height(maplist->elevation_map_with_water));
+				int tempx = x + user_config.map_x;
+				int tempy = y + user_config.map_y;
+				tempx =  bind_to_range(tempx , al_get_bitmap_width(maplist->elevation_map_with_water));
+				tempy =  bind_to_range(tempy , al_get_bitmap_height(maplist->elevation_map_with_water));
 
-					ALLEGRO_COLOR pixel_elw = al_get_pixel(maplist->elevation_map_with_water, tempx, tempy);
-					unsigned char red;
-					unsigned char green;
-					unsigned char blue;
-					al_unmap_rgb(pixel_elw, &red, &green, &blue);
-					block_array[index].water_height = block_array[index].height;
-					if(red == 0 && green == blue)
-					{
-						if(block_array[index].color.g > 0.0001)
-							block_array[index].terrain = TERRAIN_STREAM;
-						else 
-							block_array[index].terrain = TERRAIN_RIVER;
-						block_array[index].height = blue;
-						block_array[index].water_height = blue;
-						break;
-					}
-					else if(red == 0 && green == 0)
-					{
-						block_array[index].terrain = TERRAIN_OCEAN;
-						block_array[index].water_height = blue+25;
-						break;
-					}
-				}
+				ALLEGRO_COLOR pixel_elw = al_get_pixel(maplist->elevation_map_with_water, tempx, tempy);
+				unsigned char red;
+				unsigned char green;
+				unsigned char blue;
+				al_unmap_rgb(pixel_elw, &red, &green, &blue);
+				block_array[index].water_height = block_array[index].height;
 				unsigned char cR, cG, cB;
 				float R,G,B;
 				al_unmap_rgb(block_array[index].color, &cR, &cG, &cB);
 				R=cR;
 				G=cG;
 				B=cB;
-				if(block_array[index].height == 99)
-				{
-					block_array[index].terrain = TERRAIN_BEACH;
-					break;
-				}
-
-				//if(x == 0 && y == 0)
-				//	log_printf("r %d, g %d, b %d, h%d\n", R,G,B, block_array[index].height );
-				if(
-					(approx_f(((R / 2.0f) + 153.0f), block_array[index].height, 1.0f)) &&
-					(approx_f(((G / 2.0f) + 153.0f), block_array[index].height, 1.0f)) &&
-					(approx_f(((B / 2.0f) + 153.0f), block_array[index].height, 1.0f)) &&
-					block_array[index].height > 200
-					)
-				{
-					block_array[index].terrain = TERRAIN_MOUNTAIN_TALL;
-					break;
-				}
-				if(
-					(approx_f(((R)*2/3 + 50.0f), block_array[index].height, 1.0f)) &&
-					(approx_f(((G*7/6)*2/3 + 50.0f), block_array[index].height, 1.0f)) &&
-					(approx_f(((B*6/5)*2/3 + 50.0f), block_array[index].height, 1.0f)) &&
-					block_array[index].height <= 200
-					)
-				{
-					block_array[index].terrain = TERRAIN_MOUNTAIN;
-					break;
-				}
-				if(
-					(approx_f(((R)*2/3 + 50.0f), 150.0, 1.0f)) &&
-					(approx_f(((G*7/6)*2/3 + 50.0f), 150, 1.0f)) &&
-					(approx_f(((B*6/5)*2/3 + 50.0f), 150, 1.0f)) &&
-					block_array[index].height <= 200
-					)
-				{
-					block_array[index].terrain = TERRAIN_MOUNTAIN;
-					break;
-				}
-				if(
-					(approx_f(((R*3)/4 + 90.0f), block_array[index].height, 1.0f)) &&
-					(approx_f(((G)/4 + 90.0f), block_array[index].height, 1.0f)) &&
-					(approx_f(((B)/4 + 90.0f), block_array[index].height, 1.0f))
-					)
-				{
-					block_array[index].terrain = TERRAIN_GLACIER;
-					break;
-				}
-				if(
-					(approx_f(((R*3/2)/4 + 90.0f), block_array[index].height, 1.0f)) &&
-					(approx_f(((G)/4 + 90.0f), block_array[index].height, 1.0f)) &&
-					(approx_f(((B)/4 + 90.0f), block_array[index].height, 1.0f))
-					)
-				{
-					block_array[index].terrain = TERRAIN_TUNDRA;
-					break;
-				}
-				if(
-					(approx_f(((R*4)/4 + 90.0f), block_array[index].height, 1.0f)) &&
-					(approx_f(((G)/4 + 90.0f), block_array[index].height, 1.0f)) &&
-					(approx_f(((B*2)/4 + 90.0f), block_array[index].height, 1.0f))
-					)
-				{
-					block_array[index].terrain = TERRAIN_SWAMP;
-					break;
-				}
-				if(
-					(approx_f(R, 0, 1.0f)) &&
-					(approx_f(((G*3)/4 + 90.0f), block_array[index].height, 1.0f)) &&
-					(approx_f(((B*5)/4 + 90.0f), block_array[index].height, 1.0f))
-					)
-				{
-					block_array[index].terrain = TERRAIN_TAIGA;
-					break;
-				}
-				if(
-					(approx_f(R, 0, 1.0f)) &&
-					(approx_f(((G*3)/4 + 90.0f), block_array[index].height, 1.0f)) &&
-					(approx_f(((B*6)/4 + 90.0f), block_array[index].height, 1.0f))
-					)
-				{
-					block_array[index].terrain = TERRAIN_FOREST_TEMP;
-					break;
-				}
-				if(
-					(approx_f(R, 0, 1.0f)) &&
-					(approx_f(((G*3)/4 + 90.0f), block_array[index].height, 1.0f)) &&
-					(approx_f(B, 0, 1.0f))
-					)
-				{
-					block_array[index].terrain = TERRAIN_FOREST_TROP;
-					break;
-				}
-				if(
-					(approx_f(R, 0, 1.0f)) &&
-					(approx_f(((G)/4 + 90.0f), block_array[index].height, 1.0f)) &&
-					(approx_f(((B*6)/4 + 90.0f), block_array[index].height, 1.0f))
-					)
-				{
-					block_array[index].terrain = TERRAIN_GRASS_TEMP;
-					break;
-				}
-				if(
-					(approx_f(((R)/4 + 90.0f), block_array[index].height, 1.0f)) &&
-					(approx_f(((G*6/5)/4 + 90.0f), block_array[index].height, 1.0f)) &&
-					(approx_f(B, 0, 1.0f))
-					)
-				{
-					block_array[index].terrain = TERRAIN_GRASS_TROP;
-					break;
-				}
-				if(
-					(approx_f(((R)/4 + 90.0f), block_array[index].height, 1.0f)) &&
-					(approx_f(((G*3)/4 + 90.0f), block_array[index].height, 1.0f)) &&
-					(approx_f(((B*5)/4 + 90.0f), block_array[index].height, 1.0f))
-					)
-				{
-					block_array[index].terrain = TERRAIN_BADLANDS;
-					break;
-				}
-				if(
-					(approx_f(((R)/4 + 90.0f), block_array[index].height, 1.0f)) &&
-					(approx_f(((G*2)/4 + 90.0f), block_array[index].height, 1.0f)) &&
-					(approx_f(((B*4)/4 + 90.0f), block_array[index].height, 1.0f))
-					)
-				{
-					block_array[index].terrain = TERRAIN_ROCK;
-					break;
-				}
-				if(
-					(approx_f(((R)/4 + 90.0f), block_array[index].height, 1.0f)) &&
-					(approx_f(((G)/4 + 90.0f), block_array[index].height, 1.0f)) &&
-					(approx_f(((B)/4 + 90.0f), block_array[index].height, 1.0f))
-					)
-				{
-					block_array[index].terrain = TERRAIN_VILLAGE;
-					break;
-				}
-				if(
-					(approx_f(((R)/4 + 90.0f), block_array[index].height, 1.0f)) &&
-					(approx_f(((G)/4 + 90.0f), block_array[index].height, 1.0f)) &&
-					(approx_f(B, 0, 1.0f))
-					)
-				{
-					block_array[index].terrain = TERRAIN_FARM_PLANTED;
-					break;
-				}
-				if(
-					(approx_f(R, 0, 1.0f)) &&
-					(approx_f(((G)/4 + 90.0f), block_array[index].height, 1.0f)) &&
-					(approx_f(B, 0, 1.0f))
-					)
-				{
-					block_array[index].terrain = TERRAIN_FARM_PLANTED;
-					break;
-				}
-				if(
-					(approx_f(R, block_array[index].height, 1.0f)) &&
-					(approx_f(G, block_array[index].height, 1.0f)) &&
-					(approx_f(B, block_array[index].height, 1.0f))
-					)
-				{
-					block_array[index].terrain = TERRAIN_FORT_KEEP;
-					break;
-				}
-				if(
-					(approx_f(R*2, block_array[index].height, 1.0f)) &&
-					(approx_f(G*2, block_array[index].height, 1.0f)) &&
-					(approx_f(B*2, block_array[index].height, 1.0f))
-					)
-				{
-					block_array[index].terrain = TERRAIN_FORT_GATE;
-					break;
-				}
-				if(
-					(approx_f(R*3/2, block_array[index].height, 1.0f)) &&
-					(approx_f(G*3/2, block_array[index].height, 1.0f)) &&
-					(approx_f(B*3/2, block_array[index].height, 1.0f))
-					)
-				{
-					block_array[index].terrain = TERRAIN_FORT_WALL;
-					break;
-				}
-				if(
-					(approx_f(R, 0, 1.0f)) &&
-					(approx_f(G*2, block_array[index].height, 1.0f)) &&
-					(approx_f(B, 0, 1.0f))
-					)
-				{
-					block_array[index].terrain = TERRAIN_FORT_COURT;
-					break;
-				}
-				if(
-					(cR == 100) &&
-					(cG == 100) &&
-					(cB == 100) &&
-					block_array[index].height > 150
-					)
-				{
-					block_array[index].terrain = TERRAIN_DORF_EDGE;
-					break;
-				}
-				if(
-					(cR == 200) &&
-					(cG == 200) &&
-					(cB == 200) &&
-					block_array[index].height > 150
-					)
-				{
-					block_array[index].terrain = TERRAIN_DORF_CENTER;
-					break;
-				}
-				if(
-					(cR == 255) &&
-					(cG == 0) &&
-					(cB == 255) &&
-					block_array[index].height > 99
-					)
-				{
-					block_array[index].terrain = TERRAIN_GOBLIN_CENTER;
-					break;
-				}
-				if(
-					(cR == 127) &&
-					(cG == 0) &&
-					(cB == 127) &&
-					block_array[index].height > 99
-					)
-				{
-					block_array[index].terrain = TERRAIN_GOBLIN_EDGE;
-					break;
-				}
-				if(
-					(cR == 127) &&
-					(cG == 127) &&
-					(cB == 0) &&
-					block_array[index].height > 99
-					)
-				{
-					block_array[index].terrain = TERRAIN_ELF_EDGE;
-					break;
-				}
-				if(
-					(cR == 255) &&
-					(cG == 255) &&
-					(cB == 0) &&
-					block_array[index].height > 99
-					)
-				{
-					block_array[index].terrain = TERRAIN_ELF_CENTER;
-					break;
-				}
-				if(
-					(cR == 150) &&
-					(cG == 127) &&
-					(cB == 20) &&
-					block_array[index].height > 99
-					)
-				{
-					block_array[index].terrain = TERRAIN_ROAD;
-					break;
-				}
 				if(
 					(cR == 180) &&
 					(cG == 167) &&
@@ -547,10 +267,299 @@ void c_map_section::load_special_tiles(s_maplist * maplist)
 					)
 				{
 					block_array[index].terrain = TERRAIN_BRIDGE;
-					break;
+					block_array[index].height = blue;
+					block_array[index].water_height = blue;
 				}
-				block_array[index].terrain = TERRAIN_NONE;
-				break;
+				else if(red == 0 && green == blue)
+				{
+					if(block_array[index].color.g > 0.0001)
+						block_array[index].terrain = TERRAIN_STREAM;
+					else 
+						block_array[index].terrain = TERRAIN_RIVER;
+					block_array[index].height = blue;
+					block_array[index].water_height = blue;
+				}
+				else if(red == 0 && green == 0)
+				{
+					block_array[index].terrain = TERRAIN_OCEAN;
+					block_array[index].water_height = blue+25;
+				}
+				else if(block_array[index].height == 99)
+				{
+					block_array[index].terrain = TERRAIN_BEACH;
+				}
+				else if(
+					(approx_f(((R / 2.0f) + 153.0f), block_array[index].height, 1.0f)) &&
+					(approx_f(((G / 2.0f) + 153.0f), block_array[index].height, 1.0f)) &&
+					(approx_f(((B / 2.0f) + 153.0f), block_array[index].height, 1.0f)) &&
+					block_array[index].height > 200
+					)
+				{
+					block_array[index].terrain = TERRAIN_MOUNTAIN_TALL;
+				}
+				else if(
+					(approx_f(((R)*2/3 + 50.0f), block_array[index].height, 1.0f)) &&
+					(approx_f(((G*7/6)*2/3 + 50.0f), block_array[index].height, 1.0f)) &&
+					(approx_f(((B*6/5)*2/3 + 50.0f), block_array[index].height, 1.0f)) &&
+					block_array[index].height <= 200
+					)
+				{
+					block_array[index].terrain = TERRAIN_MOUNTAIN;
+				}
+				else if(
+					(approx_f(((R)*2/3 + 50.0f), 150.0, 1.0f)) &&
+					(approx_f(((G*7/6)*2/3 + 50.0f), 150, 1.0f)) &&
+					(approx_f(((B*6/5)*2/3 + 50.0f), 150, 1.0f)) &&
+					block_array[index].height <= 200
+					)
+				{
+					block_array[index].terrain = TERRAIN_MOUNTAIN;
+				}
+				else if(
+					(approx_f(((R*3)/4 + 90.0f), block_array[index].height, 1.0f)) &&
+					(approx_f(((G)/4 + 90.0f), block_array[index].height, 1.0f)) &&
+					(approx_f(((B)/4 + 90.0f), block_array[index].height, 1.0f))
+					)
+				{
+					block_array[index].terrain = TERRAIN_GLACIER;
+				}
+				else if(
+					(approx_f(((R*3/2)/4 + 90.0f), block_array[index].height, 1.0f)) &&
+					(approx_f(((G)/4 + 90.0f), block_array[index].height, 1.0f)) &&
+					(approx_f(((B)/4 + 90.0f), block_array[index].height, 1.0f))
+					)
+				{
+					block_array[index].terrain = TERRAIN_TUNDRA;
+				}
+				else if(
+					(approx_f(((R*4)/4 + 90.0f), block_array[index].height, 1.0f)) &&
+					(approx_f(((G)/4 + 90.0f), block_array[index].height, 1.0f)) &&
+					(approx_f(((B*2)/4 + 90.0f), block_array[index].height, 1.0f))
+					)
+				{
+					block_array[index].terrain = TERRAIN_SWAMP;
+				}
+				else if(
+					(approx_f(R, 0, 1.0f)) &&
+					(approx_f(((G*3)/4 + 90.0f), block_array[index].height, 1.0f)) &&
+					(approx_f(((B*5)/4 + 90.0f), block_array[index].height, 1.0f))
+					)
+				{
+					block_array[index].terrain = TERRAIN_TAIGA;
+				}
+				else if(
+					(approx_f(R, 0, 1.0f)) &&
+					(approx_f(((G*3)/4 + 90.0f), block_array[index].height, 1.0f)) &&
+					(approx_f(((B*6)/4 + 90.0f), block_array[index].height, 1.0f))
+					)
+				{
+					block_array[index].terrain = TERRAIN_FOREST_TEMP;
+				}
+				else if(
+					(approx_f(R, 0, 1.0f)) &&
+					(approx_f(((G*3)/4 + 90.0f), block_array[index].height, 1.0f)) &&
+					(approx_f(B, 0, 1.0f))
+					)
+				{
+					block_array[index].terrain = TERRAIN_FOREST_TROP;
+				}
+				else if(
+					(approx_f(R, 0, 1.0f)) &&
+					(approx_f(((G)/4 + 90.0f), block_array[index].height, 1.0f)) &&
+					(approx_f(((B*6)/4 + 90.0f), block_array[index].height, 1.0f))
+					)
+				{
+					block_array[index].terrain = TERRAIN_GRASS_TEMP;
+				}
+				else if(
+					(approx_f(((R)/4 + 90.0f), block_array[index].height, 1.0f)) &&
+					(approx_f(((G*6/5)/4 + 90.0f), block_array[index].height, 1.0f)) &&
+					(approx_f(B, 0, 1.0f))
+					)
+				{
+					block_array[index].terrain = TERRAIN_GRASS_TROP;
+				}
+				else if(
+					(approx_f(((R)/4 + 90.0f), block_array[index].height, 1.0f)) &&
+					(approx_f(((G*3)/4 + 90.0f), block_array[index].height, 1.0f)) &&
+					(approx_f(((B*5)/4 + 90.0f), block_array[index].height, 1.0f))
+					)
+				{
+					block_array[index].terrain = TERRAIN_BADLANDS;
+				}
+				else if(
+					(approx_f(((R)/4 + 90.0f), block_array[index].height, 1.0f)) &&
+					(approx_f(((G*2)/4 + 90.0f), block_array[index].height, 1.0f)) &&
+					(approx_f(((B*4)/4 + 90.0f), block_array[index].height, 1.0f))
+					)
+				{
+					block_array[index].terrain = TERRAIN_ROCK;
+				}
+				else if(
+					(approx_f(((R)/4 + 90.0f), block_array[index].height, 1.0f)) &&
+					(approx_f(((G)/4 + 90.0f), block_array[index].height, 1.0f)) &&
+					(approx_f(((B)/4 + 90.0f), block_array[index].height, 1.0f))
+					)
+				{
+					block_array[index].terrain = TERRAIN_VILLAGE;
+				}
+				else if(
+					(approx_f(((R)/4 + 90.0f), block_array[index].height, 1.0f)) &&
+					(approx_f(((G)/4 + 90.0f), block_array[index].height, 1.0f)) &&
+					(approx_f(B, 0, 1.0f))
+					)
+				{
+					block_array[index].terrain = TERRAIN_FARM_PLANTED;
+				}
+				else if(
+					(approx_f(R, 0, 1.0f)) &&
+					(approx_f(((G)/4 + 90.0f), block_array[index].height, 1.0f)) &&
+					(approx_f(B, 0, 1.0f))
+					)
+				{
+					block_array[index].terrain = TERRAIN_FARM_PASTURE;
+				}
+				else if(
+					(approx_f(R, block_array[index].height, 1.0f)) &&
+					(approx_f(G, block_array[index].height, 1.0f)) &&
+					(approx_f(B, block_array[index].height, 1.0f))
+					)
+				{
+					block_array[index].terrain = TERRAIN_FORT_KEEP;
+				}
+				else if(
+					(approx_f(R*2, block_array[index].height, 1.0f)) &&
+					(approx_f(G*2, block_array[index].height, 1.0f)) &&
+					(approx_f(B*2, block_array[index].height, 1.0f))
+					)
+				{
+					block_array[index].terrain = TERRAIN_FORT_GATE;
+				}
+				else if(
+					(approx_f(R*3/2, block_array[index].height, 1.0f)) &&
+					(approx_f(G*3/2, block_array[index].height, 1.0f)) &&
+					(approx_f(B*3/2, block_array[index].height, 1.0f))
+					)
+				{
+					block_array[index].terrain = TERRAIN_FORT_WALL;
+				}
+				else if(
+					(approx_f(R, 0, 1.0f)) &&
+					(approx_f(G*2, block_array[index].height, 1.0f)) &&
+					(approx_f(B, 0, 1.0f))
+					)
+				{
+					block_array[index].terrain = TERRAIN_FORT_COURT;
+				}
+				else if(
+					(cR == 100) &&
+					(cG == 100) &&
+					(cB == 100) &&
+					block_array[index].height > 140
+					)
+				{
+					block_array[index].terrain = TERRAIN_DORF_EDGE;
+				}
+				else if(
+					(cR == 200) &&
+					(cG == 200) &&
+					(cB == 200) &&
+					block_array[index].height > 140
+					)
+				{
+					block_array[index].terrain = TERRAIN_DORF_CENTER;
+				}
+				else if(
+					(cR == 255) &&
+					(cG == 0) &&
+					(cB == 255) &&
+					block_array[index].height > 99
+					)
+				{
+					block_array[index].terrain = TERRAIN_GOBLIN_CENTER;
+				}
+				else if(
+					(cR == 127) &&
+					(cG == 0) &&
+					(cB == 127) &&
+					block_array[index].height > 99
+					)
+				{
+					block_array[index].terrain = TERRAIN_GOBLIN_EDGE;
+				}
+				else if(
+					(cR == 127) &&
+					(cG == 127) &&
+					(cB == 0) &&
+					block_array[index].height > 99
+					)
+				{
+					block_array[index].terrain = TERRAIN_ELF_EDGE;
+				}
+				else if(
+					(cR == 255) &&
+					(cG == 255) &&
+					(cB == 0) &&
+					block_array[index].height > 99
+					)
+				{
+					block_array[index].terrain = TERRAIN_ELF_CENTER;
+				}
+				else if(
+					(cR == 150) &&
+					(cG == 127) &&
+					(cB == 20) &&
+					block_array[index].height > 99
+					)
+				{
+					block_array[index].terrain = TERRAIN_ROAD;
+				}
+				else if(
+					(cR == 20) &&
+					(cG == 20) &&
+					(cB == 20) &&
+					block_array[index].height > 100
+					)
+				{
+					block_array[index].terrain = TERRAIN_TUNNEL;
+				}
+				else if(
+					(approx_f(((R)/2 + 90.0f), block_array[index].height, 1.0f)) &&
+					(approx_f(G, 0, 1.0f)) &&
+					(approx_f(B, 0, 1.0f))
+					)
+				{
+					block_array[index].terrain = TERRAIN_FARM_FALLOW;
+				}
+				else if(
+					(approx_f(((R)/4 + 90.0f), block_array[index].height, 1.0f)) &&
+					(approx_f(G, 0, 1.0f)) &&
+					(approx_f(B, 0, 1.0f))
+					)
+				{
+					block_array[index].terrain = TERRAIN_FARM_FALLOW;
+				}
+				else if(
+					(approx_f(((R)/2 + 90.0f), block_array[index].height, 1.0f)) &&
+					(approx_f(((G)/2 + 90.0f), block_array[index].height, 1.0f)) &&
+					(approx_f(B, 0, 1.0f))
+					)
+				{
+					block_array[index].terrain = TERRAIN_FARM_FALLOW;
+				}
+				else if(
+					(approx_f(((R)/2 + 90.0f), block_array[index].height, 1.0f)) &&
+					(approx_f(((G)/2 + 90.0f), block_array[index].height, 1.0f)) &&
+					(approx_f(((B)/2 + 90.0f), block_array[index].height, 1.0f))
+					)
+				{
+					block_array[index].terrain = TERRAIN_FARM_FALLOW;
+				}
+				else if(block_array[index].height >= 150)
+				{
+					block_array[index].terrain = TERRAIN_MOUNTAIN;
+				}
+				else block_array[index].terrain = TERRAIN_NONE;
 			}
 		}
 	}
@@ -705,12 +714,19 @@ void c_map_section::generate_special_tile_borders()
 			}
 			block_array[(x + (board_width * y))].terrain_borders[TERRAIN_RIVER] |= block_array[(x + (board_width * y))].terrain_borders[TERRAIN_OCEAN];
 			block_array[(x + (board_width * y))].terrain_borders[TERRAIN_RIVER] |= block_array[(x + (board_width * y))].terrain_borders[TERRAIN_STREAM];
+			block_array[(x + (board_width * y))].terrain_borders[TERRAIN_RIVER] |= block_array[(x + (board_width * y))].terrain_borders[TERRAIN_BRIDGE];
 
 			block_array[(x + (board_width * y))].terrain_borders[TERRAIN_STREAM] |= block_array[(x + (board_width * y))].terrain_borders[TERRAIN_OCEAN];
 			block_array[(x + (board_width * y))].terrain_borders[TERRAIN_STREAM] |= block_array[(x + (board_width * y))].terrain_borders[TERRAIN_RIVER];
 
 			block_array[(x + (board_width * y))].terrain_borders[TERRAIN_FORT_WALL] |= block_array[(x + (board_width * y))].terrain_borders[TERRAIN_FORT_GATE];
 			block_array[(x + (board_width * y))].terrain_borders[TERRAIN_FORT_GATE] |= block_array[(x + (board_width * y))].terrain_borders[TERRAIN_FORT_WALL];
+
+			block_array[(x + (board_width * y))].terrain_borders[TERRAIN_DORF_EDGE] |= block_array[(x + (board_width * y))].terrain_borders[TERRAIN_FORT_WALL];
+			block_array[(x + (board_width * y))].terrain_borders[TERRAIN_FORT_WALL] |= block_array[(x + (board_width * y))].terrain_borders[TERRAIN_DORF_EDGE];
+
+			block_array[(x + (board_width * y))].terrain_borders[TERRAIN_BRIDGE] |= block_array[(x + (board_width * y))].terrain_borders[TERRAIN_ROAD];
+			block_array[(x + (board_width * y))].terrain_borders[TERRAIN_ROAD] |= block_array[(x + (board_width * y))].terrain_borders[TERRAIN_BRIDGE];
 		}
 	}
 }

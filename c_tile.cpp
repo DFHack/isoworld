@@ -200,6 +200,26 @@ terrain_type get_terrain_type(const char * text)
 		return TERRAIN_FORT_COURT;
 	if(strcmp(text, "road") == 0)
 		return TERRAIN_ROAD;
+	if(strcmp(text, "bridge") == 0)
+		return TERRAIN_BRIDGE;
+	if(strcmp(text, "tunnel") == 0)
+		return TERRAIN_TUNNEL;
+
+	if(strcmp(text, "dwarven_fortress_center") == 0)
+		return TERRAIN_DORF_CENTER;
+	if(strcmp(text, "dwarven_fortress_walls") == 0)
+		return TERRAIN_DORF_EDGE;
+
+	if(strcmp(text, "goblin_fortress_center") == 0)
+		return TERRAIN_GOBLIN_CENTER;
+	if(strcmp(text, "goblin_fortress_walls") == 0)
+		return TERRAIN_GOBLIN_EDGE;
+
+	if(strcmp(text, "elven_retreat_center") == 0)
+		return TERRAIN_ELF_CENTER;
+	if(strcmp(text, "elven_retreat_walls") == 0)
+		return TERRAIN_ELF_EDGE;
+
 	return TERRAIN_ANY;
 }
 
