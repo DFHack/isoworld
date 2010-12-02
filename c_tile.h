@@ -61,8 +61,29 @@ public:
 	int height_max;
 	int height_min;
 
+	int temp_min;
+	int temp_max;
+
 	int rain_min;
 	int rain_max;
+
+	int drain_min;
+	int drain_max;
+
+	int sav_min;
+	int sav_max;
+
+	int vol_min;
+	int vol_max;
+
+	int veg_min;
+	int veg_max;
+
+	int evil_min;
+	int evil_max;
+
+	int sal_min;
+	int sal_max;
 
 	int priority;
 

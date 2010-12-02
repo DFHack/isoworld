@@ -57,6 +57,8 @@ c_config::c_config(void)
 	use_ao = 1;
 	tile_distance = 8;
 	ray_distance = 3;
+
+	debugmode = 0;
 }
 
 c_config::~c_config(void)

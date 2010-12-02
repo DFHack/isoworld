@@ -74,8 +74,31 @@ c_tile * c_tileset::get_tile(s_map_block block)
 	{
 		if(tile_set.at(i).height_min <= (block.height) &&
 			tile_set.at(i).height_max >= (block.height) &&
+			
+			tile_set.at(i).temp_min <= block.levels[LEVEL_TEMPERATURE] &&
+			tile_set.at(i).temp_max >= block.levels[LEVEL_TEMPERATURE] &&
+			
 			tile_set.at(i).rain_min <= block.levels[LEVEL_RAINFALL] &&
 			tile_set.at(i).rain_max >= block.levels[LEVEL_RAINFALL] &&
+			
+			tile_set.at(i).drain_min <= block.levels[LEVEL_DRAINAGE] &&
+			tile_set.at(i).drain_max >= block.levels[LEVEL_DRAINAGE] &&
+			
+			tile_set.at(i).sav_min <= block.levels[LEVEL_SAVAGE] &&
+			tile_set.at(i).sav_max >= block.levels[LEVEL_SAVAGE] &&
+			
+			tile_set.at(i).vol_min <= block.levels[LEVEL_VOLCANISM] &&
+			tile_set.at(i).vol_max >= block.levels[LEVEL_VOLCANISM] &&
+			
+			tile_set.at(i).veg_min <= block.levels[LEVEL_VEGETATION] &&
+			tile_set.at(i).veg_max >= block.levels[LEVEL_VEGETATION] &&
+			
+			tile_set.at(i).evil_min <= block.levels[LEVEL_EVIL] &&
+			tile_set.at(i).evil_max >= block.levels[LEVEL_EVIL] &&
+			
+			tile_set.at(i).sal_min <= block.levels[LEVEL_SALINITY] &&
+			tile_set.at(i).sal_max >= block.levels[LEVEL_SALINITY] &&
+			
 			(tile_set.at(i).special_terrain == TERRAIN_ANY || tile_set.at(i).special_terrain == block.terrain)
 			)
 		{

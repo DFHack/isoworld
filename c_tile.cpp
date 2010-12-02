@@ -431,11 +431,32 @@ void c_tile::load_ini(ALLEGRO_PATH * path)
 	}
 	char buffer[256];
 
-	height_max = get_config_int(config, "SPRITE", "height_max", 500);
-	height_min = get_config_int(config, "SPRITE", "height_min", -500);
+	height_max = get_config_int(config, "SPRITE", "height_max", 280);
+	height_min = get_config_int(config, "SPRITE", "height_min", 0);
 
-	rain_max = get_config_int(config, "SPRITE", "rain_max", 500);
-	rain_min = get_config_int(config, "SPRITE", "rain_min", -500);
+	temp_max = get_config_int(config, "SPRITE", "temperature_max", 256);
+	temp_min = get_config_int(config, "SPRITE", "temperature_min", 0);
+
+	rain_max = get_config_int(config, "SPRITE", "rainfall_max", 256);
+	rain_min = get_config_int(config, "SPRITE", "rainfall_min", 0);
+
+	drain_max = get_config_int(config, "SPRITE", "drainage_max", 256);
+	drain_min = get_config_int(config, "SPRITE", "drainage_min", 0);
+
+	sav_max = get_config_int(config, "SPRITE", "savagery_max", 256);
+	sav_min = get_config_int(config, "SPRITE", "savagery_min", 0);
+
+	vol_max = get_config_int(config, "SPRITE", "volcanism_max", 256);
+	vol_min = get_config_int(config, "SPRITE", "volcanism_min", 0);
+
+	veg_max = get_config_int(config, "SPRITE", "vegetation_max", 256);
+	veg_min = get_config_int(config, "SPRITE", "vegetation_min", 0);
+
+	evil_max = get_config_int(config, "SPRITE", "evil_max", 256);
+	evil_min = get_config_int(config, "SPRITE", "evil_min", 0);
+
+	sal_max = get_config_int(config, "SPRITE", "salinity_max", 256);
+	sal_min = get_config_int(config, "SPRITE", "salinity_min", 0);
 
 	priority = get_config_int(config, "SPRITE", "priority", 0);
 

@@ -127,6 +127,11 @@ void c_map_section::draw(int inx, int iny)
 			drawx += inx;
 			drawy += iny;
 			unsigned int index = coords_to_index(x, y);
+
+			int height_back = block_array[index].height;
+			if(x==(board_width/2) && y==(board_height/2) && user_config.debugmode)
+				block_array[index].height =280;
+
 			int bottom_l = 0;
 			int bottom_r = 0;
 			if(x+2 < board_width)
@@ -144,10 +149,7 @@ void c_map_section::draw(int inx, int iny)
 				tileset_list.at(current_tileset).grid_tile.draw(drawx, drawy, snap_height(block_array[index].height), snap_height(bottom_r), snap_height(block_array[index].water_height), &block_array[index]);
 			if(user_config.showgrid && !((y + user_config.map_y) % 16))
 				tileset_list.at(current_tileset).grid_tile.draw(drawx, drawy, snap_height(block_array[index].height), snap_height(bottom_r), snap_height(block_array[index].water_height), &block_array[index], 1);
-			//unsigned char R, G, B;
-			//al_unmap_rgb(block_array[index].color, &R, &G, &B);
-			//if(x==(board_width-2) && y==(board_height-2))
-			//	log_printf("%d,%d,%d H:%d, T:%d B:%d\n", R,G,B, block_array[index].height , block_array[index].terrain, block_array[index].terrain_borders[block_array[index].terrain]);
+			block_array[index].height = height_back;
 		}
 	}
 	al_hold_bitmap_drawing(false);
@@ -224,7 +226,7 @@ void c_map_section::load_level(ALLEGRO_BITMAP * levelmap, int level)
 				unsigned char blue;
 				al_unmap_rgb(pixel, &red, &green, &blue);
 
-				block_array[index].levels[level] =(red * 100) /256;
+				block_array[index].levels[level] =red;
 
 			}
 			else block_array[index].levels[level] = 0;
@@ -777,4 +779,24 @@ void c_map_section::generate_ambient_lighting()
 			block_array[index].light = al_map_rgb_f(light_level, light_level, light_level);
 		}
 	}
+}
+
+
+void c_map_section::draw_debug_info()
+{
+	ALLEGRO_COLOR color = al_map_rgb(255,255,255);
+
+	int y = 0;
+
+	al_draw_textf(user_config.font, color, user_config.res_x, y += al_get_font_line_height(user_config.font), ALLEGRO_ALIGN_RIGHT, "Height: %d", block_array[coords_to_index(board_width/2, board_height/2)].height);
+	al_draw_textf(user_config.font, color, user_config.res_x, y += al_get_font_line_height(user_config.font), ALLEGRO_ALIGN_RIGHT, "Temperature: %d", block_array[coords_to_index(board_width/2, board_height/2)].levels[LEVEL_TEMPERATURE]);
+	al_draw_textf(user_config.font, color, user_config.res_x, y += al_get_font_line_height(user_config.font), ALLEGRO_ALIGN_RIGHT, "Rainfall: %d", block_array[coords_to_index(board_width/2, board_height/2)].levels[LEVEL_RAINFALL]);
+	al_draw_textf(user_config.font, color, user_config.res_x, y += al_get_font_line_height(user_config.font), ALLEGRO_ALIGN_RIGHT, "Drainage: %d", block_array[coords_to_index(board_width/2, board_height/2)].levels[LEVEL_DRAINAGE]);
+	al_draw_textf(user_config.font, color, user_config.res_x, y += al_get_font_line_height(user_config.font), ALLEGRO_ALIGN_RIGHT, "Savagery: %d", block_array[coords_to_index(board_width/2, board_height/2)].levels[LEVEL_SAVAGE]);
+	al_draw_textf(user_config.font, color, user_config.res_x, y += al_get_font_line_height(user_config.font), ALLEGRO_ALIGN_RIGHT, "Volcanism: %d", block_array[coords_to_index(board_width/2, board_height/2)].levels[LEVEL_VOLCANISM]);
+	al_draw_textf(user_config.font, color, user_config.res_x, y += al_get_font_line_height(user_config.font), ALLEGRO_ALIGN_RIGHT, "Vegetation: %d", block_array[coords_to_index(board_width/2, board_height/2)].levels[LEVEL_VEGETATION]);
+	al_draw_textf(user_config.font, color, user_config.res_x, y += al_get_font_line_height(user_config.font), ALLEGRO_ALIGN_RIGHT, "Evil: %d", block_array[coords_to_index(board_width/2, board_height/2)].levels[LEVEL_EVIL]);
+	al_draw_textf(user_config.font, color, user_config.res_x, y += al_get_font_line_height(user_config.font), ALLEGRO_ALIGN_RIGHT, "Salinity: %d", block_array[coords_to_index(board_width/2, board_height/2)].levels[LEVEL_SALINITY]);
+
+	al_draw_textf(user_config.font, color, user_config.res_x, y += al_get_font_line_height(user_config.font), ALLEGRO_ALIGN_RIGHT, "Terrain number: %d", block_array[coords_to_index(board_width/2, board_height/2)].terrain);
 }

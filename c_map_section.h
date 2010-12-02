@@ -38,6 +38,8 @@ public:
 	void propogate_tiles(s_maplist * maplist);
 	void load_tilesets(const char * index_file);
 	void increment_tileset(void);
+
+	void draw_debug_info(void);
 	int snap_height(int in);
 	double get_average_heights(int distance, int x, int y);
 	unsigned int coords_to_index(int x, int y);

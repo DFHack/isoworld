@@ -42,6 +42,12 @@ public:
 	bool use_ao;
 	double tile_distance;
 	unsigned int ray_distance;
+
+	//system stuff
+	ALLEGRO_FONT *font;
+
+	//misc
+	bool debugmode;
 };
 
 extern c_config user_config;

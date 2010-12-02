@@ -293,7 +293,6 @@ int main(void)
 	ALLEGRO_DISPLAY *display;
 	ALLEGRO_TIMER *timer;
 	ALLEGRO_EVENT_QUEUE *queue;
-	ALLEGRO_FONT *font;
 	ALLEGRO_COLOR background, active, inactive, info;
 	AsyncDialog *old_dialog = NULL;
 	AsyncDialog *cur_dialog = NULL;
@@ -341,8 +340,8 @@ int main(void)
 	log_printf("success.\n");
 
 	log_printf("Loading font '%s'...", "DejaVuSans.ttf");
-	font = al_load_font("DejaVuSans.ttf", 14, 0);
-	if (!font) {
+	user_config.font = al_load_font("DejaVuSans.ttf", 14, 0);
+	if (!user_config.font) {
 		log_printf("failure.\n");
 		abort_example("Error loading DejaVuSans.ttf\n");
 		return 1;
@@ -438,6 +437,10 @@ int main(void)
 			{
 				user_config.ray_distance++;
 			}
+			else if (event.keyboard.keycode == ALLEGRO_KEY_D && !cur_dialog)
+			{
+				user_config.debugmode = !user_config.debugmode;
+			}
 			else if (event.keyboard.keycode == ALLEGRO_KEY_SPACE && !cur_dialog)
 			{
 				test_map.increment_tileset();
@@ -520,16 +523,20 @@ int main(void)
 			{
 				if(old_dialog->newimages)
 				{
-					show_files_list(old_dialog->file_dialog, font, info);
+					show_files_list(old_dialog->file_dialog, user_config.font, info);
 					old_dialog->newimages = 0;
 				}
 			}
 			test_map.propogate_tiles(&map_list);
 			test_map.draw(x, y + user_config.map_shift);
-			al_draw_textf(font, cur_dialog ? inactive : active, x, y, ALLEGRO_ALIGN_CENTRE, "Open");
+			al_draw_textf(user_config.font, cur_dialog ? inactive : active, x, y, ALLEGRO_ALIGN_CENTRE, "Open");
 			minimap.draw();
-			al_draw_textf(font, cur_dialog ? inactive : active, 0, y, ALLEGRO_ALIGN_LEFT, "Drawtime: %dms", test_map.draw_time);
-			al_draw_textf(font, cur_dialog ? inactive : active, 0, y + al_get_font_line_height(font), ALLEGRO_ALIGN_LEFT, "Load Time: %dms", test_map.load_time);
+			if(user_config.debugmode)
+			{
+				test_map.draw_debug_info();
+				al_draw_textf(user_config.font, cur_dialog ? inactive : active, 0, y, ALLEGRO_ALIGN_LEFT, "Drawtime: %dms", test_map.draw_time);
+				al_draw_textf(user_config.font, cur_dialog ? inactive : active, 0, y + al_get_font_line_height(user_config.font), ALLEGRO_ALIGN_LEFT, "Load Time: %dms", test_map.load_time);
+			}
 			al_flip_display();
 		}
 
