@@ -536,6 +536,7 @@ int main(void)
 				test_map.draw_debug_info();
 				al_draw_textf(user_config.font, cur_dialog ? inactive : active, 0, y, ALLEGRO_ALIGN_LEFT, "Drawtime: %dms", test_map.draw_time);
 				al_draw_textf(user_config.font, cur_dialog ? inactive : active, 0, y + al_get_font_line_height(user_config.font), ALLEGRO_ALIGN_LEFT, "Load Time: %dms", test_map.load_time);
+				al_draw_textf(user_config.font, cur_dialog ? inactive : active, 0, y + al_get_font_line_height(user_config.font)*2, ALLEGRO_ALIGN_LEFT, "Fetch Time: %dms", test_map.tile_fetch_time);
 			}
 			al_flip_display();
 		}

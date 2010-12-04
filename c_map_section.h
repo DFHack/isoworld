@@ -22,6 +22,7 @@ public:
 
 	clock_t draw_time;
 	clock_t load_time;
+	clock_t tile_fetch_time;
 
 	bool set_size(int x, int y);
 	void clear_tiles(void);

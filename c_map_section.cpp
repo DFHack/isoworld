@@ -607,7 +607,9 @@ void c_map_section::propogate_tiles(s_maplist * maplist)
 	generate_special_tile_borders();
 	generate_noise();
 	generate_ambient_lighting();
+	load_time = clock() - start_time;
 	//now for the actual tile propogating.
+	clock_t prop_start_time = clock();
 	for (unsigned int y = 0; y < board_width; y++)
 	{
 		for (unsigned int x = 0; x < board_height; x++)
@@ -621,7 +623,7 @@ void c_map_section::propogate_tiles(s_maplist * maplist)
 
 		}
 	}
-	load_time = clock() - start_time;
+	tile_fetch_time = clock() - prop_start_time;
 }
 
 void c_map_section::increment_tileset(void)
