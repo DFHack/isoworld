@@ -1,0 +1,39 @@
+    Hi, me again, sorry to bother you.
+
+    do you mind sharing the info on how the colors are calculated in the biome map? mainly for the purposes of parsing it.
+
+    I've got much of the colors figured out, mostly the simple things, like fields, rivers, swamps, etc, where either two of the RGB values are always the same, or the hue is constant, etc, but some of the other things, like wastelands, or habitations, are more complicated, so I thought I may as well see what you're willing to share before spending time trying to find things out on my own.
+
+    Thanks,
+
+    Japa.
+
+
+It's a mess, really, and some of them have a random wiggle applied.  It would probably be best to have a few more options for export -- like a biome map that doesn't depend on elevation (and maybe sand material) at all, and the same for a site export, where there is no elevation modifier applied to the colors.  I'm not sure what you meant by wastelands -- there are the "wasteland" and "woodland" areas of the human towns, which'll be whatever biome color they are, and then the rocky desert badlands which might be called wastelands from more of a mad max perspective.  The badland deserts use (el,el/3,el/5) and the rock deserts use (el,el/2,el/4) where el is the elevation parameter.  For regular biomes, elevation is clamped between 100 and 150, then it subtracts 90 and multiples by 4.  So el should always between 40 and 240 for non-mountain/non-ocean biome squares.  I think the regular biome colors might end up being unique or close to it, but once you've got fields thrown in there it might not work out uniquely.
+
+I wasn't sure if you meant you've figured out fields in terms of the farm fields or grasslands.  Anyway, here's a list, and pending a future unambious biome export, just let me know what you needed (with the caveat that there are random wiggles and material colors I won't be able to help with as much).
+
+~brook: (0,0,el), where el is the adjusted river elevation
+~river: (0,el*2/3,el)
+~mountain -- if elevation is <=200, do el-50, then *3, /2, (el, el*6/7, el*5/6)
+~if elevation is >200, el -153, *2, (el,el,el)
+~lake: (0,el/5,el)
+~beach: sand color, or pebbles (208-217,208-217,208-217), or rock (128-137,128-137,128-137), remainder (158-167,158-167,158-167)
+~ocean: (0,0,actual elevation)
+~glacier: (el/3,el,el)
+~tundra: (el*2/3,el,el)
+~swamp/marsh: (el/4,el,el/2)
+~taiga: (0,el/3,el/5)
+~temperate forest: (0,el/3,el/6)
+~tropical forest: (0,el/3,0)
+~temperate grassland: (0,el,el/6)
+~tropical grassland: (el,el*5/6,0)
+~badland: (el,el/3,el/5)
+sand desert: material color * el
+~rock: (el,el/2,el/4)
+~village houses: (el,el,el)
+~planted crops: (el,el,0)
+unplanted fields: soil material color * el
+~pasture/meadow: (0,el,0)
+
+fortresses: elevation capped at 150/100 no further multipler, keep=(el,el,el), gate=(el/2,el/2,el/2), courtyard (0,el/2,0), wall (el*2/3,el*2/3,el*2/3) 

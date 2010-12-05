@@ -528,7 +528,7 @@ int main(void)
 				}
 			}
 			test_map.propogate_tiles(&map_list);
-			test_map.draw(x, y + user_config.map_shift);
+			test_map.draw(al_get_display_width(display) / 2, (al_get_display_height(display) / 2) + user_config.map_shift);
 			al_draw_textf(user_config.font, cur_dialog ? inactive : active, x, y, ALLEGRO_ALIGN_CENTRE, "Open");
 			minimap.draw();
 			if(user_config.debugmode)
@@ -565,5 +565,3 @@ int main(void)
 
 	return 0;
 }
-
-/* vim: set sts=3 sw=3 et: */

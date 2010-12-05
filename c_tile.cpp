@@ -106,6 +106,10 @@ void draw_sprite(s_sprite sprite, s_map_block * block, float x, float y, int shr
 {
 	if(offset < 0)
 		return;
+	int target_width = al_get_bitmap_width(al_get_target_bitmap());
+	int target_height = al_get_bitmap_height(al_get_target_bitmap());
+	if((x + sprite.origin_x > target_width) || (y + sprite.origin_y > target_height) || 
+		((x + sprite.origin_x + sprite.width) < 0) || ((y + sprite.origin_y + (sprite.height - shrink)) < 0))return;
 	int flags = 0;
 	if(flip)
 		flags = ALLEGRO_FLIP_HORIZONTAL;
@@ -127,7 +131,6 @@ void draw_sprite(s_sprite sprite, s_map_block * block, float x, float y, int shr
 		x + sprite.origin_x,
 		y + sprite.origin_y,
 		flags);
-
 }
 
 e_color_by get_color_selector(const char * text)
@@ -364,7 +367,7 @@ void c_tile::draw(float x, float y, int height, int bottom, int surface, s_map_b
 				offset);
 		}
 	}
-	if(height <= surface)
+	if(height < surface)
 	{
 		for(unsigned int i = 0; i < intermediate_sprites.size(); i++)
 		{

@@ -36,6 +36,7 @@ void c_map_section::pointToScreen(int *inx, int *iny)
 	int offy = board_top_y;
 	int x = *inx-*iny;
 	int y = *inx+*iny;
+	y -= ((user_config.map_width + user_config.map_height) / 2);
 	x = x * tileset_list.at(current_tileset).tile_width / 2;
 	y = y * tileset_list.at(current_tileset).tile_height / 2;
 	x+=offx;
@@ -284,7 +285,7 @@ void c_map_section::load_special_tiles(s_maplist * maplist)
 				else if(red == 0 && green == 0)
 				{
 					block_array[index].terrain = TERRAIN_OCEAN;
-					block_array[index].water_height = blue+25;
+					block_array[index].water_height = max(blue+25, 99);
 				}
 				else if(block_array[index].height == 99)
 				{

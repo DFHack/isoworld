@@ -14,9 +14,10 @@ void c_tileset::load_ini(ALLEGRO_PATH * path)
 {
 	ALLEGRO_CONFIG * config = 0;
 
-	const char * figgin = al_path_cstr(path, ALLEGRO_NATIVE_PATH_SEP);
+	//const char * figgin = al_path_cstr(path, ALLEGRO_NATIVE_PATH_SEP);
 	config = al_load_config_file(al_path_cstr(path, ALLEGRO_NATIVE_PATH_SEP));
-
+	if(!config)
+		return;
 	char buffer[256];
 
 	tile_width = get_config_int(config, "TILESET_PROPERTIES", "tile_width");
