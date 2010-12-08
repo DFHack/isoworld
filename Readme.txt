@@ -1,3 +1,20 @@
+====Introduction====
+Iso world is a little program I made that opens the worldmaps from df, but you knew that already.
+
+To use it, export all the detailed maps from DF, then open one of them. the rest will get loaded automatically. if they don't, you can manually put the path isoworld.ini.
+If you are impatient, you can get away with just exporting the biome, elevation, and elevation with water maps. you just won't get some of the tiles that depend on the others.
+
+====Key bindings====
+
+space				Change the current tileset.
+g					Toggle the grid.
+d					Toggle debug mode.
+q					Decrease ligting quality.
+w					Increase ligting quality.
+arrow keys			Move around.
+shift				Inncrease scroll speed.
+
+====How to make a tileset====
 Tilesets are stored in three main groups of files, tilesets.ini, which contains a list of all the tilesets that should be loaded, a main tileset config, and a number of tile configs. the structure is as follows:
 
 ===tilesets.ini===
@@ -47,7 +64,7 @@ cap_layers=1					#Number of sprite laters that make up the top of the tile. The 
 column_layers=1					#Number of sprites that make up the side of the column. these are tiled from the top downwards, with the bottom one shifted upwards to make it line up right. it's better to have a few larger ones than a lot of smaller ones, speed-wise.
 surface_layers=0				#Similar to the cap layers, but used for the ocean and lake surfaces.
 intermediate_layers=0			#Similar to the column layers, but they get drawn between the surface and the bottom of oceans and lakes.
-[CAP_IMAGE_0]
+[CAP_IMAGE_0][SURFACE_IMAGE_0][COLUMN_IMAGE_0][INTERMEDIATE_IMAGE_0]
 x=0								#X location on the tileset image of the top-left corner of the sprite.
 y=0								#Y location.
 width=32						#width of the sprite.
