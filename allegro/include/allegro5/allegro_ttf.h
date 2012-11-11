@@ -8,7 +8,9 @@
    extern "C" {
 #endif
 
-#define ALLEGRO_TTF_NO_KERNING 1
+#define ALLEGRO_TTF_NO_KERNING  1
+#define ALLEGRO_TTF_MONOCHROME  2
+#define ALLEGRO_TTF_NO_AUTOHINT 4
 
 #if (defined ALLEGRO_MINGW32) || (defined ALLEGRO_MSVC) || (defined ALLEGRO_BCC32)
    #ifndef ALLEGRO_STATICLINK
@@ -34,6 +36,8 @@
 
 ALLEGRO_TTF_FUNC(ALLEGRO_FONT *, al_load_ttf_font, (char const *filename, int size, int flags));
 ALLEGRO_TTF_FUNC(ALLEGRO_FONT *, al_load_ttf_font_f, (ALLEGRO_FILE *file, char const *filename, int size, int flags));
+ALLEGRO_TTF_FUNC(ALLEGRO_FONT *, al_load_ttf_font_stretch, (char const *filename, int w, int h, int flags));
+ALLEGRO_TTF_FUNC(ALLEGRO_FONT *, al_load_ttf_font_stretch_f, (ALLEGRO_FILE *file, char const *filename, int w, int h, int flags));
 ALLEGRO_TTF_FUNC(bool, al_init_ttf_addon, (void));
 ALLEGRO_TTF_FUNC(void, al_shutdown_ttf_addon, (void));
 ALLEGRO_TTF_FUNC(uint32_t, al_get_allegro_ttf_version, (void));

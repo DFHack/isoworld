@@ -59,7 +59,7 @@ struct ALLEGRO_DISPLAY_INTERFACE
 
    void (*set_window_position)(ALLEGRO_DISPLAY *display, int x, int y);
    void (*get_window_position)(ALLEGRO_DISPLAY *display, int *x, int *y);
-   bool (*toggle_display_flag)(ALLEGRO_DISPLAY *display, int flag, bool onoff);
+   bool (*set_display_flag)(ALLEGRO_DISPLAY *display, int flag, bool onoff);
    void (*set_window_title)(ALLEGRO_DISPLAY *display, const char *title);
    
    void (*flush_vertex_cache)(ALLEGRO_DISPLAY *d);
@@ -86,7 +86,7 @@ typedef struct ALLEGRO_BLENDER
 /* These are settings Allegro itself doesn't really care about on its
  * own, but which users may want to specify for a display anyway.
  */
-ALLEGRO_STATIC_ASSERT(ALLEGRO_DISPLAY_OPTIONS_COUNT <= 32);
+ALLEGRO_STATIC_ASSERT(aintern_display, ALLEGRO_DISPLAY_OPTIONS_COUNT <= 32);
 typedef struct
 {
    int required, suggested; /* Bitfields. */

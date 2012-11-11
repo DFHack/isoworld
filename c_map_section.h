@@ -29,9 +29,11 @@ public:
 	void flood_fill(c_tile * tile, int height);
 	void pointToScreen(int *inx, int *iny);
 	void load_heights(ALLEGRO_BITMAP * heightmap);
+	void load_water_level(ALLEGRO_BITMAP * watermap);
 	void load_colors(ALLEGRO_BITMAP * colormap);
 	void load_level(ALLEGRO_BITMAP * levelmap, int level);
-	void load_special_tiles(s_maplist * maplist);
+	void load_biome_tiles(s_maplist * maplist);
+	void load_structure_tiles(s_maplist * maplist);
 	void generate_special_tile_borders(void);
 	void generate_noise(void);
 	void generate_ambient_lighting(void);

@@ -62,7 +62,7 @@ typedef enum ALLEGRO_PRIM_STORAGE
 {
    ALLEGRO_PRIM_FLOAT_2,
    ALLEGRO_PRIM_FLOAT_3,
-   ALLEGRO_PRIM_SHORT_2,
+   ALLEGRO_PRIM_SHORT_2
 } ALLEGRO_PRIM_STORAGE;
 
 /* Enum: ALLEGRO_VERTEX_CACHE_SIZE
@@ -86,10 +86,6 @@ struct ALLEGRO_VERTEX_ELEMENT {
 /* Type: ALLEGRO_VERTEX_DECL
  */
 typedef struct ALLEGRO_VERTEX_DECL ALLEGRO_VERTEX_DECL;
-
-/* Type: ALLEGRO_PRIM_COLOR
- */
-typedef uint32_t ALLEGRO_PRIM_COLOR;
 
 /* Duplicated in allegro5/internal/aintern_tri_soft.h */
 #ifndef _ALLEGRO_VERTEX_DEFINED
@@ -144,6 +140,8 @@ ALLEGRO_PRIM_FUNC(void, al_calculate_arc, (float* dest, int stride, float cx, fl
 ALLEGRO_PRIM_FUNC(void, al_draw_circle, (float cx, float cy, float r, ALLEGRO_COLOR color, float thickness));
 ALLEGRO_PRIM_FUNC(void, al_draw_ellipse, (float cx, float cy, float rx, float ry, ALLEGRO_COLOR color, float thickness));
 ALLEGRO_PRIM_FUNC(void, al_draw_arc, (float cx, float cy, float r, float start_theta, float delta_theta, ALLEGRO_COLOR color, float thickness));
+ALLEGRO_PRIM_FUNC(void, al_draw_elliptical_arc, (float cx, float cy, float rx, float ry, float start_theta, float delta_theta, ALLEGRO_COLOR color, float thickness));
+ALLEGRO_PRIM_FUNC(void, al_draw_pieslice, (float cx, float cy, float r, float start_theta, float delta_theta, ALLEGRO_COLOR color, float thickness));
 
 ALLEGRO_PRIM_FUNC(void, al_calculate_spline, (float* dest, int stride, float points[8], float thickness, int num_segments));
 ALLEGRO_PRIM_FUNC(void, al_draw_spline, (float points[8], ALLEGRO_COLOR color, float thickness));
@@ -155,6 +153,7 @@ ALLEGRO_PRIM_FUNC(void, al_draw_filled_triangle, (float x1, float y1, float x2, 
 ALLEGRO_PRIM_FUNC(void, al_draw_filled_rectangle, (float x1, float y1, float x2, float y2, ALLEGRO_COLOR color));
 ALLEGRO_PRIM_FUNC(void, al_draw_filled_ellipse, (float cx, float cy, float rx, float ry, ALLEGRO_COLOR color));
 ALLEGRO_PRIM_FUNC(void, al_draw_filled_circle, (float cx, float cy, float r, ALLEGRO_COLOR color));
+ALLEGRO_PRIM_FUNC(void, al_draw_filled_pieslice, (float cx, float cy, float r, float start_theta, float delta_theta, ALLEGRO_COLOR color));
 ALLEGRO_PRIM_FUNC(void, al_draw_filled_rounded_rectangle, (float x1, float y1, float x2, float y2, float rx, float ry, ALLEGRO_COLOR color));
    
    

@@ -24,6 +24,7 @@ int get_map_height(int x, int y)
 		else
 			return blue+25;
 	}
+	else return 100;
 }
 bool approx_f(float a, float b, float accuracy)
 {
@@ -236,7 +237,42 @@ void c_map_section::load_level(ALLEGRO_BITMAP * levelmap, int level)
 	}
 }
 
-void c_map_section::load_special_tiles(s_maplist * maplist)
+void c_map_section::load_water_level(ALLEGRO_BITMAP * watermap)
+{
+	for (unsigned int y = 0; y < board_width; y++)
+	{
+		for (unsigned int x = 0; x < board_height; x++)
+		{
+			unsigned int index = x + (board_width * y);
+			if(watermap)
+			{
+				int tempx = x + user_config.map_x;
+				int tempy = y + user_config.map_y;
+
+				tempx =  bind_to_range(tempx , al_get_bitmap_width(watermap));
+				tempy =  bind_to_range(tempy , al_get_bitmap_height(watermap));
+
+				ALLEGRO_COLOR pixel = al_get_pixel(watermap, tempx, tempy);
+				unsigned char red;
+				unsigned char green;
+				unsigned char blue;
+				al_unmap_rgb(pixel, &red, &green, &blue);
+				if(red == 0){
+					if(green == 0)
+						block_array[index].water_height = blue + 25;
+					else
+						block_array[index].water_height = blue;
+				}
+				else block_array[index].water_height = block_array[index].height;
+
+			}
+			else block_array[index].water_height = block_array[index].height;
+
+		}
+	}
+}
+
+void c_map_section::load_biome_tiles(s_maplist * maplist)
 {
 	for (unsigned int y = 0; y < board_width; y++)
 	{
@@ -255,309 +291,237 @@ void c_map_section::load_special_tiles(s_maplist * maplist)
 				unsigned char green;
 				unsigned char blue;
 				al_unmap_rgb(pixel_elw, &red, &green, &blue);
-				block_array[index].water_height = block_array[index].height;
 				unsigned char cR, cG, cB;
 				float R,G,B;
 				al_unmap_rgb(block_array[index].color, &cR, &cG, &cB);
 				R=cR;
 				G=cG;
 				B=cB;
-				if(
-					(cR == 180) &&
-					(cG == 167) &&
-					(cB == 20) &&
-					block_array[index].height > 99
-					)
-				{
-					block_array[index].terrain = TERRAIN_BRIDGE;
-					block_array[index].height = blue;
-					block_array[index].water_height = blue;
-				}
-				else if(red == 0 && green == blue)
-				{
-					if(block_array[index].color.g > 0.0001)
-						block_array[index].terrain = TERRAIN_STREAM;
-					else 
-						block_array[index].terrain = TERRAIN_RIVER;
-					block_array[index].height = blue;
-					block_array[index].water_height = blue;
-				}
-				else if(red == 0 && green == 0)
-				{
-					block_array[index].terrain = TERRAIN_OCEAN;
-					block_array[index].water_height = max(blue+25, 99);
-				}
-				else if(block_array[index].height == 99)
-				{
-					block_array[index].terrain = TERRAIN_BEACH;
-				}
-				else if(
-					(approx_f(((R / 2.0f) + 153.0f), block_array[index].height, 1.0f)) &&
-					(approx_f(((G / 2.0f) + 153.0f), block_array[index].height, 1.0f)) &&
-					(approx_f(((B / 2.0f) + 153.0f), block_array[index].height, 1.0f)) &&
+				//if(
+				//	(cR == 180) &&
+				//	(cG == 167) &&
+				//	(cB == 20) &&
+				//	block_array[index].height > 99
+				//	)
+				//{
+				//	block_array[index].terrain = TERRAIN_BRIDGE;
+				//	block_array[index].height = blue;
+				//	block_array[index].water_height = blue;
+				//}
+				//else if(red == 0 && green == blue)
+				//{
+				//	if(block_array[index].color.g > 0.0001)
+				//		block_array[index].terrain = TERRAIN_STREAM;
+				//	else 
+				//		block_array[index].terrain = TERRAIN_RIVER;
+				//	block_array[index].height = blue;
+				//	block_array[index].water_height = blue;
+				//}
+				//else if(red == 0 && green == 0)
+				//{
+				//	block_array[index].terrain = TERRAIN_OCEAN;
+				//	block_array[index].water_height = max(blue+25, 99);
+				//}
+					if(
+					(cR == 128) &&
+					(cG == 128) &&
+					(cB == 128) &&
 					block_array[index].height > 200
 					)
 				{
 					block_array[index].terrain = TERRAIN_MOUNTAIN_TALL;
 				}
 				else if(
-					(approx_f(((R)*2/3 + 50.0f), block_array[index].height, 1.0f)) &&
-					(approx_f(((G*7/6)*2/3 + 50.0f), block_array[index].height, 1.0f)) &&
-					(approx_f(((B*6/5)*2/3 + 50.0f), block_array[index].height, 1.0f)) &&
+					(cR == 128) &&
+					(cG == 128) &&
+					(cB == 128) &&
 					block_array[index].height <= 200
 					)
-				{
-					block_array[index].terrain = TERRAIN_MOUNTAIN;
-				}
+				{block_array[index].terrain = TERRAIN_MOUNTAIN;}
 				else if(
-					(approx_f(((R)*2/3 + 50.0f), 150.0, 1.0f)) &&
-					(approx_f(((G*7/6)*2/3 + 50.0f), 150, 1.0f)) &&
-					(approx_f(((B*6/5)*2/3 + 50.0f), 150, 1.0f)) &&
-					block_array[index].height <= 200
-					)
-				{
-					block_array[index].terrain = TERRAIN_MOUNTAIN;
-				}
+					(cR == 0)&&
+					(cG == 224)&&
+					(cB == 255))
+				{block_array[index].terrain = TERRAIN_LAKE_TEMP_FRESH;}
 				else if(
-					(approx_f(((R*3)/4 + 90.0f), block_array[index].height, 1.0f)) &&
-					(approx_f(((G)/4 + 90.0f), block_array[index].height, 1.0f)) &&
-					(approx_f(((B)/4 + 90.0f), block_array[index].height, 1.0f))
-					)
-				{
-					block_array[index].terrain = TERRAIN_GLACIER;
-				}
+					(cR == 0)&&
+					(cG == 192)&&
+					(cB == 255))
+				{block_array[index].terrain = TERRAIN_LAKE_TEMP_BRACK;}
 				else if(
-					(approx_f(((R*3/2)/4 + 90.0f), block_array[index].height, 1.0f)) &&
-					(approx_f(((G)/4 + 90.0f), block_array[index].height, 1.0f)) &&
-					(approx_f(((B)/4 + 90.0f), block_array[index].height, 1.0f))
-					)
-				{
-					block_array[index].terrain = TERRAIN_TUNDRA;
-				}
+					(cR == 0)&&
+					(cG == 160)&&
+					(cB == 255))
+				{block_array[index].terrain = TERRAIN_LAKE_TEMP_SALT;}
 				else if(
-					(approx_f(((R*4)/4 + 90.0f), block_array[index].height, 1.0f)) &&
-					(approx_f(((G)/4 + 90.0f), block_array[index].height, 1.0f)) &&
-					(approx_f(((B*2)/4 + 90.0f), block_array[index].height, 1.0f))
-					)
-				{
-					block_array[index].terrain = TERRAIN_SWAMP;
-				}
+					(cR == 0)&&
+					(cG == 96)&&
+					(cB == 255))
+				{block_array[index].terrain = TERRAIN_LAKE_TROP_FRESH;}
 				else if(
-					(approx_f(R, 0, 1.0f)) &&
-					(approx_f(((G*3)/4 + 90.0f), block_array[index].height, 1.0f)) &&
-					(approx_f(((B*5)/4 + 90.0f), block_array[index].height, 1.0f))
-					)
-				{
-					block_array[index].terrain = TERRAIN_TAIGA;
-				}
+					(cR == 0)&&
+					(cG == 64)&&
+					(cB == 255))
+				{block_array[index].terrain = TERRAIN_LAKE_TROP_BRACK;}
 				else if(
-					(approx_f(R, 0, 1.0f)) &&
-					(approx_f(((G*3)/4 + 90.0f), block_array[index].height, 1.0f)) &&
-					(approx_f(((B*6)/4 + 90.0f), block_array[index].height, 1.0f))
-					)
-				{
-					block_array[index].terrain = TERRAIN_FOREST_TEMP;
-				}
+					(cR == 0)&&
+					(cG == 32)&&
+					(cB == 255))
+				{block_array[index].terrain = TERRAIN_LAKE_TROP_SALT;}
 				else if(
-					(approx_f(R, 0, 1.0f)) &&
-					(approx_f(((G*3)/4 + 90.0f), block_array[index].height, 1.0f)) &&
-					(approx_f(B, 0, 1.0f))
-					)
+					(cR == 0)&&
+					(cG == 255)&&
+					(cB == 255))
 				{
-					block_array[index].terrain = TERRAIN_FOREST_TROP;
-				}
+					if(block_array[index].height >= 99)
+						block_array[index].terrain = TERRAIN_BEACH_ARCT;
+					else block_array[index].terrain = TERRAIN_OCEAN_ARCT;}
 				else if(
-					(approx_f(R, 0, 1.0f)) &&
-					(approx_f(((G)/4 + 90.0f), block_array[index].height, 1.0f)) &&
-					(approx_f(((B*6)/4 + 90.0f), block_array[index].height, 1.0f))
-					)
+					(cR == 0)&&
+					(cG == 0)&&
+					(cB == 255))
 				{
-					block_array[index].terrain = TERRAIN_GRASS_TEMP;
-				}
+					if(block_array[index].height >= 99)
+						block_array[index].terrain = TERRAIN_BEACH_TROP;
+					else block_array[index].terrain = TERRAIN_OCEAN_TROP;}
 				else if(
-					(approx_f(((R)/4 + 90.0f), block_array[index].height, 1.0f)) &&
-					(approx_f(((G*6/5)/4 + 90.0f), block_array[index].height, 1.0f)) &&
-					(approx_f(B, 0, 1.0f))
-					)
+					(cR == 0)&&
+					(cG == 128)&&
+					(cB == 255))
 				{
-					block_array[index].terrain = TERRAIN_GRASS_TROP;
-				}
+					if(block_array[index].height >= 99)
+						block_array[index].terrain = TERRAIN_BEACH_TEMP;
+					else block_array[index].terrain = TERRAIN_OCEAN_TEMP;}
 				else if(
-					(approx_f(((R)/4 + 90.0f), block_array[index].height, 1.0f)) &&
-					(approx_f(((G*3)/4 + 90.0f), block_array[index].height, 1.0f)) &&
-					(approx_f(((B*5)/4 + 90.0f), block_array[index].height, 1.0f))
-					)
-				{
-					block_array[index].terrain = TERRAIN_BADLANDS;
-				}
+					(cR == 64)&&
+					(cG == 255)&&
+					(cB == 255))
+				{block_array[index].terrain = TERRAIN_GLACIER;}
 				else if(
-					(approx_f(((R)/4 + 90.0f), block_array[index].height, 1.0f)) &&
-					(approx_f(((G*2)/4 + 90.0f), block_array[index].height, 1.0f)) &&
-					(approx_f(((B*4)/4 + 90.0f), block_array[index].height, 1.0f))
-					)
-				{
-					block_array[index].terrain = TERRAIN_ROCK;
-				}
+					(cR == 128)&&
+					(cG == 255)&&
+					(cB == 255))
+				{block_array[index].terrain = TERRAIN_TUNDRA;}
 				else if(
-					(approx_f(((R)/4 + 90.0f), block_array[index].height, 1.0f)) &&
-					(approx_f(((G)/4 + 90.0f), block_array[index].height, 1.0f)) &&
-					(approx_f(((B)/4 + 90.0f), block_array[index].height, 1.0f))
-					)
-				{
-					block_array[index].terrain = TERRAIN_VILLAGE;
-				}
+					(cR == 96)&&
+					(cG == 192)&&
+					(cB == 128))
+				{block_array[index].terrain = TERRAIN_SWAMP_TEMP_FRESH;}
 				else if(
-					(approx_f(((R)/4 + 90.0f), block_array[index].height, 1.0f)) &&
-					(approx_f(((G)/4 + 90.0f), block_array[index].height, 1.0f)) &&
-					(approx_f(B, 0, 1.0f))
-					)
-				{
-					block_array[index].terrain = TERRAIN_FARM_PLANTED;
-				}
+					(cR == 64)&&
+					(cG == 192)&&
+					(cB == 128))
+				{block_array[index].terrain = TERRAIN_SWAMP_TEMP_SALT;}
 				else if(
-					(approx_f(R, 0, 1.0f)) &&
-					(approx_f(((G)/4 + 90.0f), block_array[index].height, 1.0f)) &&
-					(approx_f(B, 0, 1.0f))
-					)
-				{
-					block_array[index].terrain = TERRAIN_FARM_PASTURE;
-				}
+					(cR == 96)&&
+					(cG == 255)&&
+					(cB == 128))
+				{block_array[index].terrain = TERRAIN_MARSH_TEMP_FRESH;}
 				else if(
-					(approx_f(R, block_array[index].height, 1.0f)) &&
-					(approx_f(G, block_array[index].height, 1.0f)) &&
-					(approx_f(B, block_array[index].height, 1.0f))
-					)
-				{
-					block_array[index].terrain = TERRAIN_FORT_KEEP;
-				}
+					(cR == 64)&&
+					(cG == 255)&&
+					(cB == 128))
+				{block_array[index].terrain = TERRAIN_MARSH_TEMP_SALT;}
 				else if(
-					(approx_f(R*2, block_array[index].height, 1.0f)) &&
-					(approx_f(G*2, block_array[index].height, 1.0f)) &&
-					(approx_f(B*2, block_array[index].height, 1.0f))
-					)
-				{
-					block_array[index].terrain = TERRAIN_FORT_GATE;
-				}
+					(cR == 96)&&
+					(cG == 192)&&
+					(cB == 64))
+				{block_array[index].terrain = TERRAIN_SWAMP_TROP_FRESH;}
 				else if(
-					(approx_f(R*3/2, block_array[index].height, 1.0f)) &&
-					(approx_f(G*3/2, block_array[index].height, 1.0f)) &&
-					(approx_f(B*3/2, block_array[index].height, 1.0f))
-					)
-				{
-					block_array[index].terrain = TERRAIN_FORT_WALL;
-				}
+					(cR == 64)&&
+					(cG == 192)&&
+					(cB == 64))
+				{block_array[index].terrain = TERRAIN_SWAMP_TROP_SALT;}
 				else if(
-					(approx_f(R, 0, 1.0f)) &&
-					(approx_f(G*2, block_array[index].height, 1.0f)) &&
-					(approx_f(B, 0, 1.0f))
-					)
-				{
-					block_array[index].terrain = TERRAIN_FORT_COURT;
-				}
+					(cR == 64)&&
+					(cG == 255)&&
+					(cB == 96))
+				{block_array[index].terrain = TERRAIN_SWAMP_MANGROVE;}
 				else if(
-					(cR == 100) &&
-					(cG == 100) &&
-					(cB == 100) &&
-					block_array[index].height > 140
-					)
-				{
-					block_array[index].terrain = TERRAIN_DORF_EDGE;
-				}
+					(cR == 96)&&
+					(cG == 255)&&
+					(cB == 64))
+				{block_array[index].terrain = TERRAIN_MARSH_TROP_FRESH;}
 				else if(
-					(cR == 200) &&
-					(cG == 200) &&
-					(cB == 200) &&
-					block_array[index].height > 140
-					)
-				{
-					block_array[index].terrain = TERRAIN_DORF_CENTER;
-				}
+					(cR == 64)&&
+					(cG == 255)&&
+					(cB == 64))
+				{block_array[index].terrain = TERRAIN_MARSH_TROP_SALT;}
 				else if(
-					(cR == 255) &&
-					(cG == 0) &&
-					(cB == 255) &&
-					block_array[index].height > 99
-					)
-				{
-					block_array[index].terrain = TERRAIN_GOBLIN_CENTER;
-				}
+					(cR == 0)&&
+					(cG == 96)&&
+					(cB == 64))
+				{block_array[index].terrain = TERRAIN_FOREST_TAIGA;}
 				else if(
-					(cR == 127) &&
-					(cG == 0) &&
-					(cB == 127) &&
-					block_array[index].height > 99
-					)
-				{
-					block_array[index].terrain = TERRAIN_GOBLIN_EDGE;
-				}
+					(cR == 0)&&
+					(cG == 96)&&
+					(cB == 32))
+				{block_array[index].terrain = TERRAIN_FOREST_TEMP_FIR;}
 				else if(
-					(cR == 127) &&
-					(cG == 127) &&
-					(cB == 0) &&
-					block_array[index].height > 99
-					)
-				{
-					block_array[index].terrain = TERRAIN_ELF_EDGE;
-				}
+					(cR == 0)&&
+					(cG == 160)&&
+					(cB == 32))
+				{block_array[index].terrain = TERRAIN_FOREST_TEMP_BROAD;}
 				else if(
-					(cR == 255) &&
-					(cG == 255) &&
-					(cB == 0) &&
-					block_array[index].height > 99
-					)
-				{
-					block_array[index].terrain = TERRAIN_ELF_CENTER;
-				}
+					(cR == 0)&&
+					(cG == 96)&&
+					(cB == 0))
+				{block_array[index].terrain = TERRAIN_FOREST_TROP_FIR;}
 				else if(
-					(cR == 150) &&
-					(cG == 127) &&
-					(cB == 20) &&
-					block_array[index].height > 99
-					)
-				{
-					block_array[index].terrain = TERRAIN_ROAD;
-				}
+					(cR == 0)&&
+					(cG == 128)&&
+					(cB == 0))
+				{block_array[index].terrain = TERRAIN_FOREST_TROP_BROAD_DRY;}
 				else if(
-					(cR == 20) &&
-					(cG == 20) &&
-					(cB == 20) &&
-					block_array[index].height > 100
-					)
-				{
-					block_array[index].terrain = TERRAIN_TUNNEL;
-				}
+					(cR == 0)&&
+					(cG == 160)&&
+					(cB == 0))
+				{block_array[index].terrain = TERRAIN_FOREST_TROP_BROAD_MOIST;}
 				else if(
-					(approx_f(((R)/2 + 90.0f), block_array[index].height, 1.0f)) &&
-					(approx_f(G, 0, 1.0f)) &&
-					(approx_f(B, 0, 1.0f))
-					)
-				{
-					block_array[index].terrain = TERRAIN_FARM_FALLOW;
-				}
+					(cR == 0)&&
+					(cG == 255)&&
+					(cB == 32))
+				{block_array[index].terrain = TERRAIN_GRASS_TEMP;}
 				else if(
-					(approx_f(((R)/4 + 90.0f), block_array[index].height, 1.0f)) &&
-					(approx_f(G, 0, 1.0f)) &&
-					(approx_f(B, 0, 1.0f))
-					)
-				{
-					block_array[index].terrain = TERRAIN_FARM_FALLOW;
-				}
+					(cR == 0)&&
+					(cG == 224)&&
+					(cB == 32))
+				{block_array[index].terrain = TERRAIN_SAV_TEMP;}
 				else if(
-					(approx_f(((R)/2 + 90.0f), block_array[index].height, 1.0f)) &&
-					(approx_f(((G)/2 + 90.0f), block_array[index].height, 1.0f)) &&
-					(approx_f(B, 0, 1.0f))
-					)
-				{
-					block_array[index].terrain = TERRAIN_FARM_FALLOW;
-				}
+					(cR == 0)&&
+					(cG == 192)&&
+					(cB == 32))
+				{block_array[index].terrain = TERRAIN_SHRUB_TEMP;}
 				else if(
-					(approx_f(((R)/2 + 90.0f), block_array[index].height, 1.0f)) &&
-					(approx_f(((G)/2 + 90.0f), block_array[index].height, 1.0f)) &&
-					(approx_f(((B)/2 + 90.0f), block_array[index].height, 1.0f))
-					)
-				{
-					block_array[index].terrain = TERRAIN_FARM_FALLOW;
-				}
+					(cR == 255)&&
+					(cG == 160)&&
+					(cB == 0))
+				{block_array[index].terrain = TERRAIN_GRASS_TROP;}
+				else if(
+					(cR == 255)&&
+					(cG == 176)&&
+					(cB == 0))
+				{block_array[index].terrain = TERRAIN_SAV_TROP;}
+				else if(
+					(cR == 255)&&
+					(cG == 192)&&
+					(cB == 0))
+				{block_array[index].terrain = TERRAIN_SHRUB_TROP;}
+				else if(
+					(cR == 255)&&
+					(cG == 96)&&
+					(cB == 32))
+				{block_array[index].terrain = TERRAIN_DESERT_BAD;}
+				else if(
+					(cR == 255)&&
+					(cG == 255)&&
+					(cB == 0))
+				{block_array[index].terrain = TERRAIN_DESERT_SAND;}
+				else if(
+					(cR == 255)&&
+					(cG == 128)&&
+					(cB == 64))
+				{block_array[index].terrain = TERRAIN_DESERT_ROCK;}
 				else if(block_array[index].height >= 150)
 				{
 					block_array[index].terrain = TERRAIN_MOUNTAIN;
@@ -591,20 +555,23 @@ void c_map_section::load_colors(ALLEGRO_BITMAP * colormap)
 	}
 }
 
+
+
 void c_map_section::propogate_tiles(s_maplist * maplist)
 {
 	clock_t start_time = clock();
 	load_heights(maplist->elevation_map);
 	load_colors(maplist->biome_map);
-	load_level(maplist->temperature_map, LEVEL_TEMPERATURE);
-	load_level(maplist->rainfall_map, LEVEL_RAINFALL);
-	load_level(maplist->drainage_map, LEVEL_DRAINAGE);
-	load_level(maplist->savagery_map, LEVEL_SAVAGE);
-	load_level(maplist->volcanism_map, LEVEL_VOLCANISM);
-	load_level(maplist->vegetation_map, LEVEL_VEGETATION);
-	load_level(maplist->evil_map, LEVEL_EVIL);
-	load_level(maplist->salinity_map, LEVEL_SALINITY);
-	load_special_tiles(maplist);
+	load_water_level(maplist->elevation_map_with_water);
+	//load_level(maplist->temperature_map, LEVEL_TEMPERATURE);
+	//load_level(maplist->rainfall_map, LEVEL_RAINFALL);
+	//load_level(maplist->drainage_map, LEVEL_DRAINAGE);
+	//load_level(maplist->savagery_map, LEVEL_SAVAGE);
+	//load_level(maplist->volcanism_map, LEVEL_VOLCANISM);
+	//load_level(maplist->vegetation_map, LEVEL_VEGETATION);
+	//load_level(maplist->evil_map, LEVEL_EVIL);
+	//load_level(maplist->salinity_map, LEVEL_SALINITY);
+	load_biome_tiles(maplist);
 	generate_special_tile_borders();
 	generate_noise();
 	generate_ambient_lighting();
@@ -638,7 +605,7 @@ void c_map_section::load_tilesets(const char * index_file)
 {
 	ALLEGRO_CONFIG * config = 0;
 
-	ALLEGRO_PATH * base_path = al_get_standard_path(ALLEGRO_PROGRAM_PATH);
+	ALLEGRO_PATH * base_path = al_get_standard_path(ALLEGRO_EXENAME_PATH);
 
 	ALLEGRO_PATH * key = al_create_path(index_file);
 
@@ -717,21 +684,21 @@ void c_map_section::generate_special_tile_borders()
 				}
 				block_array[(x + (board_width * y))].terrain_borders[i]=borders;
 			}
-			block_array[(x + (board_width * y))].terrain_borders[TERRAIN_RIVER] |= block_array[(x + (board_width * y))].terrain_borders[TERRAIN_OCEAN];
-			block_array[(x + (board_width * y))].terrain_borders[TERRAIN_RIVER] |= block_array[(x + (board_width * y))].terrain_borders[TERRAIN_STREAM];
-			block_array[(x + (board_width * y))].terrain_borders[TERRAIN_RIVER] |= block_array[(x + (board_width * y))].terrain_borders[TERRAIN_BRIDGE];
+			//block_array[(x + (board_width * y))].terrain_borders[TERRAIN_RIVER] |= block_array[(x + (board_width * y))].terrain_borders[TERRAIN_OCEAN];
+			//block_array[(x + (board_width * y))].terrain_borders[TERRAIN_RIVER] |= block_array[(x + (board_width * y))].terrain_borders[TERRAIN_STREAM];
+			//block_array[(x + (board_width * y))].terrain_borders[TERRAIN_RIVER] |= block_array[(x + (board_width * y))].terrain_borders[TERRAIN_BRIDGE];
 
-			block_array[(x + (board_width * y))].terrain_borders[TERRAIN_STREAM] |= block_array[(x + (board_width * y))].terrain_borders[TERRAIN_OCEAN];
-			block_array[(x + (board_width * y))].terrain_borders[TERRAIN_STREAM] |= block_array[(x + (board_width * y))].terrain_borders[TERRAIN_RIVER];
+			//block_array[(x + (board_width * y))].terrain_borders[TERRAIN_STREAM] |= block_array[(x + (board_width * y))].terrain_borders[TERRAIN_OCEAN];
+			//block_array[(x + (board_width * y))].terrain_borders[TERRAIN_STREAM] |= block_array[(x + (board_width * y))].terrain_borders[TERRAIN_RIVER];
 
-			block_array[(x + (board_width * y))].terrain_borders[TERRAIN_FORT_WALL] |= block_array[(x + (board_width * y))].terrain_borders[TERRAIN_FORT_GATE];
-			block_array[(x + (board_width * y))].terrain_borders[TERRAIN_FORT_GATE] |= block_array[(x + (board_width * y))].terrain_borders[TERRAIN_FORT_WALL];
+			//block_array[(x + (board_width * y))].terrain_borders[TERRAIN_FORT_WALL] |= block_array[(x + (board_width * y))].terrain_borders[TERRAIN_FORT_GATE];
+			//block_array[(x + (board_width * y))].terrain_borders[TERRAIN_FORT_GATE] |= block_array[(x + (board_width * y))].terrain_borders[TERRAIN_FORT_WALL];
 
-			block_array[(x + (board_width * y))].terrain_borders[TERRAIN_DORF_EDGE] |= block_array[(x + (board_width * y))].terrain_borders[TERRAIN_FORT_WALL];
-			block_array[(x + (board_width * y))].terrain_borders[TERRAIN_FORT_WALL] |= block_array[(x + (board_width * y))].terrain_borders[TERRAIN_DORF_EDGE];
+			//block_array[(x + (board_width * y))].terrain_borders[TERRAIN_DORF_EDGE] |= block_array[(x + (board_width * y))].terrain_borders[TERRAIN_FORT_WALL];
+			//block_array[(x + (board_width * y))].terrain_borders[TERRAIN_FORT_WALL] |= block_array[(x + (board_width * y))].terrain_borders[TERRAIN_DORF_EDGE];
 
-			block_array[(x + (board_width * y))].terrain_borders[TERRAIN_BRIDGE] |= block_array[(x + (board_width * y))].terrain_borders[TERRAIN_ROAD];
-			block_array[(x + (board_width * y))].terrain_borders[TERRAIN_ROAD] |= block_array[(x + (board_width * y))].terrain_borders[TERRAIN_BRIDGE];
+			//block_array[(x + (board_width * y))].terrain_borders[TERRAIN_BRIDGE] |= block_array[(x + (board_width * y))].terrain_borders[TERRAIN_ROAD];
+			//block_array[(x + (board_width * y))].terrain_borders[TERRAIN_ROAD] |= block_array[(x + (board_width * y))].terrain_borders[TERRAIN_BRIDGE];
 		}
 	}
 }

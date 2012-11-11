@@ -9,12 +9,7 @@
 #include "allegro5/internal/aintern_vector.h"
 #include "../allegro_audio.h"
 
-/* This can probably be set to 16, or higher, if long is 64-bit */
-#define MIXER_FRAC_SHIFT  8
-#define MIXER_FRAC_ONE    (1<<MIXER_FRAC_SHIFT)
-#define MIXER_FRAC_MASK   (MIXER_FRAC_ONE-1)
-
-enum ALLEGRO_AUDIO_DRIVER_ENUM
+typedef enum ALLEGRO_AUDIO_DRIVER_ENUM
 {
    /* Various driver modes. */
    ALLEGRO_AUDIO_DRIVER_AUTODETECT = 0x20000,
@@ -24,7 +19,7 @@ enum ALLEGRO_AUDIO_DRIVER_ENUM
    ALLEGRO_AUDIO_DRIVER_OSS        = 0x20004,
    ALLEGRO_AUDIO_DRIVER_AQUEUE     = 0x20005,
    ALLEGRO_AUDIO_DRIVER_PULSEAUDIO = 0x20006
-};
+} ALLEGRO_AUDIO_DRIVER_ENUM;
 
 typedef struct ALLEGRO_AUDIO_DRIVER ALLEGRO_AUDIO_DRIVER;
 struct ALLEGRO_AUDIO_DRIVER {
@@ -51,6 +46,7 @@ struct ALLEGRO_AUDIO_DRIVER {
 extern ALLEGRO_AUDIO_DRIVER *_al_kcm_driver;
 
 const void *_al_voice_update(ALLEGRO_VOICE *voice, unsigned int *samples);
+bool _al_kcm_set_voice_playing(ALLEGRO_VOICE *voice, bool val);
 
 /* A voice structure that you'd attach a mixer or sample to. Ideally there
  * would be one ALLEGRO_VOICE per system/hardware voice.
@@ -100,7 +96,7 @@ struct ALLEGRO_SAMPLE {
    ALLEGRO_AUDIO_DEPTH  depth;
    ALLEGRO_CHANNEL_CONF chan_conf;
    unsigned int         frequency;
-   unsigned int         len;
+   int                  len;
    any_buffer_t         buffer;
    bool                 free_buf;
                         /* Whether `buffer' needs to be freed when the sample
@@ -155,10 +151,20 @@ struct ALLEGRO_SAMPLE_INSTANCE {
    float                gain;
    float                pan;
 
-   unsigned int         pos;
-   unsigned int         loop_start;
-   unsigned int         loop_end;
+   /* When resampling an audio stream there will be fractional sample
+    * positions due to the difference in frequencies.
+    */
+   int                  pos;
+   int                  pos_bresenham_error;
+
+   int                  loop_start;
+   int                  loop_end;
+
    int                  step;
+   int                  step_denom;
+                        /* The numerator and denominator of the step are 
+                         * stored separately. The actual step is obtained by 
+                         * dividing step by step_denom */
 
    float                *matrix;
                         /* Used to convert from this format to the attached
@@ -166,6 +172,7 @@ struct ALLEGRO_SAMPLE_INSTANCE {
                          * The gain is premultiplied in.
                          */
 
+   bool                 is_mixer;
    stream_reader_t      spl_read;
                         /* Reads sample data into the provided buffer, using
                          * the specified format, converting as necessary.
@@ -208,13 +215,14 @@ struct ALLEGRO_AUDIO_STREAM {
 
    void                 *main_buffer;
                         /* Pointer to a single buffer big enough to hold all
-                         * the fragments.
+                         * the fragments. Each fragment has one additional
+                         * sample at the start for linear interpolation.
                          */
 
    void                 **pending_bufs;
    void                 **used_bufs;
                         /* Arrays of offsets into the main_buffer.
-                         * The arrays are each 'buf_count' long.
+                         * The arrays are each 'buf_count + 1' long.
                          *
                          * 'pending_bufs' holds pointers to fragments supplied
                          * by the user which are yet to be handed off to the
@@ -224,6 +232,7 @@ struct ALLEGRO_AUDIO_STREAM {
                          * have been sent to the audio driver and so are
                          * ready to receive new data.
                          */
+
    volatile bool         is_draining;
                          /* Set to true if sample data is not going to be passed
                           * to the stream any more. The stream must change its
@@ -303,6 +312,9 @@ void _al_kcm_init_destructors(void);
 void _al_kcm_shutdown_destructors(void);
 void _al_kcm_register_destructor(void *object, void (*func)(void*));
 void _al_kcm_unregister_destructor(void *object);
+void _al_kcm_foreach_destructor(
+      void (*callback)(void *object, void (*func)(void *), void *udata),
+      void *userdata);
 
 ALLEGRO_KCM_AUDIO_FUNC(void, _al_kcm_shutdown_default_mixer, (void));
 

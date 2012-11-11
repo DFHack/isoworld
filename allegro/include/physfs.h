@@ -1,4 +1,8 @@
-/** \file physfs.h */
+/**
+ * \file physfs.h
+ *
+ * Main header file for PhysicsFS.
+ */
 
 /**
  * \mainpage PhysicsFS
@@ -124,9 +128,9 @@
  *
  * PhysicsFS is mostly thread safe. The error messages returned by
  *  PHYSFS_getLastError are unique by thread, and library-state-setting
- *  functions are mutex'd. For efficiency, individual file accesses are
- *  not locked, so you can not safely read/write/seek/close/etc the same
- *  file from two threads at the same time. Other race conditions are bugs
+ *  functions are mutex'd. For efficiency, individual file accesses are 
+ *  not locked, so you can not safely read/write/seek/close/etc the same 
+ *  file from two threads at the same time. Other race conditions are bugs 
  *  that should be reported/patched.
  *
  * While you CAN use stdio/syscall file access in a program that has PHYSFS_*
@@ -409,7 +413,7 @@ typedef struct PHYSFS_Version
 #ifndef DOXYGEN_SHOULD_IGNORE_THIS
 #define PHYSFS_VER_MAJOR 2
 #define PHYSFS_VER_MINOR 0
-#define PHYSFS_VER_PATCH 0
+#define PHYSFS_VER_PATCH 1
 #endif  /* DOXYGEN_SHOULD_IGNORE_THIS */
 
 
@@ -994,7 +998,7 @@ __EXPORT__ const char *PHYSFS_getRealDir(const char *filename);
  * PHYSFS_freeList(rc);
  * \endcode
  *
- *  ...will print:
+ *  \...will print:
  *
  * \verbatim
  * We've got [x.sav].

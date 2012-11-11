@@ -22,7 +22,7 @@
 #ifdef ALLEGRO_HAVE_SYS_TYPES_H
    #include <sys/types.h>
 #else
-// 4 Gig max offsets if sys/types doesn't exist.
+/* 4 Gig max offsets if sys/types doesn't exist. */
 typedef unsigned int off_t;
 #endif
 
@@ -49,7 +49,7 @@ typedef enum ALLEGRO_FILE_MODE
    ALLEGRO_FILEMODE_EXECUTE = 1 << 2,
    ALLEGRO_FILEMODE_HIDDEN  = 1 << 3,
    ALLEGRO_FILEMODE_ISFILE  = 1 << 4,
-   ALLEGRO_FILEMODE_ISDIR   = 1 << 5,
+   ALLEGRO_FILEMODE_ISDIR   = 1 << 5
 } ALLEGRO_FILE_MODE;
 
 

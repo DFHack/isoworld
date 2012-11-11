@@ -51,16 +51,6 @@ extern "C" {
 #define ALLEGRO_EVENT_AUDIO_STREAM_FINISHED  (514)
 
 
-#ifndef __cplusplus
-typedef enum ALLEGRO_AUDIO_DEPTH ALLEGRO_AUDIO_DEPTH;
-typedef enum ALLEGRO_CHANNEL_CONF ALLEGRO_CHANNEL_CONF;
-typedef enum ALLEGRO_PLAYMODE ALLEGRO_PLAYMODE;
-typedef enum ALLEGRO_MIXER_QUALITY ALLEGRO_MIXER_QUALITY;
-typedef enum ALLEGRO_AUDIO_PROPERTY ALLEGRO_AUDIO_PROPERTY;
-typedef enum ALLEGRO_AUDIO_DRIVER_ENUM ALLEGRO_AUDIO_DRIVER_ENUM;
-#endif
-
-
 /* Enum: ALLEGRO_AUDIO_DEPTH
  */
 enum ALLEGRO_AUDIO_DEPTH
@@ -125,7 +115,7 @@ enum ALLEGRO_PLAYMODE
 enum ALLEGRO_MIXER_QUALITY
 {
    ALLEGRO_MIXER_QUALITY_POINT   = 0x110,
-   ALLEGRO_MIXER_QUALITY_LINEAR  = 0x111,
+   ALLEGRO_MIXER_QUALITY_LINEAR  = 0x111
 };
 
 
@@ -167,6 +157,14 @@ typedef struct ALLEGRO_MIXER ALLEGRO_MIXER;
 /* Type: ALLEGRO_VOICE
  */
 typedef struct ALLEGRO_VOICE ALLEGRO_VOICE;
+
+
+#ifndef __cplusplus
+typedef enum ALLEGRO_AUDIO_DEPTH ALLEGRO_AUDIO_DEPTH;
+typedef enum ALLEGRO_CHANNEL_CONF ALLEGRO_CHANNEL_CONF;
+typedef enum ALLEGRO_PLAYMODE ALLEGRO_PLAYMODE;
+typedef enum ALLEGRO_MIXER_QUALITY ALLEGRO_MIXER_QUALITY;
+#endif
 
 
 /* Sample functions */
@@ -285,10 +283,12 @@ ALLEGRO_KCM_AUDIO_FUNC(unsigned int, al_get_mixer_frequency, (const ALLEGRO_MIXE
 ALLEGRO_KCM_AUDIO_FUNC(ALLEGRO_CHANNEL_CONF, al_get_mixer_channels, (const ALLEGRO_MIXER *mixer));
 ALLEGRO_KCM_AUDIO_FUNC(ALLEGRO_AUDIO_DEPTH, al_get_mixer_depth, (const ALLEGRO_MIXER *mixer));
 ALLEGRO_KCM_AUDIO_FUNC(ALLEGRO_MIXER_QUALITY, al_get_mixer_quality, (const ALLEGRO_MIXER *mixer));
+ALLEGRO_KCM_AUDIO_FUNC(float, al_get_mixer_gain, (const ALLEGRO_MIXER *mixer));
 ALLEGRO_KCM_AUDIO_FUNC(bool, al_get_mixer_playing, (const ALLEGRO_MIXER *mixer));
 ALLEGRO_KCM_AUDIO_FUNC(bool, al_get_mixer_attached, (const ALLEGRO_MIXER *mixer));
 ALLEGRO_KCM_AUDIO_FUNC(bool, al_set_mixer_frequency, (ALLEGRO_MIXER *mixer, unsigned int val));
 ALLEGRO_KCM_AUDIO_FUNC(bool, al_set_mixer_quality, (ALLEGRO_MIXER *mixer, ALLEGRO_MIXER_QUALITY val));
+ALLEGRO_KCM_AUDIO_FUNC(bool, al_set_mixer_gain, (ALLEGRO_MIXER *mixer, float gain));
 ALLEGRO_KCM_AUDIO_FUNC(bool, al_set_mixer_playing, (ALLEGRO_MIXER *mixer, bool val));
 ALLEGRO_KCM_AUDIO_FUNC(bool, al_detach_mixer, (ALLEGRO_MIXER *mixer));
 
@@ -328,7 +328,7 @@ ALLEGRO_KCM_AUDIO_FUNC(ALLEGRO_MIXER *, al_get_default_mixer, (void));
 ALLEGRO_KCM_AUDIO_FUNC(bool, al_set_default_mixer, (ALLEGRO_MIXER *mixer));
 ALLEGRO_KCM_AUDIO_FUNC(bool, al_restore_default_mixer, (void));
 ALLEGRO_KCM_AUDIO_FUNC(bool, al_play_sample, (ALLEGRO_SAMPLE *data,
-      float gain, float pan, float speed, int loop, ALLEGRO_SAMPLE_ID *ret_id));
+      float gain, float pan, float speed, ALLEGRO_PLAYMODE loop, ALLEGRO_SAMPLE_ID *ret_id));
 ALLEGRO_KCM_AUDIO_FUNC(void, al_stop_sample, (ALLEGRO_SAMPLE_ID *spl_id));
 ALLEGRO_KCM_AUDIO_FUNC(void, al_stop_samples, (void));
 

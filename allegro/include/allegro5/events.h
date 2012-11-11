@@ -20,7 +20,7 @@ enum
    ALLEGRO_EVENT_JOYSTICK_CONFIGURATION      =  4,
 
    ALLEGRO_EVENT_KEY_DOWN                    = 10,
-   ALLEGRO_EVENT_KEY_REPEAT                  = 11,
+   ALLEGRO_EVENT_KEY_CHAR                    = 11,
    ALLEGRO_EVENT_KEY_UP                      = 12,
 
    ALLEGRO_EVENT_MOUSE_AXES                  = 20,
@@ -120,8 +120,9 @@ typedef struct ALLEGRO_KEYBOARD_EVENT
    _AL_EVENT_HEADER(struct ALLEGRO_KEYBOARD)
    struct ALLEGRO_DISPLAY *display; /* the window the key was pressed in */
    int keycode;                 /* the physical key pressed */
-   unsigned int unichar;        /* unicode character */
+   int unichar;                 /* unicode character or negative */
    unsigned int modifiers;      /* bitfield */
+   bool repeat;                 /* auto-repeated or not */
 } ALLEGRO_KEYBOARD_EVENT;
 
 
@@ -202,6 +203,8 @@ AL_FUNC(void, al_destroy_user_event_source, (ALLEGRO_EVENT_SOURCE *));
 AL_FUNC(bool, al_emit_user_event, (ALLEGRO_EVENT_SOURCE *, ALLEGRO_EVENT *,
                                    void (*dtor)(ALLEGRO_USER_EVENT *)));
 AL_FUNC(void, al_unref_user_event, (ALLEGRO_USER_EVENT *));
+AL_FUNC(void, al_set_event_source_data, (ALLEGRO_EVENT_SOURCE*, intptr_t data));
+AL_FUNC(intptr_t, al_get_event_source_data, (const ALLEGRO_EVENT_SOURCE*));
 
 
 
@@ -215,8 +218,6 @@ AL_FUNC(ALLEGRO_EVENT_QUEUE*, al_create_event_queue, (void));
 AL_FUNC(void, al_destroy_event_queue, (ALLEGRO_EVENT_QUEUE*));
 AL_FUNC(void, al_register_event_source, (ALLEGRO_EVENT_QUEUE*, ALLEGRO_EVENT_SOURCE*));
 AL_FUNC(void, al_unregister_event_source, (ALLEGRO_EVENT_QUEUE*, ALLEGRO_EVENT_SOURCE*));
-AL_FUNC(void, al_set_event_source_data, (ALLEGRO_EVENT_SOURCE*, intptr_t data));
-AL_FUNC(intptr_t, al_get_event_source_data, (const ALLEGRO_EVENT_SOURCE*));
 AL_FUNC(bool, al_is_event_queue_empty, (ALLEGRO_EVENT_QUEUE*));
 AL_FUNC(bool, al_get_next_event, (ALLEGRO_EVENT_QUEUE*, ALLEGRO_EVENT *ret_event));
 AL_FUNC(bool, al_peek_next_event, (ALLEGRO_EVENT_QUEUE*, ALLEGRO_EVENT *ret_event));
@@ -230,7 +231,6 @@ AL_FUNC(bool, al_wait_for_event_timed, (ALLEGRO_EVENT_QUEUE*,
 AL_FUNC(bool, al_wait_for_event_until, (ALLEGRO_EVENT_QUEUE *queue,
                                         ALLEGRO_EVENT *ret_event,
                                         ALLEGRO_TIMEOUT *timeout));
-
 
 #ifdef __cplusplus
    }

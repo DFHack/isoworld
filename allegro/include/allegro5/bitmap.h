@@ -50,30 +50,36 @@ typedef enum ALLEGRO_PIXEL_FORMAT
 /*
  * Bitmap flags
  */
-#define ALLEGRO_VIDEO_BITMAP          0x0000
-
-#define ALLEGRO_MEMORY_BITMAP         0x0001
-#define ALLEGRO_KEEP_BITMAP_FORMAT    0x0002
-#define ALLEGRO_FORCE_LOCKING         0x0004
-#define ALLEGRO_NO_PRESERVE_TEXTURE   0x0008
-#define ALLEGRO_ALPHA_TEST            0x0010
-#define _ALLEGRO_INTERNAL_OPENGL      0x0020
-#define ALLEGRO_MIN_LINEAR            0x0040
-#define ALLEGRO_MAG_LINEAR            0x0080
-#define ALLEGRO_MIPMAP                0x0100
+enum {
+   ALLEGRO_MEMORY_BITMAP            = 0x0001,
+   ALLEGRO_KEEP_BITMAP_FORMAT       = 0x0002,
+   ALLEGRO_FORCE_LOCKING            = 0x0004,
+   ALLEGRO_NO_PRESERVE_TEXTURE      = 0x0008,
+   ALLEGRO_ALPHA_TEST               = 0x0010,
+   _ALLEGRO_INTERNAL_OPENGL         = 0x0020,
+   ALLEGRO_MIN_LINEAR               = 0x0040,
+   ALLEGRO_MAG_LINEAR               = 0x0080,
+   ALLEGRO_MIPMAP                   = 0x0100,
+   ALLEGRO_NO_PREMULTIPLIED_ALPHA   = 0x0200,
+   ALLEGRO_VIDEO_BITMAP             = 0x0400
+};
 
 
 /* Flags for the blitting functions */
-#define ALLEGRO_FLIP_HORIZONTAL       0x00001
-#define ALLEGRO_FLIP_VERTICAL         0x00002
+enum {
+   ALLEGRO_FLIP_HORIZONTAL = 0x00001,
+   ALLEGRO_FLIP_VERTICAL   = 0x00002
+};
 
 
 /*
  * Locking flags
  */
-#define ALLEGRO_LOCK_READWRITE 0
-#define ALLEGRO_LOCK_READONLY 1
-#define ALLEGRO_LOCK_WRITEONLY 2
+enum {
+   ALLEGRO_LOCK_READWRITE  = 0,
+   ALLEGRO_LOCK_READONLY   = 1,
+   ALLEGRO_LOCK_WRITEONLY  = 2
+};
 
 
 /*
@@ -132,6 +138,12 @@ AL_FUNC(void, al_draw_tinted_bitmap_region, (ALLEGRO_BITMAP *bitmap, ALLEGRO_COL
 AL_FUNC(void, al_draw_tinted_scaled_bitmap, (ALLEGRO_BITMAP *bitmap, ALLEGRO_COLOR tint, float sx, float sy, float sw, float sh, float dx, float dy, float dw, float dh, int flags));
 AL_FUNC(void, al_draw_tinted_rotated_bitmap, (ALLEGRO_BITMAP *bitmap, ALLEGRO_COLOR tint, float cx, float cy, float dx, float dy, float angle, int flags));
 AL_FUNC(void, al_draw_tinted_scaled_rotated_bitmap, (ALLEGRO_BITMAP *bitmap, ALLEGRO_COLOR tint, float cx, float cy, float dx, float dy, float xscale, float yscale, float angle, int flags));
+AL_FUNC(void, al_draw_tinted_scaled_rotated_bitmap_region, (
+   ALLEGRO_BITMAP *bitmap,
+   float sx, float sy, float sw, float sh,
+   ALLEGRO_COLOR tint,
+   float cx, float cy, float dx, float dy, float xscale, float yscale,
+   float angle, int flags));
 
 /* Locking */
 AL_FUNC(ALLEGRO_LOCKED_REGION*, al_lock_bitmap, (ALLEGRO_BITMAP *bitmap, int format, int flags));
@@ -163,11 +175,13 @@ AL_FUNC(void, al_convert_mask_to_alpha, (ALLEGRO_BITMAP *bitmap, ALLEGRO_COLOR m
 
 /* Clipping */
 AL_FUNC(void, al_set_clipping_rectangle, (int x, int y, int width, int height));
+AL_FUNC(void, al_reset_clipping_rectangle, (void));
 AL_FUNC(void, al_get_clipping_rectangle, (int *x, int *y, int *w, int *h));
 
 /* Sub bitmaps */
 AL_FUNC(ALLEGRO_BITMAP *, al_create_sub_bitmap, (ALLEGRO_BITMAP *parent, int x, int y, int w, int h));
 AL_FUNC(bool, al_is_sub_bitmap, (ALLEGRO_BITMAP *bitmap));
+AL_FUNC(ALLEGRO_BITMAP *, al_get_parent_bitmap, (ALLEGRO_BITMAP *bitmap));
 
 /* Miscellaneous */
 AL_FUNC(ALLEGRO_BITMAP *, al_clone_bitmap, (ALLEGRO_BITMAP *bitmap));

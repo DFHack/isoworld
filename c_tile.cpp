@@ -150,79 +150,86 @@ terrain_type get_terrain_type(const char * text)
 		return TERRAIN_ANY;
 	if(strcmp(text, "none") == 0)
 		return TERRAIN_NONE;
-	if(strcmp(text, "ocean") == 0)
-		return TERRAIN_OCEAN;
-	if(strcmp(text, "river") == 0)
-		return TERRAIN_RIVER;
-	if(strcmp(text, "brook") == 0)
-		return TERRAIN_STREAM;
-	if(strcmp(text, "swamp") == 0)
-		return TERRAIN_SWAMP;
-	if(strcmp(text, "marsh") == 0)
-		return TERRAIN_SWAMP;
-	if(strcmp(text, "grassland_temperate") == 0)
-		return TERRAIN_GRASS_TEMP;
-	if(strcmp(text, "grassland_tropical") == 0)
-		return TERRAIN_GRASS_TROP;
-	if(strcmp(text, "forest_temperate") == 0)
-		return TERRAIN_FOREST_TEMP;
-	if(strcmp(text, "forest_tropical") == 0)
-		return TERRAIN_FOREST_TROP;
-	if(strcmp(text, "badlands") == 0)
-		return TERRAIN_BADLANDS;
-	if(strcmp(text, "rock") == 0)
-		return TERRAIN_ROCK;
-	if(strcmp(text, "beach") == 0)
-		return TERRAIN_BEACH;
-	if(strcmp(text, "taiga") == 0)
-		return TERRAIN_TAIGA;
+	if(strcmp(text, "mountain") == 0)
+		return TERRAIN_MOUNTAIN;
+	if(strcmp(text, "temperate_freshwater_lake") == 0)
+		return TERRAIN_LAKE_TEMP_FRESH;
+	if(strcmp(text, "temperate_brackish_lake") == 0)
+		return TERRAIN_LAKE_TEMP_BRACK;
+	if(strcmp(text, "temperate_saltwater_lake") == 0)
+		return TERRAIN_LAKE_TEMP_SALT;
+	if(strcmp(text, "tropical_freshwater_lake") == 0)
+		return TERRAIN_LAKE_TROP_FRESH;
+	if(strcmp(text, "tropical_brackish_lake") == 0)
+		return TERRAIN_LAKE_TROP_BRACK;
+	if(strcmp(text, "tropical_saltwater_lake") == 0)
+		return TERRAIN_LAKE_TROP_SALT;
+	if(strcmp(text, "arctic_ocean") == 0)
+		return TERRAIN_OCEAN_ARCT;
+	if(strcmp(text, "tropical_ocean") == 0)
+		return TERRAIN_OCEAN_TROP;
+	if(strcmp(text, "temperate_ocean") == 0)
+		return TERRAIN_OCEAN_TEMP;
 	if(strcmp(text, "glacier") == 0)
 		return TERRAIN_GLACIER;
 	if(strcmp(text, "tundra") == 0)
 		return TERRAIN_TUNDRA;
-	if(strcmp(text, "mountain") == 0)
-		return TERRAIN_MOUNTAIN;
-	if(strcmp(text, "mountain_tall") == 0)
+	if(strcmp(text, "temperate_freshwater_swamp") == 0)
+		return TERRAIN_SWAMP_TEMP_FRESH;
+	if(strcmp(text, "temperate_saltwater_swamp") == 0)
+		return TERRAIN_SWAMP_TEMP_SALT;
+	if(strcmp(text, "temperate_freshwater_marsh") == 0)
+		return TERRAIN_MARSH_TEMP_FRESH;
+	if(strcmp(text, "temperate_saltwater_marsh") == 0)
+		return TERRAIN_MARSH_TEMP_SALT;
+	if(strcmp(text, "tropical_freshwater_swamp") == 0)
+		return TERRAIN_SWAMP_TROP_FRESH;
+	if(strcmp(text, "tropical_saltwater_swamp") == 0)
+		return TERRAIN_SWAMP_TROP_SALT;
+	if(strcmp(text, "mangrove_swamp") == 0)
+		return TERRAIN_SWAMP_MANGROVE;
+	if(strcmp(text, "tropical_freshwater_marsh") == 0)
+		return TERRAIN_MARSH_TROP_FRESH;
+	if(strcmp(text, "tropical_saltwater_marsh") == 0)
+		return TERRAIN_MARSH_TROP_SALT;
+	if(strcmp(text, "taiga_forest") == 0)
+		return TERRAIN_FOREST_TAIGA;
+	if(strcmp(text, "temperate_conifer_forest") == 0)
+		return TERRAIN_FOREST_TEMP_FIR;
+	if(strcmp(text, "temperate_broadleaf_forest") == 0)
+		return TERRAIN_FOREST_TEMP_BROAD;
+	if(strcmp(text, "tropical_conifer_forest") == 0)
+		return TERRAIN_FOREST_TROP_FIR;
+	if(strcmp(text, "tropical_dry_broadleaf_forest") == 0)
+		return TERRAIN_FOREST_TROP_BROAD_DRY;
+	if(strcmp(text, "tropical_moist_broadleaf_forest") == 0)
+		return TERRAIN_FOREST_TROP_BROAD_MOIST;
+	if(strcmp(text, "temperate_grassland") == 0)
+		return TERRAIN_GRASS_TEMP;
+	if(strcmp(text, "temperate_savanna") == 0)
+		return TERRAIN_SAV_TEMP;
+	if(strcmp(text, "temperate_shrubland") == 0)
+		return TERRAIN_SHRUB_TEMP;
+	if(strcmp(text, "tropical_grassland") == 0)
+		return TERRAIN_GRASS_TROP;
+	if(strcmp(text, "tropical_savanna") == 0)
+		return TERRAIN_SAV_TROP;
+	if(strcmp(text, "tropical_shrubland") == 0)
+		return TERRAIN_SHRUB_TROP;
+	if(strcmp(text, "badland_desert") == 0)
+		return TERRAIN_DESERT_BAD;
+	if(strcmp(text, "sand_desert") == 0)
+		return TERRAIN_DESERT_SAND;
+	if(strcmp(text, "rock_desert") == 0)
+		return TERRAIN_DESERT_ROCK;
+	if(strcmp(text, "tall_mountain") == 0)
 		return TERRAIN_MOUNTAIN_TALL;
-
-	if(strcmp(text, "village") == 0)
-		return TERRAIN_VILLAGE;
-	if(strcmp(text, "farm_planted") == 0)
-		return TERRAIN_FARM_PLANTED;
-	if(strcmp(text, "farm_fallow") == 0)
-		return TERRAIN_FARM_FALLOW;
-	if(strcmp(text, "farm_pasture") == 0)
-		return TERRAIN_FARM_PASTURE;
-	if(strcmp(text, "fort_keep") == 0)
-		return TERRAIN_FORT_KEEP;
-	if(strcmp(text, "fort_wall") == 0)
-		return TERRAIN_FORT_WALL;
-	if(strcmp(text, "fort_gate") == 0)
-		return TERRAIN_FORT_GATE;
-	if(strcmp(text, "fort_court") == 0)
-		return TERRAIN_FORT_COURT;
-	if(strcmp(text, "road") == 0)
-		return TERRAIN_ROAD;
-	if(strcmp(text, "bridge") == 0)
-		return TERRAIN_BRIDGE;
-	if(strcmp(text, "tunnel") == 0)
-		return TERRAIN_TUNNEL;
-
-	if(strcmp(text, "dwarven_fortress_center") == 0)
-		return TERRAIN_DORF_CENTER;
-	if(strcmp(text, "dwarven_fortress_walls") == 0)
-		return TERRAIN_DORF_EDGE;
-
-	if(strcmp(text, "goblin_fortress_center") == 0)
-		return TERRAIN_GOBLIN_CENTER;
-	if(strcmp(text, "goblin_fortress_walls") == 0)
-		return TERRAIN_GOBLIN_EDGE;
-
-	if(strcmp(text, "elven_retreat_center") == 0)
-		return TERRAIN_ELF_CENTER;
-	if(strcmp(text, "elven_retreat_walls") == 0)
-		return TERRAIN_ELF_EDGE;
-
+	if(strcmp(text, "temperate_beach") == 0)
+		return TERRAIN_BEACH_TEMP;
+	if(strcmp(text, "tropical_beach") == 0)
+		return TERRAIN_BEACH_TROP;
+	if(strcmp(text, "arctic_beach") == 0)
+		return TERRAIN_BEACH_ARCT;
 	return TERRAIN_ANY;
 }
 
@@ -401,22 +408,22 @@ void c_tile::draw(float x, float y, int height, int bottom, int surface, s_map_b
 					offset);
 			}
 		}
-		for(unsigned int i = 0; i < surface_sprites.size(); i++)
-		{
-			int offset = get_offset(
-				surface_sprites.at(i).offset_type,
-				block->terrain_borders[surface_sprites.at(i).border_terrain?surface_sprites.at(i).border_terrain:block->terrain],
-				block,
-				surface_sprites.at(i).offset_amount);
-			draw_sprite(
-				surface_sprites.at(i),
-				block,
-				x,
-				y-surface,
-				0,
-				flip,
-				offset);
-		}
+	}
+	for(unsigned int i = 0; i < surface_sprites.size(); i++)
+	{
+		int offset = get_offset(
+			surface_sprites.at(i).offset_type,
+			block->terrain_borders[surface_sprites.at(i).border_terrain?surface_sprites.at(i).border_terrain:block->terrain],
+			block,
+			surface_sprites.at(i).offset_amount);
+		draw_sprite(
+			surface_sprites.at(i),
+			block,
+			x,
+			y-surface,
+			0,
+			flip,
+			offset);
 	}
 }
 
@@ -437,29 +444,6 @@ void c_tile::load_ini(ALLEGRO_PATH * path)
 	height_max = get_config_int(config, "SPRITE", "height_max", 280);
 	height_min = get_config_int(config, "SPRITE", "height_min", 0);
 
-	temp_max = get_config_int(config, "SPRITE", "temperature_max", 256);
-	temp_min = get_config_int(config, "SPRITE", "temperature_min", 0);
-
-	rain_max = get_config_int(config, "SPRITE", "rainfall_max", 256);
-	rain_min = get_config_int(config, "SPRITE", "rainfall_min", 0);
-
-	drain_max = get_config_int(config, "SPRITE", "drainage_max", 256);
-	drain_min = get_config_int(config, "SPRITE", "drainage_min", 0);
-
-	sav_max = get_config_int(config, "SPRITE", "savagery_max", 256);
-	sav_min = get_config_int(config, "SPRITE", "savagery_min", 0);
-
-	vol_max = get_config_int(config, "SPRITE", "volcanism_max", 256);
-	vol_min = get_config_int(config, "SPRITE", "volcanism_min", 0);
-
-	veg_max = get_config_int(config, "SPRITE", "vegetation_max", 256);
-	veg_min = get_config_int(config, "SPRITE", "vegetation_min", 0);
-
-	evil_max = get_config_int(config, "SPRITE", "evil_max", 256);
-	evil_min = get_config_int(config, "SPRITE", "evil_min", 0);
-
-	sal_max = get_config_int(config, "SPRITE", "salinity_max", 256);
-	sal_min = get_config_int(config, "SPRITE", "salinity_min", 0);
 
 	priority = get_config_int(config, "SPRITE", "priority", 0);
 

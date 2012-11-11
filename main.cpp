@@ -36,14 +36,14 @@ s_maplist::s_maplist(void)
 	biome_map = 0;
 	elevation_map = 0;
 	elevation_map_with_water = 0;
-	temperature_map = 0;
-	rainfall_map = 0;
-	drainage_map = 0;
-	savagery_map = 0;
-	volcanism_map = 0;
-	vegetation_map = 0;
-	evil_map = 0;
-	salinity_map = 0;
+	//temperature_map = 0;
+	//rainfall_map = 0;
+	//drainage_map = 0;
+	//savagery_map = 0;
+	//volcanism_map = 0;
+	//vegetation_map = 0;
+	//evil_map = 0;
+	//salinity_map = 0;
 }
 
 void saveScreenshot(){
@@ -100,7 +100,7 @@ static void *async_file_dialog_thread_func(ALLEGRO_THREAD *thread, void *arg)
 
 /* Function to start the new thread. */
 static AsyncDialog *spawn_async_file_dialog(ALLEGRO_DISPLAY *display,
-											const ALLEGRO_PATH *initial_path)
+											const char *initial_path)
 {
 	AsyncDialog *data = (AsyncDialog*)malloc(sizeof *data);
 
@@ -144,14 +144,14 @@ void load_bitmaps(s_pathlist * paths, s_maplist * maps)
 	maps->elevation_map = al_load_bitmap(al_path_cstr(paths->elevation_map, ALLEGRO_NATIVE_PATH_SEP));
 	maps->elevation_map_with_water = al_load_bitmap(al_path_cstr(paths->elevation_map_with_water, ALLEGRO_NATIVE_PATH_SEP));
 	maps->biome_map = al_load_bitmap(al_path_cstr(paths->biome_map, ALLEGRO_NATIVE_PATH_SEP));
-	maps->temperature_map = al_load_bitmap(al_path_cstr(paths->temperature_map, ALLEGRO_NATIVE_PATH_SEP));
-	maps->rainfall_map = al_load_bitmap(al_path_cstr(paths->rainfall_map, ALLEGRO_NATIVE_PATH_SEP));
-	maps->drainage_map = al_load_bitmap(al_path_cstr(paths->drainage_map, ALLEGRO_NATIVE_PATH_SEP));
-	maps->savagery_map = al_load_bitmap(al_path_cstr(paths->savagery_map, ALLEGRO_NATIVE_PATH_SEP));
-	maps->volcanism_map = al_load_bitmap(al_path_cstr(paths->volcanism_map, ALLEGRO_NATIVE_PATH_SEP));
-	maps->vegetation_map = al_load_bitmap(al_path_cstr(paths->vegetation_map, ALLEGRO_NATIVE_PATH_SEP));
-	maps->evil_map = al_load_bitmap(al_path_cstr(paths->evil_map, ALLEGRO_NATIVE_PATH_SEP));
-	maps->salinity_map = al_load_bitmap(al_path_cstr(paths->salinity_map, ALLEGRO_NATIVE_PATH_SEP));
+	//maps->temperature_map = al_load_bitmap(al_path_cstr(paths->temperature_map, ALLEGRO_NATIVE_PATH_SEP));
+	//maps->rainfall_map = al_load_bitmap(al_path_cstr(paths->rainfall_map, ALLEGRO_NATIVE_PATH_SEP));
+	//maps->drainage_map = al_load_bitmap(al_path_cstr(paths->drainage_map, ALLEGRO_NATIVE_PATH_SEP));
+	//maps->savagery_map = al_load_bitmap(al_path_cstr(paths->savagery_map, ALLEGRO_NATIVE_PATH_SEP));
+	//maps->volcanism_map = al_load_bitmap(al_path_cstr(paths->volcanism_map, ALLEGRO_NATIVE_PATH_SEP));
+	//maps->vegetation_map = al_load_bitmap(al_path_cstr(paths->vegetation_map, ALLEGRO_NATIVE_PATH_SEP));
+	//maps->evil_map = al_load_bitmap(al_path_cstr(paths->evil_map, ALLEGRO_NATIVE_PATH_SEP));
+	//maps->salinity_map = al_load_bitmap(al_path_cstr(paths->salinity_map, ALLEGRO_NATIVE_PATH_SEP));
 
 	//ALLEGRO_BITMAP * temp = al_create_bitmap(al_get_bitmap_width(maps->biome_map),al_get_bitmap_height(maps->biome_map));
 	//ALLEGRO_BITMAP * back = al_get_target_bitmap();
@@ -197,9 +197,11 @@ void populate_filenames(string input, s_pathlist * paths)
 		|| input.compare(0, 4, "tmp-") == 0
 		|| input.compare(0, 4, "veg-") == 0
 		|| input.compare(0, 4, "vol-") == 0
+		|| input.compare(0, 4, "str-") == 0
 		) {
 			input.erase(0, 4);
-	}else if (input.compare(0, 3, "el-") == 0) {
+	}else if (input.compare(0, 3, "el-") == 0
+		|| input.compare(0, 3, "bm-") == 0) {
 		input.erase(0, 3);
 	}else if (
 		input.compare(0, 5, "evil-") == 0
@@ -210,7 +212,7 @@ void populate_filenames(string input, s_pathlist * paths)
 
 	//and now it's time to fill out the list of image paths	
 	paths->biome_map = al_clone_path(base_path);
-	sprintf(buffer, "world_graphic-%s", input.c_str());
+	sprintf(buffer, "world_graphic-bm-%s", input.c_str());
 	al_set_path_filename(paths->biome_map, buffer);
 
 	paths->elevation_map = al_clone_path(base_path);
@@ -221,37 +223,41 @@ void populate_filenames(string input, s_pathlist * paths)
 	sprintf(buffer, "world_graphic-elw-%s", input.c_str());
 	al_set_path_filename(paths->elevation_map_with_water, buffer);
 
-	paths->temperature_map = al_clone_path(base_path);
-	sprintf(buffer, "world_graphic-tmp-%s", input.c_str());
-	al_set_path_filename(paths->temperature_map, buffer);
+	paths->structure_map = al_clone_path(base_path);
+	sprintf(buffer, "world_graphic-str-%s", input.c_str());
+	al_set_path_filename(paths->structure_map, buffer);
 
-	paths->rainfall_map = al_clone_path(base_path);
-	sprintf(buffer, "world_graphic-rain-%s", input.c_str());
-	al_set_path_filename(paths->rainfall_map, buffer);
+	//paths->temperature_map = al_clone_path(base_path);
+	//sprintf(buffer, "world_graphic-tmp-%s", input.c_str());
+	//al_set_path_filename(paths->temperature_map, buffer);
 
-	paths->drainage_map = al_clone_path(base_path);
-	sprintf(buffer, "world_graphic-drn-%s", input.c_str());
-	al_set_path_filename(paths->drainage_map, buffer);
+	//paths->rainfall_map = al_clone_path(base_path);
+	//sprintf(buffer, "world_graphic-rain-%s", input.c_str());
+	//al_set_path_filename(paths->rainfall_map, buffer);
 
-	paths->savagery_map = al_clone_path(base_path);
-	sprintf(buffer, "world_graphic-sav-%s", input.c_str());
-	al_set_path_filename(paths->savagery_map, buffer);
+	//paths->drainage_map = al_clone_path(base_path);
+	//sprintf(buffer, "world_graphic-drn-%s", input.c_str());
+	//al_set_path_filename(paths->drainage_map, buffer);
 
-	paths->volcanism_map = al_clone_path(base_path);
-	sprintf(buffer, "world_graphic-vol-%s", input.c_str());
-	al_set_path_filename(paths->volcanism_map, buffer);
+	//paths->savagery_map = al_clone_path(base_path);
+	//sprintf(buffer, "world_graphic-sav-%s", input.c_str());
+	//al_set_path_filename(paths->savagery_map, buffer);
 
-	paths->vegetation_map = al_clone_path(base_path);
-	sprintf(buffer, "world_graphic-veg-%s", input.c_str());
-	al_set_path_filename(paths->vegetation_map, buffer);
+	//paths->volcanism_map = al_clone_path(base_path);
+	//sprintf(buffer, "world_graphic-vol-%s", input.c_str());
+	//al_set_path_filename(paths->volcanism_map, buffer);
 
-	paths->evil_map = al_clone_path(base_path);
-	sprintf(buffer, "world_graphic-evil-%s", input.c_str());
-	al_set_path_filename(paths->evil_map, buffer);
+	//paths->vegetation_map = al_clone_path(base_path);
+	//sprintf(buffer, "world_graphic-veg-%s", input.c_str());
+	//al_set_path_filename(paths->vegetation_map, buffer);
 
-	paths->salinity_map = al_clone_path(base_path);
-	sprintf(buffer, "world_graphic-sal-%s", input.c_str());
-	al_set_path_filename(paths->salinity_map, buffer);
+	//paths->evil_map = al_clone_path(base_path);
+	//sprintf(buffer, "world_graphic-evil-%s", input.c_str());
+	//al_set_path_filename(paths->evil_map, buffer);
+
+	//paths->salinity_map = al_clone_path(base_path);
+	//sprintf(buffer, "world_graphic-sal-%s", input.c_str());
+	//al_set_path_filename(paths->salinity_map, buffer);
 
 	al_destroy_path(base_path);
 
@@ -265,7 +271,7 @@ static void show_files_list(ALLEGRO_FILECHOOSER *dialog,
 	int count = al_get_native_file_dialog_count(dialog);
 	if (count = 0) return;
 
-	populate_filenames(al_path_cstr(al_get_native_file_dialog_path(dialog, 0), ALLEGRO_NATIVE_PATH_SEP), &path_list);
+	populate_filenames(al_get_native_file_dialog_path(dialog, 0), &path_list);
 
 	load_bitmaps(&path_list, &map_list);
 	minimap.reload();
@@ -388,7 +394,7 @@ int main(void)
 		if (event.type == ALLEGRO_EVENT_DISPLAY_CLOSE && !cur_dialog)
 			break;
 
-		if (event.type == ALLEGRO_EVENT_KEY_DOWN || event.type == ALLEGRO_EVENT_KEY_REPEAT) {
+		if (event.type == ALLEGRO_EVENT_KEY_CHAR) {
 			al_get_keyboard_state(&keys);
 			if (event.keyboard.keycode == ALLEGRO_KEY_ESCAPE && !cur_dialog)
 				break;
@@ -468,7 +474,7 @@ int main(void)
 				}
 			}
 			else if (!cur_dialog) {
-				const ALLEGRO_PATH *last_path = NULL;
+				const char *last_path = NULL;
 				/* If available, use the path from the last dialog as
 				* initial path for the new one.
 				*/

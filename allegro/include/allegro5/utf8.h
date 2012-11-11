@@ -13,12 +13,16 @@ typedef struct _al_tagbstring ALLEGRO_USTR;
 
 /* Type: ALLEGRO_USTR_INFO
  */
-typedef struct ALLEGRO_USTR_INFO ALLEGRO_USTR_INFO;
+typedef struct _al_tagbstring ALLEGRO_USTR_INFO;
 
-struct ALLEGRO_USTR_INFO {
-   /* This struct needs to be at least as big as struct _al_tagbstring. */
-   int __pad[4];
+#ifndef __al_tagbstring_defined
+#define __al_tagbstring_defined
+struct _al_tagbstring {
+	int mlen;
+	int slen;
+	unsigned char * data;
 };
+#endif
 
 /* Creating strings */
 AL_FUNC(ALLEGRO_USTR *, al_ustr_new, (const char *s));
@@ -33,13 +37,13 @@ AL_FUNC(ALLEGRO_USTR *, al_ustr_dup_substr, (const ALLEGRO_USTR *us,
       int start_pos, int end_pos));
 
 /* Predefined string */
-AL_FUNC(ALLEGRO_USTR *, al_ustr_empty_string, (void));
+AL_FUNC(const ALLEGRO_USTR *, al_ustr_empty_string, (void));
 
 /* Reference strings */
-AL_FUNC(ALLEGRO_USTR *, al_ref_cstr, (ALLEGRO_USTR_INFO *info, const char *s));
-AL_FUNC(ALLEGRO_USTR *, al_ref_buffer, (ALLEGRO_USTR_INFO *info, const char *s,
+AL_FUNC(const ALLEGRO_USTR *, al_ref_cstr, (ALLEGRO_USTR_INFO *info, const char *s));
+AL_FUNC(const ALLEGRO_USTR *, al_ref_buffer, (ALLEGRO_USTR_INFO *info, const char *s,
       size_t size));
-AL_FUNC(ALLEGRO_USTR *, al_ref_ustr, (ALLEGRO_USTR_INFO *info,
+AL_FUNC(const ALLEGRO_USTR *, al_ref_ustr, (ALLEGRO_USTR_INFO *info,
       const ALLEGRO_USTR *us, int start_pos, int end_pos));
 
 /* Sizes and offsets */

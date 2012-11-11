@@ -79,6 +79,9 @@ struct ALLEGRO_DISPLAY_WIN
 };
 
 
+/* standard path */
+ALLEGRO_PATH *_al_win_get_path(int id);
+
 /* thread routines */
 void _al_win_thread_init(void);
 void _al_win_thread_exit(void);
@@ -87,13 +90,15 @@ void _al_win_thread_exit(void);
 void _al_win_grab_input(ALLEGRO_DISPLAY_WIN *win_disp);
 
 /* keyboard routines */
-void _al_win_kbd_handle_key_press(int scode, int vcode, bool repeated,
+void _al_win_kbd_handle_key_press(int scode, int vcode, bool extended,
+                           bool repeated, ALLEGRO_DISPLAY_WIN *win_disp);
+void _al_win_kbd_handle_key_release(int scode, int vcode, bool extended,
                            ALLEGRO_DISPLAY_WIN *win_disp);
-void _al_win_kbd_handle_key_release(int vcode, ALLEGRO_DISPLAY_WIN *win_disp);
 
 /* mouse routines */
 void _al_win_mouse_handle_move(int x, int y, bool abs, ALLEGRO_DISPLAY_WIN *win_disp);
 void _al_win_mouse_handle_wheel(int d, bool abs, ALLEGRO_DISPLAY_WIN *win_disp);
+void _al_win_mouse_handle_hwheel(int d, bool abs, ALLEGRO_DISPLAY_WIN *win_disp);
 void _al_win_mouse_handle_button(int button, bool down, int x, int y, bool abs, ALLEGRO_DISPLAY_WIN *win_disp);
 void _al_win_mouse_handle_leave(ALLEGRO_DISPLAY_WIN *win_display);
 void _al_win_mouse_handle_enter(ALLEGRO_DISPLAY_WIN *win_display);
@@ -110,7 +115,12 @@ extern UINT _al_win_msg_suicide;
 AL_FUNC(void, _al_win_wnd_schedule_proc, (HWND wnd, void (*proc)(void*), void *param));
 AL_FUNC(void, _al_win_wnd_call_proc, (HWND wnd, void (*proc)(void*), void *param));
 
+int _al_win_determine_adapter(void);
+
 extern bool _al_win_disable_screensaver;
+
+/* dynamic library loading */
+HMODULE _al_win_safe_load_library(const char *filename);
 
 /* time */
 void _al_win_init_time(void);
@@ -129,6 +139,9 @@ typedef struct ALLEGRO_SYSTEM_WIN ALLEGRO_SYSTEM_WIN;
 struct ALLEGRO_SYSTEM_WIN
 {
    ALLEGRO_SYSTEM system; /* This must be the first member, we "derive" from it. */
+   ALLEGRO_DISPLAY *mouse_grab_display; /* May be inaccurate. */
+   int toggle_mouse_grab_keycode; /* Disabled if zero. */
+   unsigned int toggle_mouse_grab_modifiers;
 };
 
 /* helpers to create windows */
@@ -141,13 +154,13 @@ HWND _al_win_create_hidden_window(void);
 
 /* icon helpers */
 void  _al_win_set_display_icon(ALLEGRO_DISPLAY *display ,ALLEGRO_BITMAP *bitmap);
-HICON _al_win_create_icon(HWND wnd, ALLEGRO_BITMAP *sprite, int xfocus, int yfocus, bool is_cursor);
+HICON _al_win_create_icon(HWND wnd, ALLEGRO_BITMAP *sprite, int xfocus, int yfocus, bool is_cursor, bool resize);
 
 /* window decorations */
 void _al_win_set_window_position(HWND window, int x, int y);
 void _al_win_get_window_position(HWND window, int *x, int *y);
-void _al_win_toggle_window_frame(ALLEGRO_DISPLAY *display, HWND window, int w, int h, bool onoff);
-bool _al_win_toggle_display_flag(ALLEGRO_DISPLAY *display, int flag, bool onoff);
+void _al_win_set_window_frameless(ALLEGRO_DISPLAY *display, HWND window, int w, int h, bool frameless);
+bool _al_win_set_display_flag(ALLEGRO_DISPLAY *display, int flag, bool onoff);
 void _al_win_set_window_title(ALLEGRO_DISPLAY *display, const char *title);
 
 /* cursor routines */

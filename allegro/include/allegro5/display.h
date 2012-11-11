@@ -15,7 +15,8 @@ enum {
    ALLEGRO_OPENGL                      = 1 << 2,
    ALLEGRO_DIRECT3D_INTERNAL           = 1 << 3,
    ALLEGRO_RESIZABLE                   = 1 << 4,
-   ALLEGRO_NOFRAME                     = 1 << 5,
+   ALLEGRO_FRAMELESS                   = 1 << 5,
+   ALLEGRO_NOFRAME                     = ALLEGRO_FRAMELESS, /* older synonym */
    ALLEGRO_GENERATE_EXPOSE_EVENTS      = 1 << 6,
    ALLEGRO_OPENGL_3_0                  = 1 << 7,
    ALLEGRO_OPENGL_FORWARD_COMPATIBLE   = 1 << 8,
@@ -108,6 +109,11 @@ typedef struct ALLEGRO_MONITOR_INFO
 } ALLEGRO_MONITOR_INFO;
 
 
+enum {
+   ALLEGRO_DEFAULT_DISPLAY_ADAPTER = -1
+};
+
+
 AL_FUNC(void, al_set_new_display_refresh_rate, (int refresh_rate));
 AL_FUNC(void, al_set_new_display_flags, (int flags));
 AL_FUNC(int,  al_get_new_display_refresh_rate, (void));
@@ -118,6 +124,7 @@ AL_FUNC(int, al_get_display_height, (ALLEGRO_DISPLAY *display));
 AL_FUNC(int, al_get_display_format, (ALLEGRO_DISPLAY *display));
 AL_FUNC(int, al_get_display_refresh_rate, (ALLEGRO_DISPLAY *display));
 AL_FUNC(int, al_get_display_flags,  (ALLEGRO_DISPLAY *display));
+AL_FUNC(bool, al_set_display_flag, (ALLEGRO_DISPLAY *display, int flag, bool onoff));
 AL_FUNC(bool, al_toggle_display_flag, (ALLEGRO_DISPLAY *display, int flag, bool onoff));
 
 AL_FUNC(ALLEGRO_DISPLAY*, al_create_display, (int w, int h));
@@ -150,7 +157,7 @@ AL_FUNC(void, al_set_display_icon, (ALLEGRO_DISPLAY *display, ALLEGRO_BITMAP *ic
 
 /* Stuff for multihead/window management */
 AL_FUNC(int, al_get_num_video_adapters, (void));
-AL_FUNC(void, al_get_monitor_info, (int adapter, ALLEGRO_MONITOR_INFO *info));
+AL_FUNC(bool, al_get_monitor_info, (int adapter, ALLEGRO_MONITOR_INFO *info));
 AL_FUNC(int, al_get_new_display_adapter, (void));
 AL_FUNC(void, al_set_new_display_adapter, (int adapter));
 AL_FUNC(void, al_set_new_window_position, (int x, int y));
