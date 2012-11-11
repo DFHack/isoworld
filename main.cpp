@@ -36,14 +36,7 @@ s_maplist::s_maplist(void)
 	biome_map = 0;
 	elevation_map = 0;
 	elevation_map_with_water = 0;
-	//temperature_map = 0;
-	//rainfall_map = 0;
-	//drainage_map = 0;
-	//savagery_map = 0;
-	//volcanism_map = 0;
-	//vegetation_map = 0;
-	//evil_map = 0;
-	//salinity_map = 0;
+	structure_map = 0;
 }
 
 void saveScreenshot(){
@@ -134,6 +127,7 @@ void destroy_bitmaps(s_maplist * maps)
 	al_destroy_bitmap(maps->elevation_map);
 	al_destroy_bitmap(maps->elevation_map_with_water);
 	al_destroy_bitmap(maps->biome_map);
+	al_destroy_bitmap(maps->structure_map);
 }
 
 void load_bitmaps(s_pathlist * paths, s_maplist * maps)
@@ -144,33 +138,7 @@ void load_bitmaps(s_pathlist * paths, s_maplist * maps)
 	maps->elevation_map = al_load_bitmap(al_path_cstr(paths->elevation_map, ALLEGRO_NATIVE_PATH_SEP));
 	maps->elevation_map_with_water = al_load_bitmap(al_path_cstr(paths->elevation_map_with_water, ALLEGRO_NATIVE_PATH_SEP));
 	maps->biome_map = al_load_bitmap(al_path_cstr(paths->biome_map, ALLEGRO_NATIVE_PATH_SEP));
-	//maps->temperature_map = al_load_bitmap(al_path_cstr(paths->temperature_map, ALLEGRO_NATIVE_PATH_SEP));
-	//maps->rainfall_map = al_load_bitmap(al_path_cstr(paths->rainfall_map, ALLEGRO_NATIVE_PATH_SEP));
-	//maps->drainage_map = al_load_bitmap(al_path_cstr(paths->drainage_map, ALLEGRO_NATIVE_PATH_SEP));
-	//maps->savagery_map = al_load_bitmap(al_path_cstr(paths->savagery_map, ALLEGRO_NATIVE_PATH_SEP));
-	//maps->volcanism_map = al_load_bitmap(al_path_cstr(paths->volcanism_map, ALLEGRO_NATIVE_PATH_SEP));
-	//maps->vegetation_map = al_load_bitmap(al_path_cstr(paths->vegetation_map, ALLEGRO_NATIVE_PATH_SEP));
-	//maps->evil_map = al_load_bitmap(al_path_cstr(paths->evil_map, ALLEGRO_NATIVE_PATH_SEP));
-	//maps->salinity_map = al_load_bitmap(al_path_cstr(paths->salinity_map, ALLEGRO_NATIVE_PATH_SEP));
-
-	//ALLEGRO_BITMAP * temp = al_create_bitmap(al_get_bitmap_width(maps->biome_map),al_get_bitmap_height(maps->biome_map));
-	//ALLEGRO_BITMAP * back = al_get_target_bitmap();
-	//al_set_target_bitmap(temp);
-	//for(int x = 0; x < al_get_bitmap_width(maps->biome_map); x++)
-	//{
-	//	for(int y = 0; y < al_get_bitmap_height(maps->biome_map); y++)
-	//	{
-	//		ALLEGRO_COLOR pixel = al_get_pixel(maps->biome_map,x,y);
-	//		float r, g, b;
-	//		float h, s, l;
-	//		al_unmap_rgb_f(pixel, &r, &g, &b);
-	//		al_color_rgb_to_hsv(r,g,b,&h,&s,&l);
-	//		al_put_pixel(x, y, al_map_rgba_f(h,s,l,1));
-	//	}
-	//}
-	//al_set_target_bitmap(back);
-	//al_save_bitmap("hsv.png", temp);
-	//al_destroy_bitmap(temp);
+	maps->structure_map = al_load_bitmap(al_path_cstr(paths->structure_map, ALLEGRO_NATIVE_PATH_SEP));
 
 	al_set_new_bitmap_flags(backup);
 }

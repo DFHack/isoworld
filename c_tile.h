@@ -22,6 +22,12 @@ enum e_offset_type
 	OFFSET_COUNT
 };
 
+enum e_layer
+{
+	LAYER_BASE,
+	LAYER_OBJECT
+};
+
 struct s_sprite
 {
 	s_sprite(void);
@@ -39,6 +45,7 @@ struct s_sprite
 	e_offset_type offset_type;
 	unsigned char offset_amount;
 	terrain_type border_terrain;
+	structure_type border_structure;
 };
 
 class c_tile
@@ -46,7 +53,7 @@ class c_tile
 	s_sprite get_from_ini(ALLEGRO_CONFIG * config, const char * section, ALLEGRO_PATH * base_path);
 
 public:
-	void draw(float x, float y, int height, int bottom, int surface, s_map_block * block, bool flip = 0);
+	void draw(float x, float y, int height, int bottom, int surface, s_map_block * block, bool flip = 0, e_layer drawlayer = LAYER_BASE);
 	void load_ini(ALLEGRO_PATH * _path);
 	c_tile(void);
 	~c_tile(void);
@@ -56,36 +63,14 @@ public:
 	vector<s_sprite> bottom_sprites;
 	vector<s_sprite> surface_sprites;
 	vector<s_sprite> intermediate_sprites;
+	vector<s_sprite> object_sprites;
 
 
 	int height_max;
 	int height_min;
 
-	int temp_min;
-	int temp_max;
-
-	int rain_min;
-	int rain_max;
-
-	int drain_min;
-	int drain_max;
-
-	int sav_min;
-	int sav_max;
-
-	int vol_min;
-	int vol_max;
-
-	int veg_min;
-	int veg_max;
-
-	int evil_min;
-	int evil_max;
-
-	int sal_min;
-	int sal_max;
-
 	int priority;
 
 	terrain_type special_terrain;
+	structure_type structure;
 };

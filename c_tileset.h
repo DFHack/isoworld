@@ -14,6 +14,7 @@ public:
 	void load_ini(ALLEGRO_PATH * _path);
 
 	c_tile * get_tile(s_map_block block);
+	c_tile * get_structure_tile(s_map_block block);
 
 	vector<c_tile> tile_set;
 	c_tile grid_tile;

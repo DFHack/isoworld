@@ -33,7 +33,7 @@ public:
 	void load_colors(ALLEGRO_BITMAP * colormap);
 	void load_level(ALLEGRO_BITMAP * levelmap, int level);
 	void load_biome_tiles(s_maplist * maplist);
-	void load_structure_tiles(s_maplist * maplist);
+	void load_structure_tiles(ALLEGRO_BITMAP * structuremap);
 	void generate_special_tile_borders(void);
 	void generate_noise(void);
 	void generate_ambient_lighting(void);

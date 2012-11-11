@@ -52,7 +52,8 @@ void c_tileset::load_ini(ALLEGRO_PATH * path)
 					if(!(
 						temp_tile.bottom_sprites.empty() &&
 						temp_tile.surface_sprites.empty() &&
-						temp_tile.top_sprites.empty())
+						temp_tile.top_sprites.empty() &&
+						temp_tile.object_sprites.empty())
 						)
 						tile_set.push_back(temp_tile);
 				}
@@ -75,34 +76,25 @@ c_tile * c_tileset::get_tile(s_map_block block)
 	{
 		if(
 			(tile_set[i].special_terrain == TERRAIN_ANY || tile_set[i].special_terrain == block.terrain)&&
-			
+			tile_set[i].structure == STRUCTURE_NONE &&
 			tile_set[i].height_min <= (block.height) &&
-			tile_set[i].height_max >= (block.height) &&
-			
-			tile_set[i].temp_min <= block.levels[LEVEL_TEMPERATURE] &&
-			tile_set[i].temp_max >= block.levels[LEVEL_TEMPERATURE] &&
-			
-			tile_set[i].rain_min <= block.levels[LEVEL_RAINFALL] &&
-			tile_set[i].rain_max >= block.levels[LEVEL_RAINFALL] &&
-			
-			tile_set[i].drain_min <= block.levels[LEVEL_DRAINAGE] &&
-			tile_set[i].drain_max >= block.levels[LEVEL_DRAINAGE] &&
-			
-			tile_set[i].sav_min <= block.levels[LEVEL_SAVAGE] &&
-			tile_set[i].sav_max >= block.levels[LEVEL_SAVAGE] &&
-			
-			tile_set[i].vol_min <= block.levels[LEVEL_VOLCANISM] &&
-			tile_set[i].vol_max >= block.levels[LEVEL_VOLCANISM] &&
-			
-			tile_set[i].veg_min <= block.levels[LEVEL_VEGETATION] &&
-			tile_set[i].veg_max >= block.levels[LEVEL_VEGETATION] &&
-			
-			tile_set[i].evil_min <= block.levels[LEVEL_EVIL] &&
-			tile_set[i].evil_max >= block.levels[LEVEL_EVIL] &&
-			
-			tile_set[i].sal_min <= block.levels[LEVEL_SALINITY] &&
-			tile_set[i].sal_max >= block.levels[LEVEL_SALINITY]
+			tile_set[i].height_max >= (block.height)
 			)
+		{
+			return &(tile_set.at(i));
+		}
+	}
+	return 0;
+}
+c_tile * c_tileset::get_structure_tile(s_map_block block)
+{
+	if(tile_set.empty())
+		return 0;
+	for(int i = 0; i < tile_set.size(); i++)
+	{
+		if(tile_set[i].structure != STRUCTURE_NONE && 
+			(tile_set[i].structure == STRUCTURE_ANY || 
+			tile_set[i].structure == block.structure))
 		{
 			return &(tile_set.at(i));
 		}

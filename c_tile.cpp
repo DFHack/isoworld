@@ -232,6 +232,50 @@ terrain_type get_terrain_type(const char * text)
 		return TERRAIN_BEACH_ARCT;
 	return TERRAIN_ANY;
 }
+structure_type get_structure_type(const char * text)
+{
+	if(strcmp(text, "any") == 0)
+		return STRUCTURE_ANY;
+	if(strcmp(text, "none") == 0)
+		return STRUCTURE_NONE;
+	if(strcmp(text, "castle") == 0)
+		return STRUCTURE_CASTLE;
+	if(strcmp(text, "village") == 0)
+		return STRUCTURE_VILLAGE;
+	if(strcmp(text, "crops_1") == 0)
+		return STRUCTURE_CROPS1;
+	if(strcmp(text, "crops_2") == 0)
+		return STRUCTURE_CROPS2;
+	if(strcmp(text, "crops_3") == 0)
+		return STRUCTURE_CROPS3;
+	if(strcmp(text, "pasture") == 0)
+		return STRUCTURE_PASTURE;
+	if(strcmp(text, "meadow") == 0)
+		return STRUCTURE_MEADOW;
+	if(strcmp(text, "woodland") == 0)
+		return STRUCTURE_WOODLAND;
+	if(strcmp(text, "orchard") == 0)
+		return STRUCTURE_ORCHARD;
+	if(strcmp(text, "tunnel") == 0)
+		return STRUCTURE_TUNNEL;
+	if(strcmp(text, "stone_bridge") == 0)
+		return STRUCTURE_BRIDGE_STONE;
+	if(strcmp(text, "other_bridge") == 0)
+		return STRUCTURE_BRIDGE_OTHER;
+	if(strcmp(text, "stone_road") == 0)
+		return STRUCTURE_ROAD_STONE;
+	if(strcmp(text, "other_road") == 0)
+		return STRUCTURE_ROAD_OTHER;
+	if(strcmp(text, "stone_wall") == 0)
+		return STRUCTURE_WALL_STONE;
+	if(strcmp(text, "other_wall") == 0)
+		return STRUCTURE_WALL_OTHER;
+	if(strcmp(text, "river") == 0)
+		return STRUCTURE_RIVER;
+	if(strcmp(text, "brook") == 0)
+		return STRUCTURE_BROOK;
+	return STRUCTURE_NONE;
+}
 
 e_offset_type get_offset_type(const char * text)
 {
@@ -286,15 +330,15 @@ s_sprite::s_sprite(void)
 	offset_type =  OFFSET_NONE;
 	offset_amount = 0;
 	border_terrain = TERRAIN_ANY;
+	border_structure = STRUCTURE_ANY;
 }
 
 c_tile::c_tile(void)
 {
 	height_max = 999;
 	height_min = -999;
-	rain_min = -999;
-	rain_max = 999;
 	special_terrain = TERRAIN_ANY;
+	structure = STRUCTURE_NONE;
 	priority = 0;
 }
 
@@ -302,128 +346,163 @@ c_tile::~c_tile(void)
 {
 }
 
-void c_tile::draw(float x, float y, int height, int bottom, int surface, s_map_block * block, bool flip)
+void c_tile::draw(float x, float y, int height, int bottom, int surface, s_map_block * block, bool flip, e_layer drawlayer)
 {
-	if ((height-bottom) <= 0)
+	switch (drawlayer)
 	{
-		for(unsigned int i = 0; i < top_sprites.size(); i++)
+	case LAYER_BASE:
+		if ((height-bottom) <= 0)
 		{
-			int offset = get_offset(
-				top_sprites.at(i).offset_type,
-				block->terrain_borders[top_sprites.at(i).border_terrain?top_sprites.at(i).border_terrain:block->terrain],
-				block,
-				top_sprites.at(i).offset_amount);
-			draw_sprite(
-				top_sprites.at(i),
-				block,
-				x,
-				y - height,
-				0,
-				flip,
-				offset);
-		}
-	}
-	else
-	{
-		for(unsigned int i = 0; i < bottom_sprites.size(); i++)
-		{
-			int num_sections = (height - bottom) / bottom_sprites.at(i).column_height;
-			int bottom_section_height = (height - bottom) % bottom_sprites.at(i).column_height;
-			int offset = get_offset(
-				bottom_sprites.at(i).offset_type,
-				block->terrain_borders[bottom_sprites.at(i).border_terrain?bottom_sprites.at(i).border_terrain:block->terrain],
-				block,
-				bottom_sprites.at(i).offset_amount);
-			if(bottom_section_height)
+			for(unsigned int i = 0; i < top_sprites.size(); i++)
 			{
-				draw_sprite(
-					bottom_sprites.at(i), 
+				int offset = get_offset(
+					top_sprites.at(i).offset_type,
+					block->structure==STRUCTURE_NONE?
+					(block->terrain_borders[top_sprites.at(i).border_terrain?top_sprites.at(i).border_terrain:block->terrain])
+					:block->structure_borders[top_sprites.at(i).border_structure?top_sprites.at(i).border_structure:block->structure],
 					block,
-					x, 
-					y - height + (num_sections * bottom_sprites.at(i).column_height),
-					bottom_sprites.at(i).column_height - bottom_section_height,
-					flip,
-					offset);
-			}
-			for( int sec = 0; sec < num_sections; sec++)
-			{
+					top_sprites.at(i).offset_amount);
 				draw_sprite(
-					bottom_sprites.at(i), 
+					top_sprites.at(i),
 					block,
-					x, 
-					y - height + (sec * bottom_sprites.at(i).column_height),
+					x,
+					y - height,
 					0,
 					flip,
 					offset);
 			}
 		}
-		for(unsigned int i = 0; i < top_sprites.size(); i++)
+		else
 		{
-			int offset = get_offset(
-				top_sprites.at(i).offset_type,
-				block->terrain_borders[top_sprites.at(i).border_terrain?top_sprites.at(i).border_terrain:block->terrain],
-				block,
-				top_sprites.at(i).offset_amount);
-			draw_sprite(
-				top_sprites.at(i),
-				block,
-				x,
-				y - height,
-				0,
-				flip,
-				offset);
-		}
-	}
-	if(height < surface)
-	{
-		for(unsigned int i = 0; i < intermediate_sprites.size(); i++)
-		{
-			int num_sections = (surface - height) / intermediate_sprites.at(i).column_height;
-			int bottom_section_height = (surface - height) % intermediate_sprites.at(i).column_height;
-			int offset = get_offset(
-				intermediate_sprites.at(i).offset_type,
-				block->terrain_borders[intermediate_sprites.at(i).border_terrain?intermediate_sprites.at(i).border_terrain:block->terrain],
-				block,
-				intermediate_sprites.at(i).offset_amount);
-			if(bottom_section_height)
+			for(unsigned int i = 0; i < bottom_sprites.size(); i++)
 			{
-				draw_sprite(
-					intermediate_sprites.at(i), 
+				int num_sections = (height - bottom) / bottom_sprites.at(i).column_height;
+				int bottom_section_height = (height - bottom) % bottom_sprites.at(i).column_height;
+				int offset = get_offset(
+					bottom_sprites.at(i).offset_type,
+					block->structure==STRUCTURE_NONE?
+					(block->terrain_borders[bottom_sprites.at(i).border_terrain?bottom_sprites.at(i).border_terrain:block->terrain])
+					:block->structure_borders[top_sprites.at(i).border_structure?top_sprites.at(i).border_structure:block->structure],
 					block,
-					x, 
-					y - surface + (num_sections * intermediate_sprites.at(i).column_height),
-					intermediate_sprites.at(i).column_height - bottom_section_height,
-					flip,
-					offset);
+					bottom_sprites.at(i).offset_amount);
+				if(bottom_section_height)
+				{
+					draw_sprite(
+						bottom_sprites.at(i), 
+						block,
+						x, 
+						y - height + (num_sections * bottom_sprites.at(i).column_height),
+						bottom_sprites.at(i).column_height - bottom_section_height,
+						flip,
+						offset);
+				}
+				for( int sec = 0; sec < num_sections; sec++)
+				{
+					draw_sprite(
+						bottom_sprites.at(i), 
+						block,
+						x, 
+						y - height + (sec * bottom_sprites.at(i).column_height),
+						0,
+						flip,
+						offset);
+				}
 			}
-			for( int sec = 0; sec < num_sections; sec++)
+			for(unsigned int i = 0; i < top_sprites.size(); i++)
 			{
-				draw_sprite(
-					intermediate_sprites.at(i), 
+				int offset = get_offset(
+					top_sprites.at(i).offset_type,
+					block->structure==STRUCTURE_NONE?
+					(block->terrain_borders[top_sprites.at(i).border_terrain?top_sprites.at(i).border_terrain:block->terrain])
+					:block->structure_borders[top_sprites.at(i).border_structure?top_sprites.at(i).border_structure:block->structure],
 					block,
-					x, 
-					y - surface + (sec * intermediate_sprites.at(i).column_height),
+					top_sprites.at(i).offset_amount);
+				draw_sprite(
+					top_sprites.at(i),
+					block,
+					x,
+					y - height,
 					0,
 					flip,
 					offset);
 			}
 		}
-	}
-	for(unsigned int i = 0; i < surface_sprites.size(); i++)
-	{
-		int offset = get_offset(
-			surface_sprites.at(i).offset_type,
-			block->terrain_borders[surface_sprites.at(i).border_terrain?surface_sprites.at(i).border_terrain:block->terrain],
-			block,
-			surface_sprites.at(i).offset_amount);
-		draw_sprite(
-			surface_sprites.at(i),
-			block,
-			x,
-			y-surface,
-			0,
-			flip,
-			offset);
+		if(height < surface)
+		{
+			for(unsigned int i = 0; i < intermediate_sprites.size(); i++)
+			{
+				int num_sections = (surface - height) / intermediate_sprites.at(i).column_height;
+				int bottom_section_height = (surface - height) % intermediate_sprites.at(i).column_height;
+				int offset = get_offset(
+					intermediate_sprites.at(i).offset_type,
+					block->structure==STRUCTURE_NONE?
+					(block->terrain_borders[intermediate_sprites.at(i).border_terrain?intermediate_sprites.at(i).border_terrain:block->terrain])
+					:block->structure_borders[intermediate_sprites.at(i).border_structure?intermediate_sprites.at(i).border_structure:block->structure],
+					block,
+					intermediate_sprites.at(i).offset_amount);
+				if(bottom_section_height)
+				{
+					draw_sprite(
+						intermediate_sprites.at(i), 
+						block,
+						x, 
+						y - surface + (num_sections * intermediate_sprites.at(i).column_height),
+						intermediate_sprites.at(i).column_height - bottom_section_height,
+						flip,
+						offset);
+				}
+				for( int sec = 0; sec < num_sections; sec++)
+				{
+					draw_sprite(
+						intermediate_sprites.at(i), 
+						block,
+						x, 
+						y - surface + (sec * intermediate_sprites.at(i).column_height),
+						0,
+						flip,
+						offset);
+				}
+			}
+		}
+		for(unsigned int i = 0; i < surface_sprites.size(); i++)
+		{
+			int offset = get_offset(
+				surface_sprites.at(i).offset_type,
+				block->structure==STRUCTURE_NONE?
+				(block->terrain_borders[surface_sprites.at(i).border_terrain?surface_sprites.at(i).border_terrain:block->terrain])
+				:block->structure_borders[surface_sprites.at(i).border_structure?surface_sprites.at(i).border_structure:block->structure],
+				block,
+				surface_sprites.at(i).offset_amount);
+			draw_sprite(
+				surface_sprites.at(i),
+				block,
+				x,
+				y-surface,
+				0,
+				flip,
+				offset);
+		}
+		break;
+	case LAYER_OBJECT:
+		for(unsigned int i = 0; i < object_sprites.size(); i++)
+		{
+			int offset = get_offset(
+				object_sprites.at(i).offset_type,
+				block->structure==STRUCTURE_NONE?
+				(block->terrain_borders[object_sprites.at(i).border_terrain?object_sprites.at(i).border_terrain:block->terrain])
+				:block->structure_borders[object_sprites.at(i).border_structure?object_sprites.at(i).border_structure:block->structure],
+				block,
+				object_sprites.at(i).offset_amount);
+			draw_sprite(
+				object_sprites.at(i),
+				block,
+				x,
+				y-surface,
+				0,
+				flip,
+				offset);
+		}
+		break;
 	}
 }
 
@@ -444,12 +523,15 @@ void c_tile::load_ini(ALLEGRO_PATH * path)
 	height_max = get_config_int(config, "SPRITE", "height_max", 280);
 	height_min = get_config_int(config, "SPRITE", "height_min", 0);
 
-
 	priority = get_config_int(config, "SPRITE", "priority", 0);
 
 	const char * terra = al_get_config_value(config, "SPRITE", "special_terrain");
 	if(terra)
 		special_terrain = get_terrain_type(terra);
+
+	const char * cons = al_get_config_value(config, "SPRITE", "special_object");
+	if(cons)
+		structure = get_structure_type(cons);
 
 	s_sprite temp;
 	size_t cap_layers = get_config_int(config, "SPRITE", "cap_layers");
@@ -486,6 +568,15 @@ void c_tile::load_ini(ALLEGRO_PATH * path)
 		temp = get_from_ini(config, buffer, path);
 		if(temp.index >= 0)
 			intermediate_sprites.push_back(temp);
+	}
+
+	size_t object_layers = get_config_int(config, "SPRITE", "object_layers");
+	for(size_t i = 0; i < object_layers; i++)
+	{
+		sprintf(buffer, "OBJECT_IMAGE_%d", i);
+		temp = get_from_ini(config, buffer, path);
+		if(temp.index >= 0)
+			object_sprites.push_back(temp);
 	}
 
 }
@@ -533,6 +624,10 @@ s_sprite c_tile::get_from_ini(ALLEGRO_CONFIG *config, const char * section, ALLE
 	const char * neigh = al_get_config_value(config, section, "border_terrain");
 	if(neigh)
 		temp.border_terrain = get_terrain_type(neigh);
+
+	const char * neighbobj = al_get_config_value(config, section, "border_structure");
+	if(neighbobj)
+		temp.border_structure = get_structure_type(neighbobj);
 
 	temp.offset_amount = get_config_int(config, section, "offset_amount");
 

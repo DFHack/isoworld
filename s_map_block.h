@@ -56,7 +56,9 @@ enum structure_type{
 	STRUCTURE_NONE,
 	STRUCTURE_CASTLE,
 	STRUCTURE_VILLAGE,
-	STRUCTURE_CROPS,
+	STRUCTURE_CROPS1,
+	STRUCTURE_CROPS2,
+	STRUCTURE_CROPS3,
 	STRUCTURE_PASTURE,
 	STRUCTURE_MEADOW,
 	STRUCTURE_WOODLAND,
@@ -68,22 +70,10 @@ enum structure_type{
 	STRUCTURE_ROAD_OTHER,
 	STRUCTURE_WALL_STONE,
 	STRUCTURE_WALL_OTHER,
-	STRUCTURE_LAKE,
-	STRUCTURE_LAND,
-	STRUCTURE_OCEAN,
+	STRUCTURE_RIVER,
+	STRUCTURE_BROOK,
 	STRUCTURE_COUNT
 };
-
-#define LEVEL_TEMPERATURE 0
-#define LEVEL_RAINFALL 1
-#define LEVEL_DRAINAGE 2
-#define LEVEL_SAVAGE 3
-#define LEVEL_VOLCANISM 4
-#define LEVEL_VEGETATION 5
-#define LEVEL_EVIL 6
-#define LEVEL_SALINITY 7
-
-#define NUM_LEVELS 8
 
 struct s_map_block
 {
@@ -91,6 +81,7 @@ struct s_map_block
 	int water_height;
 	unsigned char levels[8];
 	c_tile * sprite;
+	c_tile * structure_sprite;
 	ALLEGRO_COLOR color;
 	terrain_type terrain;
 	structure_type structure;

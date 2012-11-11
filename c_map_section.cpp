@@ -79,12 +79,9 @@ bool c_map_section::set_size(int x, int y)
 	{
 		block_array[i].color = al_map_rgb(255,255,255);
 		block_array[i].height = 0;
-		for(int j = 0; j < NUM_LEVELS; j++)
-		{
-			block_array[i].levels[j] = 0;
-		}
 		block_array[i].sprite = 0;
 		block_array[i].terrain = TERRAIN_NONE;
+		block_array[i].structure = STRUCTURE_NONE;
 	}
 
 	return true;
@@ -103,6 +100,7 @@ void c_map_section::flood_fill(c_tile *tile, int height)
 		block_array[i].sprite = tile;
 		block_array[i].color = al_map_rgb(255,255,255);
 		block_array[i].terrain = TERRAIN_NONE;
+		block_array[i].structure = STRUCTURE_NONE;
 	}
 }
 
@@ -145,7 +143,14 @@ void c_map_section::draw(int inx, int iny)
 
 			if(block_array[index].sprite > 0)
 			{
-				block_array[index].sprite->draw(drawx, drawy, snap_height(block_array[index].height), snap_height(bottom_r), snap_height(block_array[index].water_height), &block_array[index]);
+				block_array[index].sprite->draw(drawx, drawy, snap_height(block_array[index].height), snap_height(bottom_r), snap_height(block_array[index].water_height), &block_array[index], 0, LAYER_BASE);
+				if(block_array[index].structure_sprite)
+				{
+					block_array[index].structure_sprite->draw(drawx, drawy, snap_height(block_array[index].height), snap_height(bottom_r), snap_height(block_array[index].water_height), &block_array[index], 0, LAYER_BASE);
+					block_array[index].structure_sprite->draw(drawx, drawy, snap_height(block_array[index].height), snap_height(bottom_r), snap_height(block_array[index].water_height), &block_array[index], 0, LAYER_OBJECT);
+				}
+				else
+					block_array[index].sprite->draw(drawx, drawy, snap_height(block_array[index].height), snap_height(bottom_r), snap_height(block_array[index].water_height), &block_array[index], 0, LAYER_OBJECT);
 			}
 			if(user_config.showgrid && !((x + user_config.map_x) % 16))
 				tileset_list.at(current_tileset).grid_tile.draw(drawx, drawy, snap_height(block_array[index].height), snap_height(bottom_r), snap_height(block_array[index].water_height), &block_array[index]);
@@ -259,11 +264,20 @@ void c_map_section::load_water_level(ALLEGRO_BITMAP * watermap)
 				al_unmap_rgb(pixel, &red, &green, &blue);
 				if(red == 0){
 					if(green == 0)
+					{
 						block_array[index].water_height = blue + 25;
-					else
+						block_array[index].structure = STRUCTURE_NONE;
+					}
+					else{
 						block_array[index].water_height = blue;
+						block_array[index].structure = STRUCTURE_BROOK;
+					}
+					block_array[index].height = block_array[index].water_height;
 				}
-				else block_array[index].water_height = block_array[index].height;
+				else{
+					block_array[index].structure = STRUCTURE_NONE;
+					block_array[index].water_height = block_array[index].height;
+				}
 
 			}
 			else block_array[index].water_height = block_array[index].height;
@@ -531,6 +545,115 @@ void c_map_section::load_biome_tiles(s_maplist * maplist)
 		}
 	}
 }
+void c_map_section::load_structure_tiles(ALLEGRO_BITMAP * structuremap)
+{
+	for (unsigned int y = 0; y < board_width; y++)
+	{
+		for (unsigned int x = 0; x < board_height; x++)
+		{
+			unsigned int index = x + (board_width * y);
+			if(structuremap)
+			{
+				int tempx = x + user_config.map_x;
+				int tempy = y + user_config.map_y;
+
+				tempx =  bind_to_range(tempx , al_get_bitmap_width(structuremap));
+				tempy =  bind_to_range(tempy , al_get_bitmap_height(structuremap));
+
+				ALLEGRO_COLOR pixel = al_get_pixel(structuremap, tempx, tempy);
+				unsigned char cR, cG, cB;
+				al_unmap_rgb(pixel, &cR, &cG, &cB);
+				if(
+					(cR == 128)&&
+					(cG == 128)&&
+					(cB == 128))
+				{block_array[index].structure = STRUCTURE_CASTLE;}
+				else if(
+					(cR == 255)&&
+					(cG == 255)&&
+					(cB == 255))
+				{block_array[index].structure = STRUCTURE_VILLAGE;}
+				else if(
+					(cR == 255)&&
+					(cG == 128)&&
+					(cB == 0))
+				{block_array[index].structure = STRUCTURE_CROPS1;}
+				else if(
+					(cR == 255)&&
+					(cG == 160)&&
+					(cB == 0))
+				{block_array[index].structure = STRUCTURE_CROPS2;}
+				else if(
+					(cR == 255)&&
+					(cG == 192)&&
+					(cB == 0))
+				{block_array[index].structure = STRUCTURE_CROPS3;}
+				else if(
+					(cR == 0)&&
+					(cG == 255)&&
+					(cB == 0))
+				{block_array[index].structure = STRUCTURE_PASTURE;}
+				else if(
+					(cR == 64)&&
+					(cG == 255)&&
+					(cB == 0))
+				{block_array[index].structure = STRUCTURE_MEADOW;}
+				else if(
+					(cR == 0)&&
+					(cG == 128)&&
+					(cB == 0))
+				{block_array[index].structure = STRUCTURE_WOODLAND;}
+				else if(
+					(cR == 0)&&
+					(cG == 160)&&
+					(cB == 0))
+				{block_array[index].structure = STRUCTURE_ORCHARD;}
+				else if(
+					(cR == 20)&&
+					(cG == 20)&&
+					(cB == 20))
+				{block_array[index].structure = STRUCTURE_TUNNEL;}
+				else if(
+					(cR == 224)&&
+					(cG == 224)&&
+					(cB == 224))
+				{block_array[index].structure = STRUCTURE_BRIDGE_STONE;}
+				else if(
+					(cR == 180)&&
+					(cG == 167)&&
+					(cB == 20))
+				{block_array[index].structure = STRUCTURE_BRIDGE_OTHER;}
+				else if(
+					(cR == 192)&&
+					(cG == 192)&&
+					(cB == 192))
+				{block_array[index].structure = STRUCTURE_ROAD_STONE;}
+				else if(
+					(cR == 150)&&
+					(cG == 127)&&
+					(cB == 20))
+				{block_array[index].structure = STRUCTURE_ROAD_OTHER;}
+				else if(
+					(cR == 96)&&
+					(cG == 96)&&
+					(cB == 96))
+				{block_array[index].structure = STRUCTURE_WALL_STONE;}
+				else if(
+					(cR == 160)&&
+					(cG == 127)&&
+					(cB == 20))
+				{block_array[index].structure = STRUCTURE_WALL_OTHER;}
+				else if(
+					(cR == 0)&&
+					(cG == 192)&&
+					(cB == 255))
+				{block_array[index].structure = STRUCTURE_RIVER;}
+				else if(block_array[index].structure != STRUCTURE_BROOK)
+					block_array[index].structure = STRUCTURE_NONE;
+			}
+		}
+	}
+}
 void c_map_section::load_colors(ALLEGRO_BITMAP * colormap)
 {
 	for (unsigned int y = 0; y < board_width; y++)
@@ -563,15 +686,8 @@ void c_map_section::propogate_tiles(s_maplist * maplist)
 	load_heights(maplist->elevation_map);
 	load_colors(maplist->biome_map);
 	load_water_level(maplist->elevation_map_with_water);
-	//load_level(maplist->temperature_map, LEVEL_TEMPERATURE);
-	//load_level(maplist->rainfall_map, LEVEL_RAINFALL);
-	//load_level(maplist->drainage_map, LEVEL_DRAINAGE);
-	//load_level(maplist->savagery_map, LEVEL_SAVAGE);
-	//load_level(maplist->volcanism_map, LEVEL_VOLCANISM);
-	//load_level(maplist->vegetation_map, LEVEL_VEGETATION);
-	//load_level(maplist->evil_map, LEVEL_EVIL);
-	//load_level(maplist->salinity_map, LEVEL_SALINITY);
 	load_biome_tiles(maplist);
+	load_structure_tiles(maplist->structure_map);
 	generate_special_tile_borders();
 	generate_noise();
 	generate_ambient_lighting();
@@ -585,7 +701,8 @@ void c_map_section::propogate_tiles(s_maplist * maplist)
 			unsigned int index = x + (board_width * y);
 			if(tileset_list.size() > 0)
 			{
-				block_array[index].sprite = tileset_list.at(current_tileset).get_tile(block_array[index]);	
+				block_array[index].sprite = tileset_list.at(current_tileset).get_tile(block_array[index]);
+				block_array[index].structure_sprite = tileset_list.at(current_tileset).get_structure_tile(block_array[index]);
 			}
 			else block_array[index].sprite = 0;
 
@@ -684,12 +801,68 @@ void c_map_section::generate_special_tile_borders()
 				}
 				block_array[(x + (board_width * y))].terrain_borders[i]=borders;
 			}
-			//block_array[(x + (board_width * y))].terrain_borders[TERRAIN_RIVER] |= block_array[(x + (board_width * y))].terrain_borders[TERRAIN_OCEAN];
-			//block_array[(x + (board_width * y))].terrain_borders[TERRAIN_RIVER] |= block_array[(x + (board_width * y))].terrain_borders[TERRAIN_STREAM];
-			//block_array[(x + (board_width * y))].terrain_borders[TERRAIN_RIVER] |= block_array[(x + (board_width * y))].terrain_borders[TERRAIN_BRIDGE];
+			for(int i = 0; i < STRUCTURE_COUNT ; i++)
+			{
+				unsigned char borders = 0;
+				if((x > 0) && (y > 0))
+				{
+					if(block_array[((x-1) + (board_width * (y-1)))].structure == i) borders |= 1;
+				}
+				if(y > 0)
+				{
+					if(block_array[((x+0) + (board_width * (y-1)))].structure == i) borders |= 2;
+				}
+				if(x < (board_width-1) && y > 0)
+				{
+					if(block_array[((x+1) + (board_width * (y-1)))].structure == i) borders |= 4;
+				}
+				if(x < (board_width-1))
+				{
+					if(block_array[((x+1) + (board_width * (y+0)))].structure == i) borders |= 8;
+				}
+				if(x < (board_width-1) && y < (board_height-1))
+				{
+					if(block_array[((x+1) + (board_width * (y+1)))].structure == i) borders |= 16;
+				}
+				if(y < (board_height-1))
+				{
+					if(block_array[((x+0) + (board_width * (y+1)))].structure == i) borders |= 32;
+				}
+				if(x > 0 && y < (board_height-1))
+				{
+					if(block_array[((x-1) + (board_width * (y+1)))].structure == i) borders |= 64;
+				}
+				if(x > 0)
+				{
+					if(block_array[((x-1) + (board_width * (y+0)))].structure == i) borders |= 128;
+				}
+				block_array[(x + (board_width * y))].structure_borders[i]=borders;
+			}
+			block_array[(x + (board_width * y))].structure_borders[STRUCTURE_RIVER] |= block_array[(x + (board_width * y))].terrain_borders[TERRAIN_OCEAN_ARCT];
+			block_array[(x + (board_width * y))].structure_borders[STRUCTURE_RIVER] |= block_array[(x + (board_width * y))].terrain_borders[TERRAIN_OCEAN_TROP];
+			block_array[(x + (board_width * y))].structure_borders[STRUCTURE_RIVER] |= block_array[(x + (board_width * y))].terrain_borders[TERRAIN_OCEAN_TEMP];
+			block_array[(x + (board_width * y))].structure_borders[STRUCTURE_RIVER] |= block_array[(x + (board_width * y))].terrain_borders[TERRAIN_LAKE_TEMP_FRESH];
+			block_array[(x + (board_width * y))].structure_borders[STRUCTURE_RIVER] |= block_array[(x + (board_width * y))].terrain_borders[TERRAIN_LAKE_TEMP_BRACK];
+			block_array[(x + (board_width * y))].structure_borders[STRUCTURE_RIVER] |= block_array[(x + (board_width * y))].terrain_borders[TERRAIN_LAKE_TEMP_SALT];
+			block_array[(x + (board_width * y))].structure_borders[STRUCTURE_RIVER] |= block_array[(x + (board_width * y))].terrain_borders[TERRAIN_LAKE_TROP_FRESH];
+			block_array[(x + (board_width * y))].structure_borders[STRUCTURE_RIVER] |= block_array[(x + (board_width * y))].terrain_borders[TERRAIN_LAKE_TROP_BRACK];
+			block_array[(x + (board_width * y))].structure_borders[STRUCTURE_RIVER] |= block_array[(x + (board_width * y))].terrain_borders[TERRAIN_LAKE_TROP_SALT];
+			block_array[(x + (board_width * y))].structure_borders[STRUCTURE_RIVER] |= block_array[(x + (board_width * y))].structure_borders[STRUCTURE_BRIDGE_STONE];
+			block_array[(x + (board_width * y))].structure_borders[STRUCTURE_RIVER] |= block_array[(x + (board_width * y))].structure_borders[STRUCTURE_BRIDGE_OTHER];
+			block_array[(x + (board_width * y))].structure_borders[STRUCTURE_RIVER] |= block_array[(x + (board_width * y))].structure_borders[STRUCTURE_BROOK];
 
-			//block_array[(x + (board_width * y))].terrain_borders[TERRAIN_STREAM] |= block_array[(x + (board_width * y))].terrain_borders[TERRAIN_OCEAN];
-			//block_array[(x + (board_width * y))].terrain_borders[TERRAIN_STREAM] |= block_array[(x + (board_width * y))].terrain_borders[TERRAIN_RIVER];
+			block_array[(x + (board_width * y))].structure_borders[STRUCTURE_BROOK] |= block_array[(x + (board_width * y))].terrain_borders[TERRAIN_OCEAN_ARCT];
+			block_array[(x + (board_width * y))].structure_borders[STRUCTURE_BROOK] |= block_array[(x + (board_width * y))].terrain_borders[TERRAIN_OCEAN_TROP];
+			block_array[(x + (board_width * y))].structure_borders[STRUCTURE_BROOK] |= block_array[(x + (board_width * y))].terrain_borders[TERRAIN_OCEAN_TEMP];
+			block_array[(x + (board_width * y))].structure_borders[STRUCTURE_BROOK] |= block_array[(x + (board_width * y))].terrain_borders[TERRAIN_LAKE_TEMP_FRESH];
+			block_array[(x + (board_width * y))].structure_borders[STRUCTURE_BROOK] |= block_array[(x + (board_width * y))].terrain_borders[TERRAIN_LAKE_TEMP_BRACK];
+			block_array[(x + (board_width * y))].structure_borders[STRUCTURE_BROOK] |= block_array[(x + (board_width * y))].terrain_borders[TERRAIN_LAKE_TEMP_SALT];
+			block_array[(x + (board_width * y))].structure_borders[STRUCTURE_BROOK] |= block_array[(x + (board_width * y))].terrain_borders[TERRAIN_LAKE_TROP_FRESH];
+			block_array[(x + (board_width * y))].structure_borders[STRUCTURE_BROOK] |= block_array[(x + (board_width * y))].terrain_borders[TERRAIN_LAKE_TROP_BRACK];
+			block_array[(x + (board_width * y))].structure_borders[STRUCTURE_BROOK] |= block_array[(x + (board_width * y))].terrain_borders[TERRAIN_LAKE_TROP_SALT];
+			block_array[(x + (board_width * y))].structure_borders[STRUCTURE_BROOK] |= block_array[(x + (board_width * y))].structure_borders[STRUCTURE_BRIDGE_STONE];
+			block_array[(x + (board_width * y))].structure_borders[STRUCTURE_BROOK] |= block_array[(x + (board_width * y))].structure_borders[STRUCTURE_BRIDGE_OTHER];
+			block_array[(x + (board_width * y))].structure_borders[STRUCTURE_BROOK] |= block_array[(x + (board_width * y))].structure_borders[STRUCTURE_RIVER];
 
 			//block_array[(x + (board_width * y))].terrain_borders[TERRAIN_FORT_WALL] |= block_array[(x + (board_width * y))].terrain_borders[TERRAIN_FORT_GATE];
 			//block_array[(x + (board_width * y))].terrain_borders[TERRAIN_FORT_GATE] |= block_array[(x + (board_width * y))].terrain_borders[TERRAIN_FORT_WALL];
@@ -697,8 +870,21 @@ void c_map_section::generate_special_tile_borders()
 			//block_array[(x + (board_width * y))].terrain_borders[TERRAIN_DORF_EDGE] |= block_array[(x + (board_width * y))].terrain_borders[TERRAIN_FORT_WALL];
 			//block_array[(x + (board_width * y))].terrain_borders[TERRAIN_FORT_WALL] |= block_array[(x + (board_width * y))].terrain_borders[TERRAIN_DORF_EDGE];
 
-			//block_array[(x + (board_width * y))].terrain_borders[TERRAIN_BRIDGE] |= block_array[(x + (board_width * y))].terrain_borders[TERRAIN_ROAD];
-			//block_array[(x + (board_width * y))].terrain_borders[TERRAIN_ROAD] |= block_array[(x + (board_width * y))].terrain_borders[TERRAIN_BRIDGE];
+			block_array[(x + (board_width * y))].structure_borders[STRUCTURE_BRIDGE_STONE] |= block_array[(x + (board_width * y))].structure_borders[STRUCTURE_ROAD_STONE];
+			block_array[(x + (board_width * y))].structure_borders[STRUCTURE_BRIDGE_STONE] |= block_array[(x + (board_width * y))].structure_borders[STRUCTURE_ROAD_OTHER];
+			block_array[(x + (board_width * y))].structure_borders[STRUCTURE_BRIDGE_OTHER] |= block_array[(x + (board_width * y))].structure_borders[STRUCTURE_ROAD_STONE];
+			block_array[(x + (board_width * y))].structure_borders[STRUCTURE_BRIDGE_OTHER] |= block_array[(x + (board_width * y))].structure_borders[STRUCTURE_ROAD_OTHER];
+
+			block_array[(x + (board_width * y))].structure_borders[STRUCTURE_BRIDGE_STONE] |= block_array[(x + (board_width * y))].structure_borders[STRUCTURE_BRIDGE_OTHER];
+			block_array[(x + (board_width * y))].structure_borders[STRUCTURE_BRIDGE_OTHER] |= block_array[(x + (board_width * y))].structure_borders[STRUCTURE_BRIDGE_STONE];
+
+			block_array[(x + (board_width * y))].structure_borders[STRUCTURE_ROAD_STONE] |= block_array[(x + (board_width * y))].structure_borders[STRUCTURE_BRIDGE_STONE];
+			block_array[(x + (board_width * y))].structure_borders[STRUCTURE_ROAD_STONE] |= block_array[(x + (board_width * y))].structure_borders[STRUCTURE_BRIDGE_OTHER];
+			block_array[(x + (board_width * y))].structure_borders[STRUCTURE_ROAD_OTHER] |= block_array[(x + (board_width * y))].structure_borders[STRUCTURE_BRIDGE_STONE];
+			block_array[(x + (board_width * y))].structure_borders[STRUCTURE_ROAD_OTHER] |= block_array[(x + (board_width * y))].structure_borders[STRUCTURE_BRIDGE_OTHER];
+
+			block_array[(x + (board_width * y))].structure_borders[STRUCTURE_ROAD_STONE] |= block_array[(x + (board_width * y))].structure_borders[STRUCTURE_ROAD_OTHER];
+			block_array[(x + (board_width * y))].structure_borders[STRUCTURE_ROAD_OTHER] |= block_array[(x + (board_width * y))].structure_borders[STRUCTURE_ROAD_STONE];
 		}
 	}
 }
@@ -759,14 +945,6 @@ void c_map_section::draw_debug_info()
 	int y = 0;
 
 	al_draw_textf(user_config.font, color, user_config.res_x, y += al_get_font_line_height(user_config.font), ALLEGRO_ALIGN_RIGHT, "Height: %d", block_array[coords_to_index(board_width/2, board_height/2)].height);
-	al_draw_textf(user_config.font, color, user_config.res_x, y += al_get_font_line_height(user_config.font), ALLEGRO_ALIGN_RIGHT, "Temperature: %d", block_array[coords_to_index(board_width/2, board_height/2)].levels[LEVEL_TEMPERATURE]);
-	al_draw_textf(user_config.font, color, user_config.res_x, y += al_get_font_line_height(user_config.font), ALLEGRO_ALIGN_RIGHT, "Rainfall: %d", block_array[coords_to_index(board_width/2, board_height/2)].levels[LEVEL_RAINFALL]);
-	al_draw_textf(user_config.font, color, user_config.res_x, y += al_get_font_line_height(user_config.font), ALLEGRO_ALIGN_RIGHT, "Drainage: %d", block_array[coords_to_index(board_width/2, board_height/2)].levels[LEVEL_DRAINAGE]);
-	al_draw_textf(user_config.font, color, user_config.res_x, y += al_get_font_line_height(user_config.font), ALLEGRO_ALIGN_RIGHT, "Savagery: %d", block_array[coords_to_index(board_width/2, board_height/2)].levels[LEVEL_SAVAGE]);
-	al_draw_textf(user_config.font, color, user_config.res_x, y += al_get_font_line_height(user_config.font), ALLEGRO_ALIGN_RIGHT, "Volcanism: %d", block_array[coords_to_index(board_width/2, board_height/2)].levels[LEVEL_VOLCANISM]);
-	al_draw_textf(user_config.font, color, user_config.res_x, y += al_get_font_line_height(user_config.font), ALLEGRO_ALIGN_RIGHT, "Vegetation: %d", block_array[coords_to_index(board_width/2, board_height/2)].levels[LEVEL_VEGETATION]);
-	al_draw_textf(user_config.font, color, user_config.res_x, y += al_get_font_line_height(user_config.font), ALLEGRO_ALIGN_RIGHT, "Evil: %d", block_array[coords_to_index(board_width/2, board_height/2)].levels[LEVEL_EVIL]);
-	al_draw_textf(user_config.font, color, user_config.res_x, y += al_get_font_line_height(user_config.font), ALLEGRO_ALIGN_RIGHT, "Salinity: %d", block_array[coords_to_index(board_width/2, board_height/2)].levels[LEVEL_SALINITY]);
-
 	al_draw_textf(user_config.font, color, user_config.res_x, y += al_get_font_line_height(user_config.font), ALLEGRO_ALIGN_RIGHT, "Terrain number: %d", block_array[coords_to_index(board_width/2, board_height/2)].terrain);
+	al_draw_textf(user_config.font, color, user_config.res_x, y += al_get_font_line_height(user_config.font), ALLEGRO_ALIGN_RIGHT, "Structure number: %d", block_array[coords_to_index(board_width/2, board_height/2)].structure);
 }
