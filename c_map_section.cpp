@@ -272,6 +272,7 @@ void c_map_section::load_water_level(ALLEGRO_BITMAP * watermap)
 						block_array[index].water_height = blue;
 						block_array[index].structure = STRUCTURE_BROOK;
 					}
+					if(block_array[index].height > block_array[index].water_height)
 					block_array[index].height = block_array[index].water_height;
 				}
 				else{
