@@ -76,3 +76,7 @@ packages/
 *.lai
 *.la
 *.a
+
+*.exe
+isoworld.ini
+screenshot*
