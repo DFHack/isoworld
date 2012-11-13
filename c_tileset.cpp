@@ -4,6 +4,8 @@
 c_tileset::c_tileset(void)
 {
 	snap_height = 1;
+	palette.resize(1);
+	palette[0].resize(1);
 }
 
 c_tileset::~c_tileset(void)
@@ -32,6 +34,18 @@ void c_tileset::load_ini(ALLEGRO_PATH * path)
 		grid_tile.load_ini(tilepath);
 		al_destroy_path(tilepath);
 	}
+
+	ALLEGRO_BITMAP * palettemap = 0;
+	const char * palette = al_get_config_value(config, "TILESET_PROPERTIES", "palette_file");
+	if(palette)
+	{
+		ALLEGRO_PATH * tilepath = al_create_path(palette);
+		al_rebase_path(path, tilepath);
+		palettemap = al_load_bitmap(al_path_cstr(tilepath, ALLEGRO_NATIVE_PATH_SEP));
+		al_destroy_path(tilepath);
+	}
+	load_palette(palettemap);
+	al_destroy_bitmap(palettemap);
 
 	const char * dir = al_get_config_value(config, "TILESET_PROPERTIES", "tile_dir");
 	if(dir)
@@ -100,4 +114,35 @@ c_tile * c_tileset::get_structure_tile(s_map_block block)
 		}
 	}
 	return 0;
+}
+
+void c_tileset::load_palette(ALLEGRO_BITMAP * palettemap)
+{
+	if(!palettemap)
+	{
+		palette.resize(1);
+		palette[0].resize(1);
+		palette[0][0] = al_map_rgb(255,0,255);
+		return;
+	}
+	al_lock_bitmap(palettemap, ALLEGRO_PIXEL_FORMAT_ANY, ALLEGRO_LOCK_READONLY);
+	palette.resize(al_get_bitmap_width(palettemap));
+	for(int x = 0; x < palette.size(); x++)
+	{
+		palette[x].resize(al_get_bitmap_height(palettemap));
+		for(int y = 0; y < palette[x].size(); y++)
+		{
+			palette[x][y] = al_get_pixel(palettemap, x, y);
+		}
+	}
+	al_unlock_bitmap(palettemap);
+};
+
+ALLEGRO_COLOR c_tileset::get_palette_color(int x, int y)
+{
+	if(x < 0) x = 0;
+	if(y < 0) y = 0;
+	if(x >= palette.size()) x = palette.size()-1;
+	if(y >= palette[x].size()) y = palette[x].size()-1;
+	return palette[x][y];
 }

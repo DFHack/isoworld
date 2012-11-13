@@ -143,19 +143,19 @@ void c_map_section::draw(int inx, int iny)
 
 			if(block_array[index].sprite > 0)
 			{
-				block_array[index].sprite->draw(drawx, drawy, snap_height(block_array[index].height), snap_height(bottom_r), snap_height(block_array[index].water_height), &block_array[index], 0, LAYER_BASE);
+				block_array[index].sprite->draw(drawx, drawy, snap_height(block_array[index].height), snap_height(bottom_r), snap_height(block_array[index].water_height), &block_array[index], &(tileset_list[current_tileset]), 0, LAYER_BASE);
 				if(block_array[index].structure_sprite)
 				{
-					block_array[index].structure_sprite->draw(drawx, drawy, snap_height(block_array[index].height), snap_height(bottom_r), snap_height(block_array[index].water_height), &block_array[index], 0, LAYER_BASE);
-					block_array[index].structure_sprite->draw(drawx, drawy, snap_height(block_array[index].height), snap_height(bottom_r), snap_height(block_array[index].water_height), &block_array[index], 0, LAYER_OBJECT);
+					block_array[index].structure_sprite->draw(drawx, drawy, snap_height(block_array[index].height), snap_height(bottom_r), snap_height(block_array[index].water_height), &block_array[index], &(tileset_list[current_tileset]), 0, LAYER_BASE);
+					block_array[index].structure_sprite->draw(drawx, drawy, snap_height(block_array[index].height), snap_height(bottom_r), snap_height(block_array[index].water_height), &block_array[index], &(tileset_list[current_tileset]), 0, LAYER_OBJECT);
 				}
 				else
-					block_array[index].sprite->draw(drawx, drawy, snap_height(block_array[index].height), snap_height(bottom_r), snap_height(block_array[index].water_height), &block_array[index], 0, LAYER_OBJECT);
+					block_array[index].sprite->draw(drawx, drawy, snap_height(block_array[index].height), snap_height(bottom_r), snap_height(block_array[index].water_height), &block_array[index], &(tileset_list[current_tileset]), 0, LAYER_OBJECT);
 			}
 			if(user_config.showgrid && !((x + user_config.map_x) % 16))
-				tileset_list.at(current_tileset).grid_tile.draw(drawx, drawy, snap_height(block_array[index].height), snap_height(bottom_r), snap_height(block_array[index].water_height), &block_array[index]);
+				tileset_list.at(current_tileset).grid_tile.draw(drawx, drawy, snap_height(block_array[index].height), snap_height(bottom_r), snap_height(block_array[index].water_height), &block_array[index], &(tileset_list[current_tileset]));
 			if(user_config.showgrid && !((y + user_config.map_y) % 16))
-				tileset_list.at(current_tileset).grid_tile.draw(drawx, drawy, snap_height(block_array[index].height), snap_height(bottom_r), snap_height(block_array[index].water_height), &block_array[index], 1);
+				tileset_list.at(current_tileset).grid_tile.draw(drawx, drawy, snap_height(block_array[index].height), snap_height(bottom_r), snap_height(block_array[index].water_height), &block_array[index], &(tileset_list[current_tileset]), 1);
 			block_array[index].height = height_back;
 		}
 	}

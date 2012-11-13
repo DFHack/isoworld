@@ -2,6 +2,7 @@
 #include "c_config.h"
 #include "s_map_block.h"
 #include "console.h"
+#include "c_tileset.h"
 
 int get_border_offset_path(unsigned char in)
 {
@@ -102,7 +103,7 @@ ALLEGRO_COLOR mix_colors( ALLEGRO_COLOR lhs, ALLEGRO_COLOR rhs)
 	return lhs;
 }
 
-void draw_sprite(s_sprite sprite, s_map_block * block, float x, float y, int shrink, bool flip = 0, int offset = 0)
+void draw_sprite(c_tileset * tileset, s_sprite sprite, s_map_block * block, float x, float y, int shrink, bool flip = 0, int offset = 0)
 {
 	if(offset < 0)
 		return;
@@ -114,13 +115,34 @@ void draw_sprite(s_sprite sprite, s_map_block * block, float x, float y, int shr
 	if(flip)
 		flags = ALLEGRO_FLIP_HORIZONTAL;
 	ALLEGRO_COLOR color;
-	if(sprite.color_by == NONE)
+	switch(sprite.color_by)
+	{
+	case COLOR_NONE:
 		color = block->light;
-	else if(sprite.color_by == INI)
-		color = mix_colors(sprite.color, block->light) ;
-	else if(sprite.color_by == BIOME)
+		break;
+	case COLOR_INI:
+		color = mix_colors(sprite.color, block->light);
+		break;
+	case COLOR_BIOME:
 		color = mix_colors(block->color, block->light);
-	else color = block->light;
+		break;
+	case COLOR_PALETTE:
+		switch(sprite.color_source)
+		{
+		case SOURCE_ELEV:
+			color = mix_colors(tileset->get_palette_color(sprite.palette_number, block->height), block->light);
+			break;
+		case SOURCE_DEPTH:
+			color = mix_colors(tileset->get_palette_color(sprite.palette_number,block->water_height-block->height), block->light);
+			break;
+		default:
+			color = block->light;
+		}
+		break;
+	default:
+		color = block->light;
+		break;
+	}
 	al_draw_tinted_bitmap_region(
 		imagelist.get_image(sprite.index),
 		color,
@@ -136,12 +158,23 @@ void draw_sprite(s_sprite sprite, s_map_block * block, float x, float y, int shr
 e_color_by get_color_selector(const char * text)
 {
 	if(strcmp(text, "none") == 0)
-		return NONE;
+		return COLOR_NONE;
 	if(strcmp(text, "html") == 0)
-		return INI;
+		return COLOR_INI;
 	if(strcmp(text, "biome_map") == 0)
-		return BIOME;
-	return NONE;
+		return COLOR_BIOME;
+	if(strcmp(text, "palette") == 0)
+		return COLOR_PALETTE;
+	return COLOR_NONE;
+}
+
+e_color_source get_color_source(const char * text)
+{
+	if(strcmp(text, "elevation") == 0)
+		return SOURCE_ELEV;
+	if(strcmp(text, "water_depth") == 0)
+		return SOURCE_DEPTH;
+	return SOURCE_ELEV;
 }
 
 terrain_type get_terrain_type(const char * text)
@@ -326,7 +359,9 @@ s_sprite::s_sprite(void)
 	origin_x = 0;
 	origin_y = 0;
 	column_height = 0;
-	color_by=NONE;
+	color_by=COLOR_NONE;
+	color_source=SOURCE_ELEV;
+	palette_number=0;
 	offset_type =  OFFSET_NONE;
 	offset_amount = 0;
 	border_terrain = TERRAIN_ANY;
@@ -346,7 +381,7 @@ c_tile::~c_tile(void)
 {
 }
 
-void c_tile::draw(float x, float y, int height, int bottom, int surface, s_map_block * block, bool flip, e_layer drawlayer)
+void c_tile::draw(float x, float y, int height, int bottom, int surface, s_map_block * block, c_tileset * tileset, bool flip, e_layer drawlayer)
 {
 	switch (drawlayer)
 	{
@@ -363,6 +398,7 @@ void c_tile::draw(float x, float y, int height, int bottom, int surface, s_map_b
 					block,
 					top_sprites.at(i).offset_amount);
 				draw_sprite(
+					tileset,
 					top_sprites.at(i),
 					block,
 					x,
@@ -388,6 +424,7 @@ void c_tile::draw(float x, float y, int height, int bottom, int surface, s_map_b
 				if(bottom_section_height)
 				{
 					draw_sprite(
+						tileset,
 						bottom_sprites.at(i), 
 						block,
 						x, 
@@ -399,6 +436,7 @@ void c_tile::draw(float x, float y, int height, int bottom, int surface, s_map_b
 				for( int sec = 0; sec < num_sections; sec++)
 				{
 					draw_sprite(
+						tileset,
 						bottom_sprites.at(i), 
 						block,
 						x, 
@@ -418,6 +456,7 @@ void c_tile::draw(float x, float y, int height, int bottom, int surface, s_map_b
 					block,
 					top_sprites.at(i).offset_amount);
 				draw_sprite(
+					tileset,
 					top_sprites.at(i),
 					block,
 					x,
@@ -443,6 +482,7 @@ void c_tile::draw(float x, float y, int height, int bottom, int surface, s_map_b
 				if(bottom_section_height)
 				{
 					draw_sprite(
+						tileset,
 						intermediate_sprites.at(i), 
 						block,
 						x, 
@@ -454,6 +494,7 @@ void c_tile::draw(float x, float y, int height, int bottom, int surface, s_map_b
 				for( int sec = 0; sec < num_sections; sec++)
 				{
 					draw_sprite(
+						tileset,
 						intermediate_sprites.at(i), 
 						block,
 						x, 
@@ -474,6 +515,7 @@ void c_tile::draw(float x, float y, int height, int bottom, int surface, s_map_b
 				block,
 				surface_sprites.at(i).offset_amount);
 			draw_sprite(
+				tileset,
 				surface_sprites.at(i),
 				block,
 				x,
@@ -494,6 +536,7 @@ void c_tile::draw(float x, float y, int height, int bottom, int surface, s_map_b
 				block,
 				object_sprites.at(i).offset_amount);
 			draw_sprite(
+				tileset,
 				object_sprites.at(i),
 				block,
 				x,
@@ -607,11 +650,17 @@ s_sprite c_tile::get_from_ini(ALLEGRO_CONFIG *config, const char * section, ALLE
 	temp.origin_x = 0 - temp.origin_x;
 	temp.origin_y = 0 - temp.origin_y;
 
+	temp.palette_number = get_config_int(config, section, "palette_index");
+
 	temp.column_height = get_config_int(config, section, "column_height");
 
 	const char * color_selection = al_get_config_value(config, section, "color_source");
 	if(color_selection)
 		temp.color_by = get_color_selector(color_selection);
+
+	const char * pal_source = al_get_config_value(config, section, "palette_source");
+	if(pal_source)
+		temp.color_source = get_color_source(pal_source);
 
 	const char * color = al_get_config_value(config, section, "color_html");
 	if(color)
