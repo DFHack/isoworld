@@ -42,29 +42,15 @@ These are the tiles that appear on the map. Isoworld will load all of them that 
 [SPRITE]
 height_max=280 					#the maximum allowable height for the tile. if the height on the terrain is above this, the tile will be skipped, and the next one on the list will be tested for drawing.
 height_min=0					#the minimum height that the tile will be drawn.
-temperature_max=256				#the rest of these ranges are optional, and should not be used unless as a last resort, as it's slower than just selecting based off of biome directly.
-temperature_min=0
-rainfall_max=256
-rainfall_min=0
-drainage_max=256
-drainage_min=0
-savagery_max=256
-savagery_min=0
-volcanism_max=256
-volcanism_min=0
-vegetation_max=256
-vegetation_min=0
-evil_max=256
-evil_min=0
-salinity_max=256
-salinity_min=0
 priority=0						#The priority of the tile. if two tiles are found that match the given terrain, the one with the lower number will be drawn.
 special_terrain=any				#The biome for which this tile should be drawn. see the later section for a full list.
+special_object=none				#additional objects on the terrain. This includes rivers, and all manmade objects.
 cap_layers=1					#Number of sprite laters that make up the top of the tile. The sprites themselves are listed later.
 column_layers=1					#Number of sprites that make up the side of the column. these are tiled from the top downwards, with the bottom one shifted upwards to make it line up right. it's better to have a few larger ones than a lot of smaller ones, speed-wise.
 surface_layers=0				#Similar to the cap layers, but used for the ocean and lake surfaces.
+object_layers=0					#This is for objects that sit on top of the terrain. Anything in these layers will be not be drawn if there is any special objects on the terrain, such as rivers, roads, and towns.
 intermediate_layers=0			#Similar to the column layers, but they get drawn between the surface and the bottom of oceans and lakes.
-[CAP_IMAGE_0][SURFACE_IMAGE_0][COLUMN_IMAGE_0][INTERMEDIATE_IMAGE_0]
+[OBJECT_IMAGE_0][CAP_IMAGE_0][SURFACE_IMAGE_0][COLUMN_IMAGE_0][INTERMEDIATE_IMAGE_0]
 x=0								#X location on the tileset image of the top-left corner of the sprite.
 y=0								#Y location.
 width=32						#width of the sprite.
@@ -87,40 +73,64 @@ biome_map						#The color is taken from the biome map that is exported from DF.
 ==special_terrain==
 any								#This tile will be used for any terrain, unless excluded by a different tag.
 none							#This tile will only show up if the biome map has a biome that's not recognised by Isoworld.
-ocean							#the rest are pretty self explanatory.
-river
-brook
-swamp
-marsh
-grassland_temperate
-grassland_tropical
-forest_temperate
-forest_tropical
-badlands
-rock
-beach
-taiga
+mountain						#the rest are pretty self explanatory.
+temperate_freshwater_lake
+temperate_brackish_lake
+temperate_saltwater_lake
+tropical_freshwater_lake
+tropical_brackish_lake
+tropical_saltwater_lake
+arctic_ocean
+tropical_ocean
+temperate_ocean
 glacier
 tundra
-mountain
-mountain_tall
+temperate_freshwater_swamp
+temperate_saltwater_swamp
+temperate_freshwater_marsh
+temperate_saltwater_marsh
+tropical_freshwater_swamp
+tropical_saltwater_swamp
+mangrove_swamp
+tropical_freshwater_marsh
+tropical_saltwater_marsh
+taiga_forest
+temperate_conifer_forest
+temperate_broadleaf_forest
+tropical_conifer_forest
+tropical_dry_broadleaf_forest
+tropical_moist_broadleaf_forest
+temperate_grassland
+temperate_savanna
+temperate_shrubland
+tropical_grassland
+tropical_savanna
+tropical_shrubland
+badland_desert
+sand_desert
+rock_desert
+
+==special_object==
+any								#This tile will be used for any objects on the terrain. Good for default, but make sure it has a low priority.
+none							#This tile will only show up on unbuilt terrain
+castle							#the rest are pretty self explanatory.
 village
-farm_planted
-farm_fallow
-farm_pasture
-fort_keep
-fort_wall
-fort_gate
-fort_court
-road
-bridge
+crops_1
+crops_2
+crops_3
+pasture
+meadow
+woodland
+orchard
 tunnel
-dwarven_fortress_center
-dwarven_fortress_walls
-goblin_fortress_center
-goblin_fortress_walls
-elven_retreat_center
-elven_retreat_walls
+stone_bridge
+other_bridge
+stone_road
+other_road
+stone_wall
+other_wall
+river
+brook
 
 ==offset_type==
 none							#There is no tile offset.
