@@ -350,12 +350,15 @@ int main(void)
 
 	int selection = 0;
 
+	bool mapmove = 0;
+
 	ALLEGRO_COLOR unselected = al_map_rgb(255,255,255);
 	ALLEGRO_COLOR selected = al_map_rgb(128,128,128);
 
 	ALLEGRO_KEYBOARD_STATE keys;
 	while (1) {
 		float h = al_get_display_height(display);
+		float w = al_get_display_width(display);
 		ALLEGRO_EVENT event;
 		al_wait_for_event(queue, &event);
 
@@ -424,9 +427,37 @@ int main(void)
 		/* When a mouse button is pressed, and no native dialog is
 		* shown already, we show a new one.
 		*/
+		if(event.type == ALLEGRO_EVENT_MOUSE_BUTTON_UP)
+		{
+			mapmove = false;
+		}
+		if(event.type == ALLEGRO_EVENT_MOUSE_AXES)
+		{
+			if(mapmove)
+			{
+				if ((event.mouse.x >= w - user_config.minimap_size) && (event.mouse.y >= user_config.minimap_size))
+				{
+					mapmove = true;
+					int relx = event.mouse.x - w + user_config.minimap_size -1;
+					int rely = event.mouse.y - h + user_config.minimap_size -1;
+					user_config.map_x = (float)al_get_bitmap_width(map_list.biome_map)/user_config.minimap_size * relx;
+					user_config.map_y = (float)al_get_bitmap_height(map_list.biome_map)/user_config.minimap_size * rely;
+				}
+				else
+					mapmove = false;
+			}
+		}
 		if (event.type == ALLEGRO_EVENT_MOUSE_BUTTON_DOWN) {
 			log_printf("Mouse clicked at %d,%d.\n", event.mouse.x, event.mouse.y);
-			if (event.mouse.y > 30) {
+			if ((event.mouse.x >= w - user_config.minimap_size) && (event.mouse.y >= user_config.minimap_size))
+			{
+				mapmove = true;
+				int relx = event.mouse.x - w + user_config.minimap_size -1;
+				int rely = event.mouse.y - h + user_config.minimap_size -1;
+				user_config.map_x = (float)al_get_bitmap_width(map_list.biome_map)/user_config.minimap_size * relx;
+				user_config.map_y = (float)al_get_bitmap_height(map_list.biome_map)/user_config.minimap_size * rely;
+			}
+			else if (event.mouse.y > 30) {
 				if (event.mouse.y > h - 30) {
 					message_log = !message_log;
 					if (message_log) {

@@ -26,6 +26,145 @@ int get_map_height(int x, int y)
 	}
 	else return 100;
 }
+
+const char * get_terrain_string(terrain_type input)
+{
+	switch(input)
+	{
+	case TERRAIN_ANY:
+		return "any";
+	case TERRAIN_NONE:
+		return "none";
+	case TERRAIN_MOUNTAIN:
+		return "mountain";
+	case TERRAIN_LAKE_TEMP_FRESH:
+		return "temperate_freshwater_lake";
+	case TERRAIN_LAKE_TEMP_BRACK:
+		return "temperate_brackish_lake";
+	case TERRAIN_LAKE_TEMP_SALT:
+		return "temperate_saltwater_lake";
+	case TERRAIN_LAKE_TROP_FRESH:
+		return "tropical_freshwater_lake";
+	case TERRAIN_LAKE_TROP_BRACK:
+		return "tropical_brackish_lake";
+	case TERRAIN_LAKE_TROP_SALT:
+		return "tropical_saltwater_lake";
+	case TERRAIN_OCEAN_ARCT:
+		return "arctic_ocean";
+	case TERRAIN_OCEAN_TROP:
+		return "tropical_ocean";
+	case TERRAIN_OCEAN_TEMP:
+		return "temperate_ocean";
+	case TERRAIN_GLACIER:
+		return "glacier";
+	case TERRAIN_TUNDRA:
+		return "tundra";
+	case TERRAIN_SWAMP_TEMP_FRESH:
+		return "temperate_freshwater_swamp";
+	case TERRAIN_SWAMP_TEMP_SALT:
+		return "temperate_saltwater_swamp";
+	case TERRAIN_MARSH_TEMP_FRESH:
+		return "temperate_freshwater_marsh";
+	case TERRAIN_MARSH_TEMP_SALT:
+		return "temperate_saltwater_marsh";
+	case TERRAIN_SWAMP_TROP_FRESH:
+		return "tropical_freshwater_swamp";
+	case TERRAIN_SWAMP_TROP_SALT:
+		return "tropical_saltwater_swamp";
+	case TERRAIN_SWAMP_MANGROVE:
+		return "mangrove_swamp";
+	case TERRAIN_MARSH_TROP_FRESH:
+		return "tropical_freshwater_marsh";
+	case TERRAIN_MARSH_TROP_SALT:
+		return "tropical_saltwater_marsh";
+	case TERRAIN_FOREST_TAIGA:
+		return "taiga_forest";
+	case TERRAIN_FOREST_TEMP_FIR:
+		return "temperate_conifer_forest";
+	case TERRAIN_FOREST_TEMP_BROAD:
+		return "temperate_broadleaf_forest";
+	case TERRAIN_FOREST_TROP_FIR:
+		return "tropical_conifer_forest";
+	case TERRAIN_FOREST_TROP_BROAD_DRY:
+		return "tropical_dry_broadleaf_forest";
+	case TERRAIN_FOREST_TROP_BROAD_MOIST:
+		return "tropical_moist_broadleaf_forest";
+	case TERRAIN_GRASS_TEMP:
+		return "temperate_grassland";
+	case TERRAIN_SAV_TEMP:
+		return "temperate_savanna";
+	case TERRAIN_SHRUB_TEMP:
+		return "temperate_shrubland";
+	case TERRAIN_GRASS_TROP:
+		return "tropical_grassland";
+	case TERRAIN_SAV_TROP:
+		return "tropical_savanna";
+	case TERRAIN_SHRUB_TROP:
+		return "tropical_shrubland";
+	case TERRAIN_DESERT_BAD:
+		return "badland_desert";
+	case TERRAIN_DESERT_SAND:
+		return "sand_desert";
+	case TERRAIN_DESERT_ROCK:
+		return "rock_desert";
+	case TERRAIN_MOUNTAIN_TALL:
+		return "tall_mountain";
+	case TERRAIN_BEACH_TEMP:
+		return "temperate_beach";
+	case TERRAIN_BEACH_TROP:
+		return "tropical_beach";
+	case TERRAIN_BEACH_ARCT:
+		return "arctic_beach";
+	}
+	return "ERROR";
+}
+const char* get_structure_string(structure_type input)
+{
+	switch(input)
+	{
+	case STRUCTURE_ANY:
+		return "any";
+	case STRUCTURE_NONE:
+		return "none";
+	case STRUCTURE_CASTLE:
+		return "castle";
+	case STRUCTURE_VILLAGE:
+		return "village";
+	case STRUCTURE_CROPS1:
+		return "crops_1";
+	case STRUCTURE_CROPS2:
+		return "crops_2";
+	case STRUCTURE_CROPS3:
+		return "crops_3";
+	case STRUCTURE_PASTURE:
+		return "pasture";
+	case STRUCTURE_MEADOW:
+		return "meadow";
+	case STRUCTURE_WOODLAND:
+		return "woodland";
+	case STRUCTURE_ORCHARD:
+		return "orchard";
+	case STRUCTURE_TUNNEL:
+		return "tunnel";
+	case STRUCTURE_BRIDGE_STONE:
+		return "stone_bridge";
+	case STRUCTURE_BRIDGE_OTHER:
+		return "other_bridge";
+	case STRUCTURE_ROAD_STONE:
+		return "stone_road";
+	case STRUCTURE_ROAD_OTHER:
+		return "other_road";
+	case STRUCTURE_WALL_STONE:
+		return "stone_wall";
+	case STRUCTURE_WALL_OTHER:
+		return "other_wall";
+	case STRUCTURE_RIVER:
+		return "river";
+	case STRUCTURE_BROOK:
+		return "brook";
+	}
+	return "ERROR";
+}
 bool approx_f(float a, float b, float accuracy)
 {
 	return (abs(a-b) <= accuracy);
@@ -130,7 +269,11 @@ void c_map_section::draw(int inx, int iny)
 
 			int height_back = block_array[index].height;
 			if(x==(board_width/2) && y==(board_height/2) && user_config.debugmode)
-				block_array[index].height =280;
+			{
+				int diff = 280-block_array[index].water_height;
+				block_array[index].height +=diff;
+				block_array[index].water_height +=diff;
+			}
 
 			int bottom_l = 0;
 			int bottom_r = 0;
@@ -946,6 +1089,6 @@ void c_map_section::draw_debug_info()
 	int y = 0;
 
 	al_draw_textf(user_config.font, color, user_config.res_x, y += al_get_font_line_height(user_config.font), ALLEGRO_ALIGN_RIGHT, "Height: %d", block_array[coords_to_index(board_width/2, board_height/2)].height);
-	al_draw_textf(user_config.font, color, user_config.res_x, y += al_get_font_line_height(user_config.font), ALLEGRO_ALIGN_RIGHT, "Terrain number: %d", block_array[coords_to_index(board_width/2, board_height/2)].terrain);
-	al_draw_textf(user_config.font, color, user_config.res_x, y += al_get_font_line_height(user_config.font), ALLEGRO_ALIGN_RIGHT, "Structure number: %d", block_array[coords_to_index(board_width/2, board_height/2)].structure);
+	al_draw_textf(user_config.font, color, user_config.res_x, y += al_get_font_line_height(user_config.font), ALLEGRO_ALIGN_RIGHT, "special_terrain: %s", get_terrain_string(block_array[coords_to_index(board_width/2, board_height/2)].terrain));
+	al_draw_textf(user_config.font, color, user_config.res_x, y += al_get_font_line_height(user_config.font), ALLEGRO_ALIGN_RIGHT, "special_object: %s", get_structure_string(block_array[coords_to_index(board_width/2, board_height/2)].structure));
 }

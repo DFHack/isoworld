@@ -23,6 +23,7 @@ enum e_color_source
 enum e_offset_type
 {
 	OFFSET_NONE,
+	OFFSET_SIXTEEN,
 	OFFSET_PATH,
 	OFFSET_PAIR,
 	OFFSET_SIX,

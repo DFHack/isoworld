@@ -4,6 +4,43 @@
 #include "console.h"
 #include "c_tileset.h"
 
+int get_border_offset_sixteen(unsigned char in)
+{
+	if((in&(2|8|32|128)) == (2|8|32|128))
+		return 15;
+	else if((in&(2|8|128)) == (2|8|128))
+		return 14;
+	else if((in&(2|32|128)) == (2|32|128))
+		return 13;
+	else if((in&(8|32|128)) == (8|32|128))
+		return 12;
+	else if((in&(2|8|32)) == (2|8|32))
+		return 11;
+	else if((in&(2|128)) == (2|128))
+		return 10;
+	else if((in&(32|128)) == (32|128))
+		return 9;
+	else if((in&(8|32)) == (8|32))
+		return 8;
+	else if((in&(2|8)) == (2|8))
+		return 7;
+	else if((in&(8|32)) == (8|32))
+		return 6;
+	else if((in&(2|32)) == (2|32))
+		return 5;
+	else if((in&128) == 128)
+		return 4;
+	else if((in&32) == 32)
+		return 3;
+	else if((in&8) == 8)
+		return 2;
+	else if((in&2) == 2)
+		return 1;
+	else if(in == 0)
+		return 0;
+	return -1;
+}
+
 int get_border_offset_path(unsigned char in)
 {
 	if((in&(2|8|32|128)) == (2|8|32|128))
@@ -103,7 +140,7 @@ ALLEGRO_COLOR mix_colors( ALLEGRO_COLOR lhs, ALLEGRO_COLOR rhs)
 	return lhs;
 }
 
-void draw_sprite(c_tileset * tileset, s_sprite sprite, s_map_block * block, float x, float y, int shrink, bool flip = 0, int offset = 0)
+void draw_sprite(c_tileset * tileset, s_sprite sprite, s_map_block * block, float x, float y, int shrink, bool flip = 0, int offset = 0, bool shiftup = false)
 {
 	if(offset < 0)
 		return;
@@ -147,7 +184,7 @@ void draw_sprite(c_tileset * tileset, s_sprite sprite, s_map_block * block, floa
 		imagelist.get_image(sprite.index),
 		color,
 		sprite.x + (sprite.width * offset),
-		sprite.y + shrink,
+		sprite.y + ((!shiftup)*shrink),
 		sprite.width,
 		sprite.height - shrink,
 		x + sprite.origin_x,
@@ -265,6 +302,8 @@ terrain_type get_terrain_type(const char * text)
 		return TERRAIN_BEACH_ARCT;
 	return TERRAIN_ANY;
 }
+
+
 structure_type get_structure_type(const char * text)
 {
 	if(strcmp(text, "any") == 0)
@@ -322,6 +361,8 @@ e_offset_type get_offset_type(const char * text)
 		return OFFSET_PAIR;
 	if(strcmp(text, "six") == 0)
 		return OFFSET_SIX;
+	if(strcmp(text, "sixteen") == 0)
+		return OFFSET_SIXTEEN;
 	if(strcmp(text, "four") == 0)
 		return OFFSET_FOUR;
 	if(strcmp(text, "random") == 0)
@@ -331,16 +372,19 @@ e_offset_type get_offset_type(const char * text)
 
 int get_offset(e_offset_type type, char borders, s_map_block * block, unsigned char amount)
 {
-	if(type == OFFSET_PATH)
-		return get_border_offset_path(borders);
-	else if(type == OFFSET_PAIR)
-		return get_border_offset_pair(borders);
-	else if(type == OFFSET_SIX)
-		return get_border_offset_six(borders);
-	else if(type == OFFSET_FOUR)
-		return get_border_offset_four(borders);
-	else if(type == OFFSET_RANDOM)
+	switch(type)
 	{
+	case OFFSET_SIXTEEN:
+		return get_border_offset_sixteen(borders);
+	case OFFSET_PATH:
+		return get_border_offset_path(borders);
+	case OFFSET_PAIR:
+		return get_border_offset_pair(borders);
+	case OFFSET_SIX:
+		return get_border_offset_six(borders);
+	case OFFSET_FOUR:
+		return get_border_offset_four(borders);
+	case OFFSET_RANDOM:
 		int off = amount*block->random;
 		if(off >= amount)
 			off=0;
@@ -386,6 +430,48 @@ void c_tile::draw(float x, float y, int height, int bottom, int surface, s_map_b
 	switch (drawlayer)
 	{
 	case LAYER_BASE:
+		//Draw ocean layer first.
+		if(height < surface)
+		{
+			for(unsigned int i = 0; i < intermediate_sprites.size(); i++)
+			{
+				int num_sections = (surface - height) / intermediate_sprites.at(i).column_height;
+				int bottom_section_height = (surface - height) % intermediate_sprites.at(i).column_height;
+				int offset = get_offset(
+					intermediate_sprites.at(i).offset_type,
+					block->structure==STRUCTURE_NONE?
+					(block->terrain_borders[intermediate_sprites.at(i).border_terrain?intermediate_sprites.at(i).border_terrain:block->terrain])
+					:block->structure_borders[intermediate_sprites.at(i).border_structure?intermediate_sprites.at(i).border_structure:block->structure],
+					block,
+					intermediate_sprites.at(i).offset_amount);
+				if(bottom_section_height)
+				{
+					draw_sprite(
+						tileset,
+						intermediate_sprites.at(i), 
+						block,
+						x, 
+						y - surface + (num_sections * intermediate_sprites.at(i).column_height),
+						intermediate_sprites.at(i).column_height - bottom_section_height,
+						flip,
+						offset,
+						true);
+				}
+				for( int sec = 0; sec < num_sections; sec++)
+				{
+					draw_sprite(
+						tileset,
+						intermediate_sprites.at(i), 
+						block,
+						x, 
+						y - surface + (sec * intermediate_sprites.at(i).column_height),
+						0,
+						flip,
+						offset);
+				}
+			}
+		}
+		//next comes the bottom layers
 		if ((height-bottom) <= 0)
 		{
 			for(unsigned int i = 0; i < top_sprites.size(); i++)
@@ -464,45 +550,6 @@ void c_tile::draw(float x, float y, int height, int bottom, int surface, s_map_b
 					0,
 					flip,
 					offset);
-			}
-		}
-		if(height < surface)
-		{
-			for(unsigned int i = 0; i < intermediate_sprites.size(); i++)
-			{
-				int num_sections = (surface - height) / intermediate_sprites.at(i).column_height;
-				int bottom_section_height = (surface - height) % intermediate_sprites.at(i).column_height;
-				int offset = get_offset(
-					intermediate_sprites.at(i).offset_type,
-					block->structure==STRUCTURE_NONE?
-					(block->terrain_borders[intermediate_sprites.at(i).border_terrain?intermediate_sprites.at(i).border_terrain:block->terrain])
-					:block->structure_borders[intermediate_sprites.at(i).border_structure?intermediate_sprites.at(i).border_structure:block->structure],
-					block,
-					intermediate_sprites.at(i).offset_amount);
-				if(bottom_section_height)
-				{
-					draw_sprite(
-						tileset,
-						intermediate_sprites.at(i), 
-						block,
-						x, 
-						y - surface + (num_sections * intermediate_sprites.at(i).column_height),
-						intermediate_sprites.at(i).column_height - bottom_section_height,
-						flip,
-						offset);
-				}
-				for( int sec = 0; sec < num_sections; sec++)
-				{
-					draw_sprite(
-						tileset,
-						intermediate_sprites.at(i), 
-						block,
-						x, 
-						y - surface + (sec * intermediate_sprites.at(i).column_height),
-						0,
-						flip,
-						offset);
-				}
 			}
 		}
 		for(unsigned int i = 0; i < surface_sprites.size(); i++)
