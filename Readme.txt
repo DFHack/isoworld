@@ -1,8 +1,7 @@
 ====Introduction====
 Iso world is a little program I made that opens the worldmaps from df, but you knew that already.
 
-To use it, export all the detailed maps from DF, then open one of them. the rest will get loaded automatically. if they don't, you can manually put the path isoworld.ini.
-If you are impatient, you can get away with just exporting the biome, elevation, and elevation with water maps. you just won't get some of the tiles that depend on the others.
+To use it, export the elevation, elevation with water, biome (NOT that standard biome+elevation map), and structure maps from DF, then open one of them. the rest will get loaded automatically. if they don't, you can manually put the path isoworld.ini.
 
 ====Key bindings====
 
@@ -13,6 +12,8 @@ q					Decrease ligting quality.
 w					Increase ligting quality.
 arrow keys			Move around.
 shift				Inncrease scroll speed.
+left click (on minimap)	Jump to area on map.
+right click drag	Move around.
 
 ====How to make a tileset====
 Tilesets are stored in three main groups of files, tilesets.ini, which contains a list of all the tilesets that should be loaded, a main tileset config, and a number of tile configs. the structure is as follows:
@@ -34,7 +35,7 @@ tile_height=16					#The height of the main portion of the tiles. used by the til
 snap_height						#Optional. If set, this 
 grid_tile						#A tile containing a single diagonal line, for use in the grid.
 tile_dir						#Directory containing all the tiles. if the tiles are in the same folder as the tileset config, simply put './' without the quotes.
-
+palette_file					#image file containing color gradients. Each pixel column is one gradient, can be any size, but only 280 pixels tall is of any use.
 
 ===Individual tile configs===
 These are the tiles that appear on the map. Isoworld will load all of them that are in a directory, and draw the first one in a list that it finds that matches all the given paramiters. If no match is found, no tile is drawn, so it's best to have a default tile that can always get drawn.
@@ -134,6 +135,7 @@ brook
 
 ==offset_type==
 none							#There is no tile offset.
+sixteen							#Sprite is chosen from a list of sixteen possible neighbor boundaries.
 path							#The sprite is chosen from a list of 10 directions. good for rivers, walls, and roads.
 pair							#A pair of two sprites are chosen betwen, one in the / direction, the other in the \ direction.
 six								#similar to the path one, but with no T or X sections

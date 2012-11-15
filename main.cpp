@@ -341,8 +341,6 @@ int main(void)
 
 	minimap.reload();
 
-	c_tileset temp_tileset;
-
 	test_map.load_tilesets("tilesets.ini");
 
 	test_map.board_center_x = 0;
@@ -351,6 +349,11 @@ int main(void)
 	int selection = 0;
 
 	bool mapmove = 0;
+	bool rightmove = 0;
+	int mousemove_start_x = 0;
+	int mousemove_start_y = 0;
+	int mapmove_start_x = 0;
+	int mapmove_start_y = 0;
 
 	ALLEGRO_COLOR unselected = al_map_rgb(255,255,255);
 	ALLEGRO_COLOR selected = al_map_rgb(128,128,128);
@@ -430,6 +433,7 @@ int main(void)
 		if(event.type == ALLEGRO_EVENT_MOUSE_BUTTON_UP)
 		{
 			mapmove = false;
+			rightmove = false;
 		}
 		if(event.type == ALLEGRO_EVENT_MOUSE_AXES)
 		{
@@ -446,10 +450,23 @@ int main(void)
 				else
 					mapmove = false;
 			}
+			if(rightmove)
+			{
+				user_config.map_x = mapmove_start_x - ((event.mouse.x - mousemove_start_x) / test_map.tileset_list[test_map.current_tileset].tile_width) - ((event.mouse.y - mousemove_start_y) / test_map.tileset_list[test_map.current_tileset].tile_height);
+				user_config.map_y = mapmove_start_y + ((event.mouse.x - mousemove_start_x) / test_map.tileset_list[test_map.current_tileset].tile_width) - ((event.mouse.y - mousemove_start_y) / test_map.tileset_list[test_map.current_tileset].tile_height);
+			}
 		}
 		if (event.type == ALLEGRO_EVENT_MOUSE_BUTTON_DOWN) {
 			log_printf("Mouse clicked at %d,%d.\n", event.mouse.x, event.mouse.y);
-			if ((event.mouse.x >= w - user_config.minimap_size) && (event.mouse.y >= user_config.minimap_size))
+			if(event.mouse.button == 2)
+			{
+				rightmove = true;
+				mousemove_start_x = event.mouse.x;
+				mousemove_start_y = event.mouse.y;
+				mapmove_start_x = user_config.map_x;
+				mapmove_start_y = user_config.map_y;
+			}
+			else if ((event.mouse.x >= w - user_config.minimap_size) && (event.mouse.y >= user_config.minimap_size))
 			{
 				mapmove = true;
 				int relx = event.mouse.x - w + user_config.minimap_size -1;

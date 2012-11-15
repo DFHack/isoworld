@@ -504,7 +504,7 @@ void c_tile::draw(float x, float y, int height, int bottom, int surface, s_map_b
 					bottom_sprites.at(i).offset_type,
 					block->structure==STRUCTURE_NONE?
 					(block->terrain_borders[bottom_sprites.at(i).border_terrain?bottom_sprites.at(i).border_terrain:block->terrain])
-					:block->structure_borders[top_sprites.at(i).border_structure?top_sprites.at(i).border_structure:block->structure],
+					:block->structure_borders[bottom_sprites.at(i).border_structure?bottom_sprites.at(i).border_structure:block->structure],
 					block,
 					bottom_sprites.at(i).offset_amount);
 				if(bottom_section_height)
