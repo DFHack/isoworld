@@ -127,10 +127,10 @@ ELSE(UNIX)
         ${CMAKE_CURRENT_SOURCE_DIR}/allegro/lib
     )
 ENDIF(UNIX)
-
+SET(PROJECT_SRCS ${PROJECT_SRCS} ${CMAKE_CURRENT_SOURCE_DIR}/../proto/isoworldremote.pb.cc)
 ADD_EXECUTABLE(isoworld ${PROJECT_SRCS})
 
-TARGET_LINK_LIBRARIES(isoworld protobuf-lite ${PROJECT_LIBS})
+TARGET_LINK_LIBRARIES(isoworld protobuf-lite dfhack-client ${PROJECT_LIBS})
 
 #install resources into DF/isoworld
 install(DIRECTORY resources/

@@ -14,6 +14,14 @@
 #include "console.h"
 #include "c_minimap.h"
 #include "c_tileset.h"
+#include "isoworldremote.pb.h"
+#include "RemoteClient.h"
+
+//Needed for writing the protobuff stuff to a file.
+#include <fstream>
+#include <string>
+#include <iomanip>
+
 
 using namespace std;
 
@@ -68,6 +76,8 @@ c_config user_config;
 c_minimap minimap;
 
 c_imagelist imagelist;
+
+std::string current_save;
 /* Our thread to show the native file dialog. */
 static void *async_file_dialog_thread_func(ALLEGRO_THREAD *thread, void *arg)
 {
@@ -177,7 +187,11 @@ void populate_filenames(string input, s_pathlist * paths)
 		) {
 			input.erase(0, 5);
 	}
-
+    //save the resulting name to a gobal
+    current_save = input;
+    current_save.erase(current_save.find_last_of("-"), std::string::npos); // -16014.bmp
+    current_save.erase(current_save.find_last_of("-"), std::string::npos); // -250
+    log_printf("Loaded up %s\n", current_save.c_str());
 	//and now it's time to fill out the list of image paths	
 	paths->biome_map = al_clone_path(base_path);
 	sprintf(buffer, "world_graphic-bm-%s", input.c_str());
@@ -266,6 +280,7 @@ int main(void)
 {
 	ALLEGRO_DISPLAY *display;
 	ALLEGRO_TIMER *timer;
+    ALLEGRO_TIMER *network_timer;
 	ALLEGRO_EVENT_QUEUE *queue;
 	ALLEGRO_COLOR background, active, inactive, info;
 	AsyncDialog *old_dialog = NULL;
@@ -323,18 +338,20 @@ int main(void)
 	log_printf("success.\n");
 
 	timer = al_create_timer(1.0 / 30);
+    network_timer = al_create_timer(1.0);
 	log_printf("Starting main loop.\n");
 	queue = al_create_event_queue();
 	al_register_event_source(queue, al_get_keyboard_event_source());
 	al_register_event_source(queue, al_get_mouse_event_source());
 	al_register_event_source(queue, al_get_display_event_source(display));
 	al_register_event_source(queue, al_get_timer_event_source(timer));
+	al_register_event_source(queue, al_get_timer_event_source(network_timer));
 	if (textlog) {
 		al_register_event_source(queue, al_get_native_text_log_event_source(
 			textlog));
 	}
 	al_start_timer(timer);
-
+    al_start_timer(network_timer);
 	c_map_section test_map;
 
 	test_map.set_size(user_config.map_width, user_config.map_height);
@@ -345,6 +362,28 @@ int main(void)
 
 	test_map.board_center_x = 0;
 	test_map.board_top_y = 0;
+
+    DFHack::color_ostream_wrapper out(cout);
+
+    bool connected = 0;
+    //Now attempt to connect to DF.
+    DFHack::RemoteClient client(&out);
+    connected = client.connect();
+    using namespace isoworldremote;
+    DFHack::RemoteFunction<MapRequest, MapReply> EmbarkInfoCall;
+    if(connected) {
+        EmbarkInfoCall.bind(&client, "GetEmbarkInfo", "isoworldremote");
+        MapRequest request;
+        MapReply reply;
+        request.set_save_folder(current_save);
+        EmbarkInfoCall(&request, &reply);
+        if(reply.available()){
+            log_printf("Current_Year: %d", reply.current_year());
+        }
+        else log_printf("connection failed, somehow.");
+    }
+    client.disconnect();
+
 
 	int selection = 0;
 
@@ -444,8 +483,8 @@ int main(void)
 					mapmove = true;
 					int relx = event.mouse.x - w + user_config.minimap_size -1;
 					int rely = event.mouse.y - h + user_config.minimap_size -1;
-					user_config.map_x = (float)al_get_bitmap_width(map_list.biome_map)/user_config.minimap_size * relx;
-					user_config.map_y = (float)al_get_bitmap_height(map_list.biome_map)/user_config.minimap_size * rely;
+					user_config.map_x = (float)al_get_bitmap_width(map_list.biome_map)/user_config.minimap_size * relx - user_config.map_width/2;
+					user_config.map_y = (float)al_get_bitmap_height(map_list.biome_map)/user_config.minimap_size * rely - user_config.map_height/2;
 				}
 				else
 					mapmove = false;
@@ -471,8 +510,8 @@ int main(void)
 				mapmove = true;
 				int relx = event.mouse.x - w + user_config.minimap_size -1;
 				int rely = event.mouse.y - h + user_config.minimap_size -1;
-				user_config.map_x = (float)al_get_bitmap_width(map_list.biome_map)/user_config.minimap_size * relx;
-				user_config.map_y = (float)al_get_bitmap_height(map_list.biome_map)/user_config.minimap_size * rely;
+				user_config.map_x = (float)al_get_bitmap_width(map_list.biome_map)/user_config.minimap_size * relx - user_config.map_width/2;
+				user_config.map_y = (float)al_get_bitmap_height(map_list.biome_map)/user_config.minimap_size * rely - user_config.map_height/2;
 			}
 			else if (event.mouse.y > 30) {
 				if (event.mouse.y > h - 30) {
@@ -527,6 +566,7 @@ int main(void)
 		}
 
 		if (event.type == ALLEGRO_EVENT_TIMER) {
+
 			redraw = true;
 		}
 		if (event.type == ALLEGRO_EVENT_DISPLAY_RESIZE) {

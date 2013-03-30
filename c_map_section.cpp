@@ -214,7 +214,7 @@ bool c_map_section::set_size(int x, int y)
 
 	num_tiles = total_needed;
 
-	for(int i = 0; i < num_tiles; i++)
+	for(unsigned int i = 0; i < num_tiles; i++)
 	{
 		block_array[i].color = al_map_rgb(255,255,255);
 		block_array[i].height = 0;
