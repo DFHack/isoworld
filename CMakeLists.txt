@@ -1,46 +1,7 @@
-# main project file. use it from a build sub-folder, see COMPILE for details
+PROJECT (isoworld)
+SET(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/CMake/Modules)
 
-## some generic CMake magic
-cmake_minimum_required(VERSION 2.8 FATAL_ERROR)
-project(isoworld)
-
-if(MSVC)
-# disable C4819 code-page warning
-add_definitions( "/wd4819" )
-endif()
-
-# set up folder structures for IDE solutions
-# MSVC Express won't load solutions that use this. It also doesn't include MFC supported
-# Check for MFC!
-find_package(MFC QUIET)
-if(MFC_FOUND OR (NOT MSVC))
-    OPTION(CMAKE_USE_FOLDERS "Enable folder grouping of projects in IDEs." ON)
-else()
-    OPTION(CMAKE_USE_FOLDERS "Enable folder grouping of projects in IDEs." OFF)
-endif()
-
-if(CMAKE_USE_FOLDERS)
-    SET_PROPERTY(GLOBAL PROPERTY USE_FOLDERS ON)
-else()
-    SET_PROPERTY(GLOBAL PROPERTY USE_FOLDERS OFF)
-endif()
-
-# macro for setting up IDE folders without nasty IF()s everywhere
-MACRO(IDE_FOLDER target folder)
-    if(CMAKE_USE_FOLDERS)
-        SET_PROPERTY(TARGET ${target} PROPERTY FOLDER ${folder})
-    endif()
-ENDMACRO()
-
-SET(CMAKE_MODULE_PATH
-${CMAKE_CURRENT_SOURCE_DIR}/CMake/Modules
-${CMAKE_MODULE_PATH}
-)
-
-# mixing the build system with the source code is ugly and stupid. enforce the opposite :)
-if("${CMAKE_SOURCE_DIR}" STREQUAL "${CMAKE_BINARY_DIR}")
-   message(FATAL_ERROR "In-source builds are not allowed.")
-endif()
+include_directories (${CMAKE_SOURCE_DIR})
 
 SET(PROJECT_SRCS
 	c_config.cpp
@@ -169,4 +130,15 @@ ENDIF(UNIX)
 
 ADD_EXECUTABLE(isoworld ${PROJECT_SRCS})
 
-TARGET_LINK_LIBRARIES(isoworld ${PROJECT_LIBS})
+TARGET_LINK_LIBRARIES(isoworld protobuf-lite ${PROJECT_LIBS})
+
+#install resources into DF/isoworld
+install(DIRECTORY resources/
+        DESTINATION "isoworld"
+        PATTERN "CVS" EXCLUDE
+        PATTERN ".svn" EXCLUDE)
+# install readme
+install(FILES README.txt DESTINATION isoworld)
+install(TARGETS isoworld
+		LIBRARY DESTINATION ${DFHACK_LIBRARY_DESTINATION}
+        RUNTIME DESTINATION ${DFHACK_LIBRARY_DESTINATION})

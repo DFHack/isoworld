@@ -313,11 +313,11 @@ int main(void)
 	}
 	log_printf("success.\n");
 
-	log_printf("Loading font '%s'...", "DejaVuSans.ttf");
-	user_config.font = al_load_font("DejaVuSans.ttf", 14, 0);
+	log_printf("Loading font '%s'...", "isoworld/DejaVuSans.ttf");
+	user_config.font = al_load_font("isoworld/DejaVuSans.ttf", 14, 0);
 	if (!user_config.font) {
 		log_printf("failure.\n");
-		abort_example("Error loading DejaVuSans.ttf\n");
+		abort_example("Error loading isoworld/DejaVuSans.ttf\n");
 		return 1;
 	}
 	log_printf("success.\n");
@@ -341,7 +341,7 @@ int main(void)
 
 	minimap.reload();
 
-	test_map.load_tilesets("tilesets.ini");
+	test_map.load_tilesets("isoworld/tilesets.ini");
 
 	test_map.board_center_x = 0;
 	test_map.board_top_y = 0;
