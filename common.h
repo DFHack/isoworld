@@ -12,6 +12,8 @@
 #include <string>
 using namespace std;
 
+class DetailedMap;
+
 struct s_pathlist
 {
 	ALLEGRO_PATH * biome_map;
@@ -41,6 +43,7 @@ struct s_maplist
 	//ALLEGRO_BITMAP * vegetation_map;
 	//ALLEGRO_BITMAP * evil_map;
 	//ALLEGRO_BITMAP * salinity_map;
+    DetailedMap * rendered_map;
 	s_maplist(void);
 };
 

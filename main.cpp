@@ -16,6 +16,7 @@
 #include "c_tileset.h"
 #include "isoworldremote.pb.h"
 #include "RemoteClient.h"
+#include "DetailedTile.h"
 
 //Needed for writing the protobuff stuff to a file.
 #include <fstream>
@@ -138,6 +139,7 @@ void destroy_bitmaps(s_maplist * maps)
 	al_destroy_bitmap(maps->elevation_map_with_water);
 	al_destroy_bitmap(maps->biome_map);
 	al_destroy_bitmap(maps->structure_map);
+    delete maps->rendered_map;
 }
 
 void load_bitmaps(s_pathlist * paths, s_maplist * maps)
@@ -149,6 +151,8 @@ void load_bitmaps(s_pathlist * paths, s_maplist * maps)
 	maps->elevation_map_with_water = al_load_bitmap(al_path_cstr(paths->elevation_map_with_water, ALLEGRO_NATIVE_PATH_SEP));
 	maps->biome_map = al_load_bitmap(al_path_cstr(paths->biome_map, ALLEGRO_NATIVE_PATH_SEP));
 	maps->structure_map = al_load_bitmap(al_path_cstr(paths->structure_map, ALLEGRO_NATIVE_PATH_SEP));
+
+    maps->rendered_map = new DetailedMap(al_get_bitmap_width(maps->elevation_map), al_get_bitmap_height(maps->elevation_map));
 
 	al_set_new_bitmap_flags(backup);
 }
@@ -365,24 +369,23 @@ int main(void)
 
     DFHack::color_ostream_wrapper out(cout);
 
-    bool connected = 0;
+    bool connected_to_df = 0;
     //Now attempt to connect to DF.
     DFHack::RemoteClient client(&out);
-    connected = client.connect();
+    connected_to_df = client.connect();
     using namespace isoworldremote;
+    MapRequest net_request;
+    MapReply net_reply;
+    TileRequest net_tile_request;
+    EmbarkTile net_embark_tile;
     DFHack::RemoteFunction<MapRequest, MapReply> EmbarkInfoCall;
-    if(connected) {
+    DFHack::RemoteFunction<TileRequest, EmbarkTile> EmbarkTileCall;
+    if(connected_to_df) {
         EmbarkInfoCall.bind(&client, "GetEmbarkInfo", "isoworldremote");
-        MapRequest request;
-        MapReply reply;
-        request.set_save_folder(current_save);
-        EmbarkInfoCall(&request, &reply);
-        if(reply.available()){
-            log_printf("Current_Year: %d", reply.current_year());
-        }
-        else log_printf("connection failed, somehow.");
+        EmbarkTileCall.bind(&client, "GetEmbarkTile", "isoworldremote");
+        net_request.set_save_folder(current_save);
+        EmbarkInfoCall(&net_request, &net_reply);
     }
-    client.disconnect();
 
 
 	int selection = 0;
@@ -561,14 +564,43 @@ int main(void)
 			cur_dialog = NULL;
 		}
 
-		if (event.type == ALLEGRO_EVENT_NATIVE_DIALOG_CLOSE) {
-			close_log = true;
-		}
+        if (event.type == ALLEGRO_EVENT_NATIVE_DIALOG_CLOSE) {
+            close_log = true;
+        }
 
-		if (event.type == ALLEGRO_EVENT_TIMER) {
-
-			redraw = true;
-		}
+        if (event.type == ALLEGRO_EVENT_TIMER) {
+            if(event.timer.source == timer)
+                redraw = true;
+            else if(event.timer.source == network_timer) {
+                if(connected_to_df) {
+                    net_request.set_save_folder(current_save);
+                    EmbarkInfoCall(&net_request, &net_reply);
+                    if(net_reply.available()) {
+                        for(int yy = 0; yy < net_reply.region_size_y(); yy++) {
+                            for(int xx = 0; xx < net_reply.region_size_x(); xx++) {
+                                DetailedTile * tile = map_list.rendered_map->get_tile(net_reply.region_x()+xx, net_reply.region_y()+yy);
+                                if(!tile)
+                                    tile = map_list.rendered_map->new_tile(net_reply.region_x()+xx, net_reply.region_y()+yy);
+                                if(tile) {
+                                    if(tile->year == net_reply.current_year()) {
+                                        if(tile->season == net_reply.current_season())
+                                            continue;
+                                    }
+                                }
+                                net_tile_request.set_want_x(xx);
+                                net_tile_request.set_want_y(yy);
+                                EmbarkTileCall(&net_tile_request, &net_embark_tile);
+                                tile->year = net_reply.current_year();
+                                tile->season = net_reply.current_season();
+                                tile->make_tile(&net_embark_tile, &test_map);
+                                goto EXIT_LOOP;
+                            }
+                        }
+EXIT_LOOP: ;
+                    }
+                }
+            }
+        }
 		if (event.type == ALLEGRO_EVENT_DISPLAY_RESIZE) {
 			al_acknowledge_resize(event.display.source);
 			user_config.res_x = al_get_display_width(display);
@@ -614,6 +646,8 @@ int main(void)
 	}
 
 	log_printf("Exiting.\n");
+    if(connected_to_df)
+        client.disconnect();
 
 	imagelist.unload_bitmaps();
 

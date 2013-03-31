@@ -28,6 +28,7 @@ public:
 	void clear_tiles(void);
 	void flood_fill(c_tile * tile, int height);
 	void pointToScreen(int *inx, int *iny);
+	void pointToSprite(float *inx, float *iny, int inz);
 	void load_heights(ALLEGRO_BITMAP * heightmap);
 	void load_water_level(ALLEGRO_BITMAP * watermap);
 	void load_colors(ALLEGRO_BITMAP * colormap);

@@ -2,6 +2,7 @@
 #include "c_config.h"
 #include "common.h"
 #include <cmath>
+#include "DetailedTile.h"
 
 int get_map_height(int x, int y)
 {
@@ -184,6 +185,19 @@ void c_map_section::pointToScreen(int *inx, int *iny)
 	*inx=x;*iny=y;
 }
 
+void c_map_section::pointToSprite(float *inx, float *iny, int inz)
+{
+    float offx = 0;
+    float offy = (tileset_list.at(current_tileset).tile_height/2)-inz+2;
+	float x = *inx-*iny;
+    float y = *inx+*iny;
+	x = x * tileset_list.at(current_tileset).tile_width / (48*2);
+	y = y * tileset_list.at(current_tileset).tile_height / (48*2);
+    x+=offx;
+    y+=offy;
+    *inx=floor(x+0.5f); *iny = floor(y+0.5f);
+}
+
 c_map_section::c_map_section(void)
 {
 	block_array = 0;
@@ -281,25 +295,29 @@ void c_map_section::draw(int inx, int iny)
 				bottom_r = block_array[index+1].height;
 			if(y+2 < board_height)
 				bottom_l = block_array[index+board_width].height;
-			if (bottom_l < bottom_r)
-				bottom_r = bottom_l;
-
-			if(block_array[index].sprite > 0)
-			{
-				block_array[index].sprite->draw(drawx, drawy, snap_height(block_array[index].height), snap_height(bottom_r), snap_height(block_array[index].water_height), &block_array[index], &(tileset_list[current_tileset]), 0, LAYER_BASE);
-				if(block_array[index].structure_sprite)
-				{
-					block_array[index].structure_sprite->draw(drawx, drawy, snap_height(block_array[index].height), snap_height(bottom_r), snap_height(block_array[index].water_height), &block_array[index], &(tileset_list[current_tileset]), 0, LAYER_BASE);
-					block_array[index].structure_sprite->draw(drawx, drawy, snap_height(block_array[index].height), snap_height(bottom_r), snap_height(block_array[index].water_height), &block_array[index], &(tileset_list[current_tileset]), 0, LAYER_OBJECT);
-				}
-				else
-					block_array[index].sprite->draw(drawx, drawy, snap_height(block_array[index].height), snap_height(bottom_r), snap_height(block_array[index].water_height), &block_array[index], &(tileset_list[current_tileset]), 0, LAYER_OBJECT);
-			}
-			if(user_config.showgrid && !((x + user_config.map_x) % 16))
-				tileset_list.at(current_tileset).grid_tile.draw(drawx, drawy, snap_height(block_array[index].height), snap_height(bottom_r), snap_height(block_array[index].water_height), &block_array[index], &(tileset_list[current_tileset]));
-			if(user_config.showgrid && !((y + user_config.map_y) % 16))
-				tileset_list.at(current_tileset).grid_tile.draw(drawx, drawy, snap_height(block_array[index].height), snap_height(bottom_r), snap_height(block_array[index].water_height), &block_array[index], &(tileset_list[current_tileset]), 1);
-			block_array[index].height = height_back;
+            if (bottom_l < bottom_r)
+                bottom_r = bottom_l;
+            if(DetailedTile * tile = map_list.rendered_map->get_tile(x + user_config.map_x, y + user_config.map_y)){
+                tile->draw(drawx, drawy);
+            }
+            else {
+                if(block_array[index].sprite > 0)
+                {
+                    block_array[index].sprite->draw(drawx, drawy, snap_height(block_array[index].height), snap_height(bottom_r), snap_height(block_array[index].water_height), &block_array[index], &(tileset_list[current_tileset]), 0, LAYER_BASE);
+                    if(block_array[index].structure_sprite)
+                    {
+                        block_array[index].structure_sprite->draw(drawx, drawy, snap_height(block_array[index].height), snap_height(bottom_r), snap_height(block_array[index].water_height), &block_array[index], &(tileset_list[current_tileset]), 0, LAYER_BASE);
+                        block_array[index].structure_sprite->draw(drawx, drawy, snap_height(block_array[index].height), snap_height(bottom_r), snap_height(block_array[index].water_height), &block_array[index], &(tileset_list[current_tileset]), 0, LAYER_OBJECT);
+                    }
+                    else
+                        block_array[index].sprite->draw(drawx, drawy, snap_height(block_array[index].height), snap_height(bottom_r), snap_height(block_array[index].water_height), &block_array[index], &(tileset_list[current_tileset]), 0, LAYER_OBJECT);
+                }
+                if(user_config.showgrid && !((x + user_config.map_x) % 16))
+                    tileset_list.at(current_tileset).grid_tile.draw(drawx, drawy, snap_height(block_array[index].height), snap_height(bottom_r), snap_height(block_array[index].water_height), &block_array[index], &(tileset_list[current_tileset]));
+                if(user_config.showgrid && !((y + user_config.map_y) % 16))
+                    tileset_list.at(current_tileset).grid_tile.draw(drawx, drawy, snap_height(block_array[index].height), snap_height(bottom_r), snap_height(block_array[index].water_height), &block_array[index], &(tileset_list[current_tileset]), 1);
+            }
+            block_array[index].height = height_back;
 		}
 	}
 	al_hold_bitmap_drawing(false);
