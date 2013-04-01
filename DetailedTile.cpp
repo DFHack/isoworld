@@ -23,7 +23,7 @@ DetailedTile::~DetailedTile() {
 
 void DetailedTile::draw(int draw_x, int draw_y){
     if(sprite)
-        al_draw_bitmap(sprite, draw_x+offset_x, draw_y+offset_y-height, 0);
+        al_draw_bitmap(sprite, draw_x+offset_x, draw_y+offset_y, 0);
 }
 
 void DetailedTile::make_tile(isoworldremote::EmbarkTile * input, c_map_section * section) {
@@ -31,7 +31,6 @@ void DetailedTile::make_tile(isoworldremote::EmbarkTile * input, c_map_section *
     al_store_state(&state_backup, ALLEGRO_STATE_ALL);
     int max_z = input->tile_layer_size();
     int max_draw_x, min_draw_x, max_draw_y, min_draw_y;
-
     //following is to get the bounds of all the junk.
     float tempx = 0.0f;
     float tempy = 0.0f;
@@ -52,7 +51,7 @@ void DetailedTile::make_tile(isoworldremote::EmbarkTile * input, c_map_section *
     max_draw_x -= min_draw_x;
     max_draw_y -= min_draw_y;
     offset_x = min_draw_x;
-    offset_y = min_draw_y;
+    offset_y = min_draw_y-input->world_z();
     sprite=al_create_bitmap(max_draw_x, max_draw_y);
     al_set_target_bitmap(sprite);
     al_set_blender(ALLEGRO_ADD, ALLEGRO_ONE, ALLEGRO_ZERO);

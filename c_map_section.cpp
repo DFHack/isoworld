@@ -188,7 +188,7 @@ void c_map_section::pointToScreen(int *inx, int *iny)
 void c_map_section::pointToSprite(float *inx, float *iny, int inz)
 {
     float offx = 0;
-    float offy = (tileset_list.at(current_tileset).tile_height/2)-inz+2;
+    float offy = -inz-tileset_list.at(current_tileset).tile_height;
 	float x = *inx-*iny;
     float y = *inx+*iny;
 	x = x * tileset_list.at(current_tileset).tile_width / (48*2);
@@ -297,8 +297,8 @@ void c_map_section::draw(int inx, int iny)
 				bottom_l = block_array[index+board_width].height;
             if (bottom_l < bottom_r)
                 bottom_r = bottom_l;
-            if(DetailedTile * tile = map_list.rendered_map->get_tile(x + user_config.map_x, y + user_config.map_y)){
-                tile->draw(drawx, drawy);
+            if(map_list.rendered_map && map_list.rendered_map->get_tile(x + user_config.map_x, y + user_config.map_y)){
+                map_list.rendered_map->get_tile(x + user_config.map_x, y + user_config.map_y)->draw(drawx, drawy);
             }
             else {
                 if(block_array[index].sprite > 0)

@@ -573,6 +573,7 @@ int main(void)
                 redraw = true;
             else if(event.timer.source == network_timer) {
                 if(connected_to_df) {
+                    al_stop_timer(network_timer); //wait at least a second between the end of load and the start of the next, not between the start and start.
                     net_request.set_save_folder(current_save);
                     EmbarkInfoCall(&net_request, &net_reply);
                     if(net_reply.available()) {
@@ -598,6 +599,7 @@ int main(void)
                         }
 EXIT_LOOP: ;
                     }
+                    al_start_timer(network_timer);
                 }
             }
         }

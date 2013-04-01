@@ -13,7 +13,6 @@ class DetailedTile {
 public:
     int year;
     char season;
-    int height;
     DetailedTile();
     ~DetailedTile();
     void make_tile(isoworldremote::EmbarkTile * input, c_map_section * section);
@@ -26,7 +25,7 @@ class DetailedMap {
     unsigned int width;
     unsigned int height;
     unsigned int coords_to_index(unsigned int x, unsigned int y) {
-        return (y * width) + x;
+        return ((y%height) * width) + (x%width);
     }
 public:
     void flush();
