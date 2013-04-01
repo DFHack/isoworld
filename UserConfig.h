@@ -6,7 +6,7 @@ ALLEGRO_COLOR color_html(char const *string);
 void color_html_to_rgba(char const *string,
 						float *red, float *green, float *blue, float *alpha);
 
-class c_config
+class UserConfig
 {
 	ALLEGRO_CONFIG * default_config;
 public:
@@ -14,8 +14,8 @@ public:
 	void retrieve_values(void);
 	bool load_file(void);
 	bool save_file(void);
-	c_config(void);
-	~c_config(void);
+	UserConfig(void);
+	~UserConfig(void);
 
 	//screen resolution
 	unsigned int res_x;
@@ -50,4 +50,4 @@ public:
 	bool debugmode;
 };
 
-extern c_config user_config;
+extern UserConfig user_config;

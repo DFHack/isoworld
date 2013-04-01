@@ -1,5 +1,5 @@
 #include "c_map_section.h"
-#include "c_config.h"
+#include "UserConfig.h"
 #include "common.h"
 #include <cmath>
 #include "DetailedTile.h"

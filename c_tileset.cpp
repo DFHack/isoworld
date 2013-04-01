@@ -1,5 +1,5 @@
 #include "c_tileset.h"
-#include "c_config.h"
+#include "UserConfig.h"
 
 c_tileset::c_tileset(void)
 {

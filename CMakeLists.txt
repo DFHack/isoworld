@@ -4,7 +4,7 @@ SET(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/CMake/Modules)
 include_directories (${CMAKE_SOURCE_DIR})
 
 SET(PROJECT_SRCS
-	c_config.cpp
+	UserConfig.cpp
 	c_imagelist.cpp
 	c_map_section.cpp
 	c_minimap.cpp

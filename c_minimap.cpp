@@ -1,5 +1,5 @@
 #include "c_minimap.h"
-#include "c_config.h"
+#include "UserConfig.h"
 
 c_minimap::c_minimap(void)
 {

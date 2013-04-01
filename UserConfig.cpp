@@ -1,4 +1,4 @@
-#include "c_config.h"
+#include "UserConfig.h"
 
 /* Function: al_color_html_to_rgba
 */
@@ -41,7 +41,7 @@ int get_config_int(const ALLEGRO_CONFIG *config, const char *section, const char
 	else return default_value;
 }
 
-c_config::c_config(void)
+UserConfig::UserConfig(void)
 {
 	res_x = 640;
 	res_y = 480;
@@ -61,13 +61,13 @@ c_config::c_config(void)
 	debugmode = 0;
 }
 
-c_config::~c_config(void)
+UserConfig::~UserConfig(void)
 {
 	save_file();
 	al_destroy_config(default_config);
 }
 
-void c_config::save_values(void)
+void UserConfig::save_values(void)
 {
 	char buffer[256];
 	sprintf(buffer, "%d", res_x);
@@ -107,7 +107,7 @@ void c_config::save_values(void)
 
 }
 
-void c_config::retrieve_values(void)
+void UserConfig::retrieve_values(void)
 {
 	res_x = atoi(al_get_config_value(default_config, "GRAPHICS", "width"));
 	res_y = atoi(al_get_config_value(default_config, "GRAPHICS", "height"));
@@ -136,12 +136,12 @@ void c_config::retrieve_values(void)
 
 }
 
-bool c_config::save_file(void)
+bool UserConfig::save_file(void)
 {
 	return al_save_config_file("isoworld.ini", default_config);
 }
 
-bool c_config::load_file(void)
+bool UserConfig::load_file(void)
 {
 	bool success = 0;
 	ALLEGRO_CONFIG * loaded_config = al_load_config_file("isoworld.ini");

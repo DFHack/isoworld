@@ -10,7 +10,7 @@
 #include "common.c"
 #include "c_tile.h"
 #include "c_map_section.h"
-#include "c_config.h"
+#include "UserConfig.h"
 #include "console.h"
 #include "c_minimap.h"
 #include "c_tileset.h"
@@ -72,7 +72,7 @@ s_pathlist path_list;
 
 s_maplist map_list;
 
-c_config user_config;
+UserConfig user_config;
 
 c_minimap minimap;
 

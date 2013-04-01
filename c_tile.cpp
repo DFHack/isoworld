@@ -1,5 +1,5 @@
 #include "c_tile.h"
-#include "c_config.h"
+#include "UserConfig.h"
 #include "s_map_block.h"
 #include "console.h"
 #include "c_tileset.h"
