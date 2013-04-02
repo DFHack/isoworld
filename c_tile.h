@@ -70,7 +70,10 @@ public:
 	void load_ini(ALLEGRO_PATH * _path);
 	c_tile(void);
 	~c_tile(void);
-	inline bool c_tile::operator < (const c_tile & a){return this->priority < a.priority;};
+	inline bool operator < (const c_tile & a) const
+	{
+		return this->priority < a.priority;
+	};
 
 	vector<s_sprite> top_sprites;
 	vector<s_sprite> bottom_sprites;

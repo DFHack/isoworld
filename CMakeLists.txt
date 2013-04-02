@@ -66,6 +66,8 @@ IF(UNIX)
 				${CMAKE_CURRENT_SOURCE_DIR}/allegro/lib/liballegro.so.5.0
 				${CMAKE_CURRENT_SOURCE_DIR}/allegro/lib/liballegro_primitives.so.5.0
 				${CMAKE_CURRENT_SOURCE_DIR}/allegro/lib/liballegro_font.so.5.0
+				${CMAKE_CURRENT_SOURCE_DIR}/allegro/lib/liballegro_color.so.5.0
+				${CMAKE_CURRENT_SOURCE_DIR}/allegro/lib/liballegro_dialog.so.5.0
 				${CMAKE_CURRENT_SOURCE_DIR}/allegro/lib/liballegro_image.so.5.0
 				${CMAKE_CURRENT_SOURCE_DIR}/allegro/lib/liballegro_ttf.so.5.0
 				${PROJECT_LIBS}
@@ -83,6 +85,8 @@ IF(UNIX)
 				allegro
 				allegro_primitives
 				allegro_font
+				allegro_color
+				allegro_dialog
 				allegro_image
 				allegro_ttf
 				${PROJECT_LIBS}
@@ -129,8 +133,16 @@ ELSE(UNIX)
         ${CMAKE_CURRENT_SOURCE_DIR}/allegro/lib
     )
 ENDIF(UNIX)
+# Tell CMake the source won't be available until build time.
+SET_SOURCE_FILES_PROPERTIES(${CMAKE_CURRENT_SOURCE_DIR}/../proto/isoworldremote.pb.cc PROPERTIES GENERATED 1)
+
 SET(PROJECT_SRCS ${PROJECT_SRCS} ${CMAKE_CURRENT_SOURCE_DIR}/../proto/isoworldremote.pb.cc)
+
+
 ADD_EXECUTABLE(isoworld ${PROJECT_SRCS})
+
+# Make sure the source is generated before the executable builds.
+ADD_DEPENDENCIES(isoworld generate_proto)
 
 TARGET_LINK_LIBRARIES(isoworld protobuf-lite dfhack-client ${PROJECT_LIBS})
 
@@ -140,7 +152,7 @@ install(DIRECTORY resources/
         PATTERN "CVS" EXCLUDE
         PATTERN ".svn" EXCLUDE)
 # install readme
-install(FILES README.txt DESTINATION isoworld)
+install(FILES Readme.txt DESTINATION isoworld)
 install(TARGETS isoworld
 		LIBRARY DESTINATION ${DFHACK_LIBRARY_DESTINATION}
         RUNTIME DESTINATION ${DFHACK_LIBRARY_DESTINATION})

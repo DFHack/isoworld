@@ -242,7 +242,7 @@ bool c_map_section::set_size(int x, int y)
 
 void c_map_section::clear_tiles(void)
 {
-	delete [num_tiles] block_array;
+	delete[] block_array;
 	num_tiles = 0;
 }
 void c_map_section::flood_fill(c_tile *tile, int height)
