@@ -10,6 +10,14 @@ class DetailedTile {
     ALLEGRO_BITMAP * sprite;
     int offset_x;
     int offset_y;
+    unsigned int coords_to_index(unsigned int x, unsigned int y) {
+        return ((y%48) * 48) + (x%48);
+    }
+    double get_average_heights(vector<int> * heightmap, int width, int height, int distance, int x, int y);
+    vector<ALLEGRO_COLOR> generate_ambient_lighting(vector<int> * heightmap, int width, int height);
+    vector<int> heightmap;
+    double get_height(int x, int y);
+    int surrounding_heights[3][3];
 public:
     int year;
     char season;

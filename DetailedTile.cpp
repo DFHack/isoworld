@@ -1,8 +1,11 @@
 #include "DetailedTile.h"
 #include "isoworldremote.pb.h"
 #include "c_map_section.h"
+#include "UserConfig.h"
 
 using namespace isoworldremote;
+
+#define MIN_LIGHT 0.5
 
 ALLEGRO_COLOR multiply(ALLEGRO_COLOR a, ALLEGRO_COLOR b) {
     a.a *= b.a;
@@ -10,6 +13,49 @@ ALLEGRO_COLOR multiply(ALLEGRO_COLOR a, ALLEGRO_COLOR b) {
     a.g *= b.g;
     a.r *= b.r;
     return a;
+}
+//ab
+//cd
+double interpolate(double a, double c, double b, double d, double x, double y) {
+    if(x > 1)
+        x=1;
+    if(x < 0)
+        x=0;
+    if(y > 1)
+        y=1;
+    if(y < 0)
+        y=0;
+    return 
+        (a*(1-x)*(1-y))+
+        (c*x*(1-y))+
+        (b*(1-x)*y)+
+        (d*x*y);
+}
+
+double DetailedTile::get_height(int x, int y) {
+    if(x >= 0 && y >= 0 && x < 48 && y < 48)
+        return heightmap[y*48+x];
+    if(x < 24 && y < 24)
+        return interpolate(
+        surrounding_heights[0][0], surrounding_heights[1][0],
+        surrounding_heights[0][1], surrounding_heights[1][1],
+        (double)(x+24)/48.0, (double)(y+24)/48.0);
+    else if(x >= 24 && y < 24)
+        return interpolate(
+        surrounding_heights[1][0], surrounding_heights[2][0],
+        surrounding_heights[1][1], surrounding_heights[2][1],
+        (double)(x-24)/48.0, (double)(y+24)/48.0);
+    else if(x < 24 && y >= 24)
+        return interpolate(
+        surrounding_heights[0][1], surrounding_heights[1][1],
+        surrounding_heights[0][2], surrounding_heights[1][2],
+        (double)(x+24)/48.0, (double)(y-24)/48.0);
+    else if(x >= 24 && y >= 24)
+        return interpolate(
+        surrounding_heights[1][1], surrounding_heights[2][1],
+        surrounding_heights[1][2], surrounding_heights[2][2],
+        (double)(x-24)/48.0, (double)(y-24)/48.0);
+    return 0;
 }
 
 DetailedTile::DetailedTile() {
@@ -30,6 +76,9 @@ void DetailedTile::make_tile(isoworldremote::EmbarkTile * input, c_map_section *
     ALLEGRO_STATE state_backup;
     al_store_state(&state_backup, ALLEGRO_STATE_ALL);
     int max_z = input->tile_layer_size();
+    int world_x = input->world_x();
+    int world_y = input->world_y();
+    int world_z = input->world_z();
     int max_draw_x, min_draw_x, max_draw_y, min_draw_y;
     //following is to get the bounds of all the junk.
     float tempx = 0.0f;
@@ -58,6 +107,43 @@ void DetailedTile::make_tile(isoworldremote::EmbarkTile * input, c_map_section *
     al_clear_to_color(al_map_rgba(0,0,0,0));
     al_set_blender(ALLEGRO_ADD, ALLEGRO_ONE, ALLEGRO_INVERSE_ALPHA);
     al_lock_bitmap(sprite, ALLEGRO_PIXEL_FORMAT_ANY, ALLEGRO_LOCK_READWRITE);
+    for(int xx = 0; xx < 3; xx++) {
+        for(int yy = 0; yy < 3; yy++) {
+            if(map_list.elevation_map_with_water)
+            {
+                int tempx = world_x + xx - 1;
+                int tempy = world_y + yy - 1;
+                tempx =  bind_to_range(tempx , al_get_bitmap_width(map_list.elevation_map_with_water));
+                tempy =  bind_to_range(tempy , al_get_bitmap_height(map_list.elevation_map_with_water));
+
+                ALLEGRO_COLOR pixel = al_get_pixel(map_list.elevation_map_with_water, tempx, tempy);
+                unsigned char red;
+                unsigned char green;
+                unsigned char blue;
+                al_unmap_rgb(pixel, &red, &green, &blue);
+                if(red == 0)
+                {
+                    surrounding_heights[xx][yy] = blue-world_z;
+                }
+                else{
+                    surrounding_heights[xx][yy] = blue + 25-world_z;
+                }
+            }
+            else surrounding_heights[xx][yy] = 0;
+        }
+    }
+    heightmap.resize(48*48);
+    for(int yy = 0; yy < 48; yy++) {
+        for(int xx = 0; xx < 48; xx++) {
+            for(int zz = max_z-1; zz >= 0; zz--) {
+                if(input->tile_layer(zz).mat_type_table(yy*48+xx) != AIR) {
+                    heightmap[yy*48+xx] = zz;
+                    break;
+                }
+            }
+        }
+    }
+    vector<ALLEGRO_COLOR> surfacelight = generate_ambient_lighting(&heightmap, 48, 48);
     for(int zz = 0; zz < max_z; zz++) {
         for(int yy = 0; yy < 48; yy++) {
             for(int xx = 0; xx < 48; xx++) {
@@ -67,32 +153,36 @@ void DetailedTile::make_tile(isoworldremote::EmbarkTile * input, c_map_section *
                     BasicMaterial upper_mat = AIR;
                     BasicMaterial side_mat = AIR;
                     if(zz+1 < max_z)
-                         upper_mat = input->tile_layer(zz+1).mat_type_table(yy*48+xx);
+                        upper_mat = input->tile_layer(zz+1).mat_type_table(yy*48+xx);
                     if((zz+1 < max_z) && (xx > 0) && upper_mat == AIR)
                         upper_mat = input->tile_layer(zz+1).mat_type_table(yy*48+xx-1);
                     if(xx+1 < 48)
                         side_mat = input->tile_layer(zz).mat_type_table(yy*48+xx+1);
-                    float drawx = xx;
-                    float drawy = yy;
                     ALLEGRO_COLOR materialcolor = al_map_rgb(255,255,255);
-                    ALLEGRO_COLOR light = al_map_rgb(255,255,255);
-                    ALLEGRO_COLOR med = al_map_rgb(179,179,179);
-                    ALLEGRO_COLOR dark = al_map_rgb(107,107,107);
+                    ALLEGRO_COLOR light, med, dark;
+                    if(zz >= heightmap[yy*48+xx])
+                        light = surfacelight[yy*48+xx];
+                    else
+                        light = al_map_rgb_f(MIN_LIGHT,MIN_LIGHT,MIN_LIGHT);
+                    med = multiply(light, al_map_rgb(233,233,233));
+                    dark = multiply(light, al_map_rgb(139,139,139));
                     switch (current_mat) {
                     case INORGANIC:
                         break;
                     case LIQUID:
                         if(current_submat == 2){
-                        materialcolor = al_map_rgb(255,64,0);
-                        med=al_map_rgb(255,255,255);
-                        dark = al_map_rgb(255,255,255);
+                            materialcolor = al_map_rgb(255,64,0);
+                            med=al_map_rgb(255,255,255);
+                            dark = al_map_rgb(255,255,255);
                         }
                         else
-                        materialcolor = al_map_rgb(128,128,255);
+                            materialcolor = al_map_rgb(128,128,255);
                         break;
                     default:
                         break;
                     }
+                    float drawx = xx;
+                    float drawy = yy;
                     section->pointToSprite(&drawx, &drawy, zz);
                     if(upper_mat == AIR)
                         al_put_pixel(drawx-min_draw_x, drawy-min_draw_y, multiply(light, materialcolor));
@@ -147,4 +237,57 @@ DetailedTile * DetailedMap::get_tile(unsigned int x, unsigned int y) {
     if(tile_map[coords_to_index(x,y)] >= 0)
         return tile_list[tile_map[coords_to_index(x,y)]];
     return NULL;
+}
+
+//This really should be the same function as for the larger map, but fuck it.
+double DetailedTile::get_average_heights(vector<int> * heightmap, int width, int height, int distance, int x, int y)
+{
+    if(distance < 1)
+        return 0;
+    int count=0;
+    double result=0.0;
+    for(int i = x-distance; i <= x+distance; i++)
+    {
+        double real_distance= sqrt((double)((i-x)*(i-x)+(distance*distance)));
+        result += (get_height( i, y-distance)-get_height( x, y))/real_distance;
+        result += (get_height( i, y+distance)-get_height( x, y))/real_distance;
+        count += 2;
+    }
+    for(int i = (y-distance)+1; i < y+distance; i++)
+    {
+        double real_distance= sqrt((double)(((i-y)*(i-y))+(distance*distance)));
+        result += (get_height( x-distance, i)-get_height( x, y))/real_distance;
+        result += (get_height( x+distance, i)-get_height( x, y))/real_distance;
+        count +=2;
+    }
+    return max((result/count), 0.0);
+}
+
+vector<ALLEGRO_COLOR> DetailedTile::generate_ambient_lighting(vector<int> * heightmap, int width, int height)
+{
+    vector<ALLEGRO_COLOR> output;
+    output.resize(width*height);
+    for (unsigned int y = 0; y < height; y++)
+    {
+        for (unsigned int x = 0; x < width; x++)
+        {
+            const unsigned int index = coords_to_index( x, y);
+            double height = heightmap->at(index);
+
+            double height_difference = 0.0;
+
+            for(int i = 1; i < 24; i++)
+            {
+                double diff = get_average_heights(heightmap, width, height, i, x, y);
+                height_difference = max(diff, height_difference);
+            }
+
+            double light_level = 1.0 - (atan((48 * height_difference)/user_config.tile_distance) / (ALLEGRO_PI/2.0));
+            if(light_level < MIN_LIGHT)
+                light_level = MIN_LIGHT;
+            //double light_level = (get_height(x, y) - 90) / 50;
+            output[index] = al_map_rgb_f(light_level, light_level, light_level);
+        }
+    }
+    return output;
 }
