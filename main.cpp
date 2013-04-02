@@ -17,6 +17,7 @@
 #include "isoworldremote.pb.h"
 #include "RemoteClient.h"
 #include "DetailedTile.h"
+#include "ColorList.h"
 
 //Needed for writing the protobuff stuff to a file.
 #include <fstream>
@@ -77,6 +78,8 @@ UserConfig user_config;
 c_minimap minimap;
 
 c_imagelist imagelist;
+
+ColorList color_list;
 
 std::string current_save;
 /* Our thread to show the native file dialog. */
@@ -378,11 +381,14 @@ int main(void)
     MapReply net_reply;
     TileRequest net_tile_request;
     EmbarkTile net_embark_tile;
+    RawNames net_material_names;
     DFHack::RemoteFunction<MapRequest, MapReply> EmbarkInfoCall;
+    DFHack::RemoteFunction<MapRequest, RawNames> MaterialInfoCall;
     DFHack::RemoteFunction<TileRequest, EmbarkTile> EmbarkTileCall;
     if(connected_to_df) {
         EmbarkInfoCall.bind(&client, "GetEmbarkInfo", "isoworldremote");
         EmbarkTileCall.bind(&client, "GetEmbarkTile", "isoworldremote");
+        MaterialInfoCall.bind(&client, "GetRawNames", "isoworldremote");
         net_request.set_save_folder(current_save);
         EmbarkInfoCall(&net_request, &net_reply);
     }
@@ -575,6 +581,14 @@ int main(void)
                 if(connected_to_df) {
                     al_stop_timer(network_timer); //wait at least a second between the end of load and the start of the next, not between the start and start.
                     net_request.set_save_folder(current_save);
+                    if(!color_list.has_names){
+                        MaterialInfoCall(&net_request, &net_material_names);
+                        if(net_material_names.available()) {
+                            color_list.import_names(&net_material_names);
+                            if(!color_list.has_colors)
+                                color_list.import_colors("isoworld/material_colors.ini");
+                        }
+                    }
                     EmbarkInfoCall(&net_request, &net_reply);
                     if(net_reply.available()) {
                         for(int yy = 0; yy < net_reply.region_size_y(); yy++) {
@@ -591,6 +605,9 @@ int main(void)
                                 net_tile_request.set_want_x(xx);
                                 net_tile_request.set_want_y(yy);
                                 EmbarkTileCall(&net_tile_request, &net_embark_tile);
+                                if(!net_embark_tile.is_valid())
+                                    continue;
+                                tile->valid = true;
                                 tile->year = net_reply.current_year();
                                 tile->season = net_reply.current_season();
                                 tile->make_tile(&net_embark_tile, &test_map);

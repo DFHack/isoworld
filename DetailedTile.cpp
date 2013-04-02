@@ -2,6 +2,7 @@
 #include "isoworldremote.pb.h"
 #include "c_map_section.h"
 #include "UserConfig.h"
+#include "ColorList.h"
 
 using namespace isoworldremote;
 
@@ -59,6 +60,7 @@ double DetailedTile::get_height(int x, int y) {
 }
 
 DetailedTile::DetailedTile() {
+    valid = false;
     year = -1;
     season = -1;
     sprite = 0;
@@ -158,7 +160,7 @@ void DetailedTile::make_tile(isoworldremote::EmbarkTile * input, c_map_section *
                         upper_mat = input->tile_layer(zz+1).mat_type_table(yy*48+xx-1);
                     if(xx+1 < 48)
                         side_mat = input->tile_layer(zz).mat_type_table(yy*48+xx+1);
-                    ALLEGRO_COLOR materialcolor = al_map_rgb(255,255,255);
+                    ALLEGRO_COLOR materialcolor = color_list.get_color(current_mat, current_submat);
                     ALLEGRO_COLOR light, med, dark;
                     if(zz >= heightmap[yy*48+xx])
                         light = surfacelight[yy*48+xx];
@@ -172,8 +174,7 @@ void DetailedTile::make_tile(isoworldremote::EmbarkTile * input, c_map_section *
                     case LIQUID:
                         if(current_submat == 2){
                             materialcolor = al_map_rgb(255,64,0);
-                            med=al_map_rgb(255,255,255);
-                            dark = al_map_rgb(255,255,255);
+                            light=med=dark=al_map_rgb(255,255,255);
                         }
                         else
                             materialcolor = al_map_rgb(128,128,255);
@@ -234,7 +235,7 @@ DetailedTile * DetailedMap::new_tile(unsigned int x, unsigned int y) {
 }
 
 DetailedTile * DetailedMap::get_tile(unsigned int x, unsigned int y) {
-    if(tile_map[coords_to_index(x,y)] >= 0)
+    if(tile_map[coords_to_index(x,y)] >= 0 && tile_list[tile_map[coords_to_index(x,y)]]->valid)
         return tile_list[tile_map[coords_to_index(x,y)]];
     return NULL;
 }

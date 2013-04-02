@@ -5,6 +5,7 @@ include_directories (${CMAKE_SOURCE_DIR})
 
 SET(PROJECT_SRCS
 	UserConfig.cpp
+	ColorList.cpp
 	c_imagelist.cpp
 	c_map_section.cpp
 	c_minimap.cpp

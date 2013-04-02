@@ -19,6 +19,7 @@ class DetailedTile {
     double get_height(int x, int y);
     int surrounding_heights[3][3];
 public:
+    bool valid;
     int year;
     char season;
     DetailedTile();
