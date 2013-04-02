@@ -884,11 +884,7 @@ void c_map_section::load_tilesets(const char * index_file)
 {
 	ALLEGRO_CONFIG * config = 0;
 
-	ALLEGRO_PATH * base_path = al_get_standard_path(ALLEGRO_EXENAME_PATH);
-
 	ALLEGRO_PATH * key = al_create_path(index_file);
-
-	al_rebase_path(base_path, key);
 
 	config = al_load_config_file(al_path_cstr(key, ALLEGRO_NATIVE_PATH_SEP));
 
@@ -909,7 +905,6 @@ void c_map_section::load_tilesets(const char * index_file)
 			al_destroy_path(temp);
 		}
 	}
-	al_destroy_path(base_path);
 	al_destroy_path(key);
 }
 
