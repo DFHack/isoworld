@@ -3,7 +3,7 @@
 #include <vector>
 #include "common.h"
 #include "c_tile.h"
-#include "c_tileset.h"
+#include "TileSet.h"
 #include "s_map_block.h"
 
 class c_map_section
@@ -17,7 +17,7 @@ public:
 	int board_center_x;
 	int board_top_y;
 
-	vector<c_tileset> tileset_list;
+	vector<TileSet> tileset_list;
 	int current_tileset;
 
 	clock_t draw_time;

@@ -4,7 +4,7 @@
 
 typedef class c_tile c_tile;
 #include "s_map_block.h"
-class c_tileset;
+class TileSet;
 
 enum e_color_by
 {
@@ -66,7 +66,7 @@ class c_tile
 	s_sprite get_from_ini(ALLEGRO_CONFIG * config, const char * section, ALLEGRO_PATH * base_path);
 
 public:
-	void draw(float x, float y, int height, int bottom, int surface, s_map_block * block, c_tileset * tileset, bool flip = 0, e_layer drawlayer = LAYER_BASE);
+	void draw(float x, float y, int height, int bottom, int surface, s_map_block * block, TileSet * tileset, bool flip = 0, e_layer drawlayer = LAYER_BASE);
 	void load_ini(ALLEGRO_PATH * _path);
 	c_tile(void);
 	~c_tile(void);

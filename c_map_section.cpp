@@ -903,7 +903,7 @@ void c_map_section::load_tilesets(const char * index_file)
 		{
 			ALLEGRO_PATH * temp = al_create_path(file);
 			al_rebase_path(key, temp);
-			c_tileset temp_tileset;
+			TileSet temp_tileset;
 			temp_tileset.load_ini(temp);
 			tileset_list.push_back(temp_tileset);
 			al_destroy_path(temp);

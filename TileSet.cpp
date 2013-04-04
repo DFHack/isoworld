@@ -1,18 +1,18 @@
-#include "c_tileset.h"
+#include "TileSet.h"
 #include "UserConfig.h"
 
-c_tileset::c_tileset(void)
+TileSet::TileSet(void)
 {
 	snap_height = 1;
 	palette.resize(1);
 	palette[0].resize(1);
 }
 
-c_tileset::~c_tileset(void)
+TileSet::~TileSet(void)
 {
 }
 
-void c_tileset::load_ini(ALLEGRO_PATH * path)
+void TileSet::load_ini(ALLEGRO_PATH * path)
 {
 	ALLEGRO_CONFIG * config = 0;
 
@@ -82,7 +82,7 @@ void c_tileset::load_ini(ALLEGRO_PATH * path)
 	}
 }
 
-c_tile * c_tileset::get_tile(s_map_block block)
+c_tile * TileSet::get_tile(s_map_block block)
 {
 	if(tile_set.empty())
 		return 0;
@@ -100,7 +100,7 @@ c_tile * c_tileset::get_tile(s_map_block block)
 	}
 	return 0;
 }
-c_tile * c_tileset::get_structure_tile(s_map_block block)
+c_tile * TileSet::get_structure_tile(s_map_block block)
 {
 	if(tile_set.empty())
 		return 0;
@@ -116,7 +116,7 @@ c_tile * c_tileset::get_structure_tile(s_map_block block)
 	return 0;
 }
 
-void c_tileset::load_palette(ALLEGRO_BITMAP * palettemap)
+void TileSet::load_palette(ALLEGRO_BITMAP * palettemap)
 {
 	if(!palettemap)
 	{
@@ -138,7 +138,7 @@ void c_tileset::load_palette(ALLEGRO_BITMAP * palettemap)
 	al_unlock_bitmap(palettemap);
 };
 
-ALLEGRO_COLOR c_tileset::get_palette_color(int x, int y)
+ALLEGRO_COLOR TileSet::get_palette_color(int x, int y)
 {
 	if(x < 0) x = 0;
 	if(y < 0) y = 0;

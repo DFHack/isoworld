@@ -13,7 +13,6 @@
 #include "UserConfig.h"
 #include "console.h"
 #include "c_minimap.h"
-#include "c_tileset.h"
 #include "isoworldremote.pb.h"
 #include "RemoteClient.h"
 #include "DetailedTile.h"

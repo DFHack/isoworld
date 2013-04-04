@@ -10,7 +10,7 @@ SET(PROJECT_SRCS
 	c_map_section.cpp
 	c_minimap.cpp
 	c_tile.cpp
-	c_tileset.cpp
+	TileSet.cpp
 	DetailedTile.cpp
 	common.c
 	console.cpp

@@ -2,7 +2,7 @@
 #include "UserConfig.h"
 #include "s_map_block.h"
 #include "console.h"
-#include "c_tileset.h"
+#include "TileSet.h"
 
 int get_border_offset_sixteen(unsigned char in)
 {
@@ -140,7 +140,7 @@ ALLEGRO_COLOR mix_colors( ALLEGRO_COLOR lhs, ALLEGRO_COLOR rhs)
 	return lhs;
 }
 
-void draw_sprite(c_tileset * tileset, s_sprite sprite, s_map_block * block, float x, float y, int shrink, bool flip = 0, int offset = 0, bool shiftup = false)
+void draw_sprite(TileSet * tileset, s_sprite sprite, s_map_block * block, float x, float y, int shrink, bool flip = 0, int offset = 0, bool shiftup = false)
 {
 	if(offset < 0)
 		return;
@@ -425,7 +425,7 @@ c_tile::~c_tile(void)
 {
 }
 
-void c_tile::draw(float x, float y, int height, int bottom, int surface, s_map_block * block, c_tileset * tileset, bool flip, e_layer drawlayer)
+void c_tile::draw(float x, float y, int height, int bottom, int surface, s_map_block * block, TileSet * tileset, bool flip, e_layer drawlayer)
 {
 	switch (drawlayer)
 	{

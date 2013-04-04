@@ -4,12 +4,13 @@
 #include <vector>
 #include "c_tile.h"
 #include "s_map_block.h"
+#include "DetailedTile.h"
 
-class c_tileset
+class TileSet
 {
 public:
-	c_tileset(void);
-	~c_tileset(void);
+	TileSet(void);
+	~TileSet(void);
 
 	void load_ini(ALLEGRO_PATH * _path);
 
