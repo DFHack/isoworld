@@ -172,7 +172,7 @@ void DetailedTile::make_tile(isoworldremote::EmbarkTile * input, c_map_section *
                     case INORGANIC:
                         break;
                     case LIQUID:
-                        if(current_submat == 2){
+                        if(current_submat == LiquidType::MAGMA){
                             materialcolor = al_map_rgb(255,64,0);
                             light=med=dark=al_map_rgb(255,255,255);
                         }
