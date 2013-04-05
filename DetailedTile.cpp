@@ -15,8 +15,8 @@ ALLEGRO_COLOR multiply(ALLEGRO_COLOR a, ALLEGRO_COLOR b) {
     a.r *= b.r;
     return a;
 }
-//ab
-//cd
+//ac
+//bd
 double interpolate(double a, double c, double b, double d, double x, double y) {
     if(x > 1)
         x=1;
@@ -33,29 +33,87 @@ double interpolate(double a, double c, double b, double d, double x, double y) {
         (d*x*y);
 }
 
+//surrounding_heights[0][0],                                (surrounding_heights[0][0] + surrounding_heights[1][0])/2,  surrounding_heights[1][0],      (surrounding_heights[1][0] + surrounding_heights[2][0])/2,  surrounding_heights[2][0],
+//(surrounding_heights[0][0] +surrounding_heights[0][1])/2, heightmap[0*48+0],                                          heightmap[0*48+23],             heightmap[0*48+47],                                         (surrounding_heights[2][0] +surrounding_heights[2][1])/2,
+//surrounding_heights[0][1],                                heightmap[23*48+0],                                         heightmap[23*48+23],            heightmap[23*48+47],                                        surrounding_heights[2][1],
+//(surrounding_heights[0][1] +surrounding_heights[0][2])/2, heightmap[47*48+0],                                         heightmap[47*48+23],            heightmap[47*48+47],                                        (surrounding_heights[2][1] +surrounding_heights[2][2])/2,
+//surrounding_heights[0][2],                                (surrounding_heights[0][2] + surrounding_heights[1][2])/2,  surrounding_heights[1][2],      (surrounding_heights[1][2] + surrounding_heights[2][2])/2,  surrounding_heights[2][2],
+
 double DetailedTile::get_height(int x, int y) {
+    //center square
     if(x >= 0 && y >= 0 && x < 48 && y < 48)
         return heightmap[y*48+x];
-    if(x < 24 && y < 24)
+    //top row
+    if(x < 0 && y < 0)
         return interpolate(
-        surrounding_heights[0][0], surrounding_heights[1][0],
-        surrounding_heights[0][1], surrounding_heights[1][1],
-        (double)(x+24)/48.0, (double)(y+24)/48.0);
-    else if(x >= 24 && y < 24)
+        surrounding_heights[0][0] , (surrounding_heights[0][0] + surrounding_heights[1][0])/2,
+        (surrounding_heights[0][0] + surrounding_heights[0][1])/2 , heightmap[0*48+0],
+        (double)(x+24)/24.0, (double)(y+24)/24.0);
+    if(x >= 0 && x < 24 && y < 0)
         return interpolate(
-        surrounding_heights[1][0], surrounding_heights[2][0],
-        surrounding_heights[1][1], surrounding_heights[2][1],
-        (double)(x-24)/48.0, (double)(y+24)/48.0);
-    else if(x < 24 && y >= 24)
+        (surrounding_heights[0][0] + surrounding_heights[1][0])/2, surrounding_heights[1][0],
+        heightmap[0*48+0] , heightmap[0*48+24],
+        (double)(x+0)/24.0, (double)(y+24)/24.0);
+    if(x >= 24 && x < 48 && y < 0)
         return interpolate(
-        surrounding_heights[0][1], surrounding_heights[1][1],
-        surrounding_heights[0][2], surrounding_heights[1][2],
-        (double)(x+24)/48.0, (double)(y-24)/48.0);
-    else if(x >= 24 && y >= 24)
+        surrounding_heights[1][0] , (surrounding_heights[1][0] + surrounding_heights[2][0])/2,
+        heightmap[0*48+24] , heightmap[0*48+47],
+        (double)(x-24)/24.0, (double)(y+24)/24.0);
+    if(x >= 48 && y < 0)
         return interpolate(
-        surrounding_heights[1][1], surrounding_heights[2][1],
-        surrounding_heights[1][2], surrounding_heights[2][2],
-        (double)(x-24)/48.0, (double)(y-24)/48.0);
+        (surrounding_heights[1][0] + surrounding_heights[2][0])/2, surrounding_heights[2][0] , 
+        heightmap[0*48+47] , (surrounding_heights[2][0] + surrounding_heights[2][1])/2,
+        (double)(x-48)/24.0, (double)(y+24)/24.0);
+
+        //upper middle
+    if(x < 0 && y >= 0 && y < 24)
+        return interpolate(
+        (surrounding_heights[0][0] + surrounding_heights[0][1])/2 , heightmap[0*48+0],
+        surrounding_heights[0][1],                                heightmap[23*48+0],
+        (double)(x+24)/24.0, (double)(y+0)/24.0);
+
+
+    if(x >= 48 && y >= 0 && y < 24)
+        return interpolate(
+        heightmap[0*48+24] , (surrounding_heights[2][0] + surrounding_heights[2][1])/2,
+        heightmap[23*48+47],                                        surrounding_heights[2][1],
+        (double)(x-48)/24.0, (double)(y+0)/24.0);
+
+        //lower middle
+    if(x < 0 && y >= 24 && y < 48)
+        return interpolate(
+        surrounding_heights[0][1],                                heightmap[24*48+0],
+        (surrounding_heights[0][1] +surrounding_heights[0][2])/2, heightmap[47*48+0],
+        (double)(x+24)/24.0, (double)(y-24)/24.0);
+
+
+    if(x >= 48 && y >= 24 && y < 48)
+        return interpolate(
+        heightmap[23*48+47],                                        surrounding_heights[2][1],
+        heightmap[47*48+47],                                        (surrounding_heights[2][1] +surrounding_heights[2][2])/2,
+        (double)(x-48)/24.0, (double)(y-24)/24.0);
+
+    //bottom row
+    if(x < 0 && y >= 48)
+        return interpolate(
+        (surrounding_heights[0][1] +surrounding_heights[0][2])/2, heightmap[47*48+0],
+        surrounding_heights[0][2],                                (surrounding_heights[0][2] + surrounding_heights[1][2])/2,
+        (double)(x+24)/24.0, (double)(y-48)/24.0);
+    if(x >= 0 && x < 24 && y >= 48)
+        return interpolate(
+        heightmap[47*48+0],                                         heightmap[47*48+23],
+        (surrounding_heights[0][2] + surrounding_heights[1][2])/2,  surrounding_heights[1][2],
+        (double)(x+0)/24.0, (double)(y-48)/24.0);
+    if(x >= 24 && x < 48 && y >= 48)
+        return interpolate(
+        heightmap[47*48+23],            heightmap[47*48+47],
+        surrounding_heights[1][2],      (surrounding_heights[1][2] + surrounding_heights[2][2])/2,
+        (double)(x-24)/24.0, (double)(y-48)/24.0);
+    if(x >= 48 && y >= 48)
+        return interpolate(
+        heightmap[47*48+47],                                        (surrounding_heights[2][1] +surrounding_heights[2][2])/2, 
+        (surrounding_heights[1][2] + surrounding_heights[2][2])/2,  surrounding_heights[2][2],
+        (double)(x-48)/24.0, (double)(y-48)/24.0);
     return 0;
 }
 
