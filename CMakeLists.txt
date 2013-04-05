@@ -57,15 +57,17 @@ IF(UNIX)
 	#linux
 		OPTION(STONESENSE_INTERNAL_SO "Link with prebuilt internal allegro libs and headers." ON)
 		IF(STONESENSE_INTERNAL_SO)
-			FILE(DOWNLOAD http://cloud.github.com/downloads/peterix/stonesense/allegro.tar.bz2
-						  ${CMAKE_CURRENT_SOURCE_DIR}/allegro.tar.bz2
-						  EXPECTED_MD5 11ce22e71db4a0886eac3af220eef032)
-			execute_process(COMMAND tar xf ${CMAKE_CURRENT_SOURCE_DIR}/allegro.tar.bz2
-							WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
+			FILE(DOWNLOAD http://dethware.org/dfhack/download/allegro509.tar.bz2
+						  ${stonesense_SOURCE_DIR}/allegro509.tar.bz2
+						  EXPECTED_MD5 09e3ef4eb0a35ee8fef68aed0bc1458b)
+			execute_process(COMMAND tar xf ${stonesense_SOURCE_DIR}/allegro509.tar.bz2
+							WORKING_DIRECTORY ${stonesense_SOURCE_DIR})
 			SET(PROJECT_LIBS
 				${CMAKE_CURRENT_SOURCE_DIR}/allegro/lib/liballegro.so.5.0
 				${CMAKE_CURRENT_SOURCE_DIR}/allegro/lib/liballegro_primitives.so.5.0
 				${CMAKE_CURRENT_SOURCE_DIR}/allegro/lib/liballegro_font.so.5.0
+				${CMAKE_CURRENT_SOURCE_DIR}/allegro/lib/liballegro_color.so.5.0
+				${CMAKE_CURRENT_SOURCE_DIR}/allegro/lib/liballegro_dialog.so.5.0
 				${CMAKE_CURRENT_SOURCE_DIR}/allegro/lib/liballegro_image.so.5.0
 				${CMAKE_CURRENT_SOURCE_DIR}/allegro/lib/liballegro_ttf.so.5.0
 				${PROJECT_LIBS}
@@ -83,6 +85,8 @@ IF(UNIX)
 				allegro
 				allegro_primitives
 				allegro_font
+				allegro_color
+				allegro_dialog
 				allegro_image
 				allegro_ttf
 				${PROJECT_LIBS}
@@ -91,6 +95,11 @@ IF(UNIX)
 	ENDIF()
 # windows
 ELSE(UNIX)
+    FILE(DOWNLOAD http://dethware.org/dfhack/download/allegrow509.tar.gz
+                  ${stonesense_SOURCE_DIR}/allegrow509.tar.gz
+                  EXPECTED_MD5 8303d7026eb7c59cac9b7e329f34b559)
+    execute_process(COMMAND ${CMAKE_COMMAND} -E tar xzf ${stonesense_SOURCE_DIR}/allegrow509.tar.gz
+                    WORKING_DIRECTORY ${stonesense_SOURCE_DIR})
     ADD_DEFINITIONS("-DALLEGRO_STATICLINK")
     SET(PROJECT_LIBS
 		kernel32.lib
@@ -103,34 +112,41 @@ ELSE(UNIX)
 		uuid.lib
 		comdlg32.lib
 		advapi32.lib
-		allegro-5.0.7-monolith-static-md.lib
-		dumb-0.9.3-static-md.lib
-		freetype-2.4.8-static-md.lib
-		libFLAC-1.2.1-static-md.lib
-		libogg-1.2.1-static-md.lib
-		libvorbis-1.3.2-static-md.lib
-		libvorbisfile-1.3.2-static-md.lib
-		openal-1.14-static-md.lib
-		zlib-1.2.5-static-md.lib
+		allegro-static.lib
+		allegro_primitives-static.lib
+		allegro_font-static.lib
+		allegro_color-static.lib
+		allegro_dialog-static.lib
+		allegro_image-static.lib
+		allegro_ttf-static.lib
+		freetype-static.lib
 		winmm.lib
 		psapi.lib
 		opengl32.lib
 		glu32.lib
 		gdiplus.lib
 		shlwapi.lib
-        $(NOINHERIT)
-       )
-    include_directories (
-        ${include_directories}
-        ${CMAKE_CURRENT_SOURCE_DIR}/allegro/include
-    )
-    LINK_DIRECTORIES(
-        ${LINK_DIRECTORIES}
-        ${CMAKE_CURRENT_SOURCE_DIR}/allegro/lib
-    )
+		$(NOINHERIT)
+	)
+	include_directories (
+		${include_directories}
+		${CMAKE_CURRENT_SOURCE_DIR}/allegrow/include
+	)
+	LINK_DIRECTORIES(
+		${LINK_DIRECTORIES}
+		${CMAKE_CURRENT_SOURCE_DIR}/allegrow/lib
+	)
 ENDIF(UNIX)
+# Tell CMake the source won't be available until build time.
+SET_SOURCE_FILES_PROPERTIES(${CMAKE_CURRENT_SOURCE_DIR}/../proto/isoworldremote.pb.cc PROPERTIES GENERATED 1)
+
 SET(PROJECT_SRCS ${PROJECT_SRCS} ${CMAKE_CURRENT_SOURCE_DIR}/../proto/isoworldremote.pb.cc)
+
+
 ADD_EXECUTABLE(isoworld ${PROJECT_SRCS})
+
+# Make sure the source is generated before the executable builds.
+ADD_DEPENDENCIES(isoworld generate_proto)
 
 TARGET_LINK_LIBRARIES(isoworld protobuf-lite dfhack-client ${PROJECT_LIBS})
 
@@ -140,7 +156,7 @@ install(DIRECTORY resources/
         PATTERN "CVS" EXCLUDE
         PATTERN ".svn" EXCLUDE)
 # install readme
-install(FILES README.txt DESTINATION isoworld)
+install(FILES Readme.txt DESTINATION isoworld)
 install(TARGETS isoworld
-		LIBRARY DESTINATION ${DFHACK_LIBRARY_DESTINATION}
-        RUNTIME DESTINATION ${DFHACK_LIBRARY_DESTINATION})
+		LIBRARY DESTINATION isoworld
+        RUNTIME DESTINATION isoworld)
