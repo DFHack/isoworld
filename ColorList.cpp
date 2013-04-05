@@ -32,6 +32,8 @@ void ColorList::set_color(isoworldremote::BasicMaterial mat_type, int mat_subtyp
          type = INORGANIC;
      else if(mat_type == "WOOD")
          type = WOOD;
+     else if(mat_type == "PLANT")
+         type = PLANT;
      else return;
      auto iter = std::find(name_list[type].begin(), name_list[type].end(), mat_subtype);
      set_color(type, (int)(iter-name_list[type].begin()), color);
@@ -51,6 +53,9 @@ void ColorList::import_names(isoworldremote::RawNames * input) {
     }
 
     for(int i = 0; i < input->organic_size(); i++) {
+        set_material_name(PLANT, input->organic(i), i);
+    }
+    for(int i = 0; i < input->organic_size(); i++) {
         set_material_name(WOOD, input->organic(i), i);
     }
     has_names = true;
@@ -64,6 +69,7 @@ void ColorList::import_colors(const char * filename) {
     ALLEGRO_CONFIG_ENTRY * config_entry;
     const char * section_string = al_get_first_config_section(color_config, &config_section);
     while(section_string) {
+        log_printf("Adding %s material colors\n", section_string);
         const char * material_string = al_get_first_config_entry(color_config, section_string, &config_entry);
         while(material_string) {
             const char * color_string = al_get_config_value(color_config, section_string, material_string);
