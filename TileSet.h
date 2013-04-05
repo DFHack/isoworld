@@ -18,6 +18,7 @@ public:
 
 	c_tile * get_tile(s_map_block block);
 	c_tile * get_structure_tile(s_map_block block);
+    DetailedMap * rendered_map;
 
 	vector<vector<ALLEGRO_COLOR>> palette;
 	ALLEGRO_COLOR get_palette_color(int x, int y);

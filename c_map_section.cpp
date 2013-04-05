@@ -297,8 +297,8 @@ void c_map_section::draw(int inx, int iny)
 				bottom_l = block_array[index+board_width].height;
             if (bottom_l < bottom_r)
                 bottom_r = bottom_l;
-            if(map_list.rendered_map && map_list.rendered_map->get_tile(x + user_config.map_x, y + user_config.map_y)){
-                map_list.rendered_map->get_tile(x + user_config.map_x, y + user_config.map_y)->draw(drawx, drawy);
+            if(tileset_list[current_tileset].rendered_map && tileset_list[current_tileset].rendered_map->get_tile(x + user_config.map_x, y + user_config.map_y)){
+                tileset_list[current_tileset].rendered_map->get_tile(x + user_config.map_x, y + user_config.map_y)->draw(drawx, drawy);
             }
             else {
                 if(block_array[index].sprite > 0)
@@ -1109,4 +1109,30 @@ void c_map_section::draw_debug_info()
 	al_draw_textf(user_config.font, color, user_config.res_x, y += al_get_font_line_height(user_config.font), ALLEGRO_ALIGN_RIGHT, "Height: %d", block_array[coords_to_index(board_width/2, board_height/2)].height);
 	al_draw_textf(user_config.font, color, user_config.res_x, y += al_get_font_line_height(user_config.font), ALLEGRO_ALIGN_RIGHT, "special_terrain: %s", get_terrain_string(block_array[coords_to_index(board_width/2, board_height/2)].terrain));
 	al_draw_textf(user_config.font, color, user_config.res_x, y += al_get_font_line_height(user_config.font), ALLEGRO_ALIGN_RIGHT, "special_object: %s", get_structure_string(block_array[coords_to_index(board_width/2, board_height/2)].structure));
+}
+
+bool c_map_section::query_tile(isoworldremote::MapReply * reply, int local_x, int local_y) {
+    if(!tileset_list[current_tileset].rendered_map){
+        return true;
+    }
+    DetailedTile * tile = tileset_list[current_tileset].rendered_map->get_tile(reply->region_x()+local_x, reply->region_y()+local_y);
+    if(!tile)
+        return true;
+
+    if((tile->year == reply->current_year()) && (tile->season == reply->current_season()))
+            return false;
+    return true;
+}
+
+void c_map_section::make_tile(isoworldremote::EmbarkTile * input, isoworldremote::MapReply * region){
+    if(!tileset_list[current_tileset].rendered_map){
+        tileset_list[current_tileset].rendered_map = new DetailedMap(al_get_bitmap_width(map_list.elevation_map), al_get_bitmap_height(map_list.elevation_map));;
+    }
+    auto tile = tileset_list[current_tileset].rendered_map->new_tile(input->world_x(), input->world_y());
+
+    tile->valid = true;
+    tile->year = region->current_year();
+    tile->season = region->current_season();
+    tile->make_tile(input, this);
+
 }

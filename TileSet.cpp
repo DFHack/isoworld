@@ -6,10 +6,13 @@ TileSet::TileSet(void)
 	snap_height = 1;
 	palette.resize(1);
 	palette[0].resize(1);
+    rendered_map = NULL;
 }
 
 TileSet::~TileSet(void)
 {
+    if(rendered_map)
+        delete rendered_map;
 }
 
 void TileSet::load_ini(ALLEGRO_PATH * path)
@@ -20,7 +23,6 @@ void TileSet::load_ini(ALLEGRO_PATH * path)
 	config = al_load_config_file(al_path_cstr(path, ALLEGRO_NATIVE_PATH_SEP));
 	if(!config)
 		return;
-	char buffer[256];
 
 	tile_width = get_config_int(config, "TILESET_PROPERTIES", "tile_width");
 	tile_height = get_config_int(config, "TILESET_PROPERTIES", "tile_height");

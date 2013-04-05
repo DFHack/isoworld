@@ -172,7 +172,7 @@ void DetailedTile::make_tile(isoworldremote::EmbarkTile * input, c_map_section *
                     case INORGANIC:
                         break;
                     case LIQUID:
-                        if(current_submat == LiquidType::MAGMA){
+                        if(current_submat == MAGMA){
                             materialcolor = al_map_rgb(255,64,0);
                             light=med=dark=al_map_rgb(255,255,255);
                         }
@@ -205,6 +205,7 @@ DetailedMap::DetailedMap(unsigned int in_width, unsigned int in_height) {
     width = in_width;
     height = in_height;
     tile_map.resize(width*height, -1);
+    tile_list.size();
 }
 
 DetailedMap::~DetailedMap() {

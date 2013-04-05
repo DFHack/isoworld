@@ -42,6 +42,8 @@ public:
 	void propogate_tiles(s_maplist * maplist);
 	void load_tilesets(const char * index_file);
 	void increment_tileset(void);
+    void make_tile(isoworldremote::EmbarkTile * input, isoworldremote::MapReply * region);
+    bool query_tile(isoworldremote::MapReply * reply, int local_x, int local_y);
 
 	void draw_debug_info(void);
 	int snap_height(int in);

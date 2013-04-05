@@ -141,7 +141,6 @@ void destroy_bitmaps(s_maplist * maps)
 	al_destroy_bitmap(maps->elevation_map_with_water);
 	al_destroy_bitmap(maps->biome_map);
 	al_destroy_bitmap(maps->structure_map);
-    delete maps->rendered_map;
 }
 
 void load_bitmaps(s_pathlist * paths, s_maplist * maps)
@@ -153,8 +152,6 @@ void load_bitmaps(s_pathlist * paths, s_maplist * maps)
 	maps->elevation_map_with_water = al_load_bitmap(al_path_cstr(paths->elevation_map_with_water, ALLEGRO_NATIVE_PATH_SEP));
 	maps->biome_map = al_load_bitmap(al_path_cstr(paths->biome_map, ALLEGRO_NATIVE_PATH_SEP));
 	maps->structure_map = al_load_bitmap(al_path_cstr(paths->structure_map, ALLEGRO_NATIVE_PATH_SEP));
-
-    maps->rendered_map = new DetailedMap(al_get_bitmap_width(maps->elevation_map), al_get_bitmap_height(maps->elevation_map));
 
 	al_set_new_bitmap_flags(backup);
 }
@@ -592,24 +589,14 @@ int main(void)
                     if(net_reply.available()) {
                         for(int yy = 0; yy < net_reply.region_size_y(); yy++) {
                             for(int xx = 0; xx < net_reply.region_size_x(); xx++) {
-                                DetailedTile * tile = map_list.rendered_map->get_tile(net_reply.region_x()+xx, net_reply.region_y()+yy);
-                                if(!tile)
-                                    tile = map_list.rendered_map->new_tile(net_reply.region_x()+xx, net_reply.region_y()+yy);
-                                if(tile) {
-                                    if(tile->year == net_reply.current_year()) {
-                                        if(tile->season == net_reply.current_season())
-                                            continue;
-                                    }
-                                }
+                                if(!test_map.query_tile(&net_reply, xx, yy))
+                                    continue;
                                 net_tile_request.set_want_x(xx);
                                 net_tile_request.set_want_y(yy);
                                 EmbarkTileCall(&net_tile_request, &net_embark_tile);
                                 if(!net_embark_tile.is_valid())
                                     continue;
-                                tile->valid = true;
-                                tile->year = net_reply.current_year();
-                                tile->season = net_reply.current_season();
-                                tile->make_tile(&net_embark_tile, &test_map);
+                                test_map.make_tile(&net_embark_tile, &net_reply);
                                 goto EXIT_LOOP;
                             }
                         }
