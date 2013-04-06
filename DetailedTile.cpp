@@ -3,6 +3,7 @@
 #include "c_map_section.h"
 #include "UserConfig.h"
 #include "ColorList.h"
+#include "TileSet.h"
 
 using namespace isoworldremote;
 
@@ -132,7 +133,7 @@ void DetailedTile::draw(int draw_x, int draw_y){
         al_draw_bitmap(sprite, draw_x+offset_x, draw_y+offset_y, 0);
 }
 
-void DetailedTile::make_tile(isoworldremote::EmbarkTile * input, c_map_section * section) {
+void DetailedTile::make_tile(isoworldremote::EmbarkTile * input, c_map_section * section, TileSet * tile_set) {
     ALLEGRO_STATE state_backup;
     al_store_state(&state_backup, ALLEGRO_STATE_ALL);
     int max_z = input->tile_layer_size();
@@ -160,7 +161,7 @@ void DetailedTile::make_tile(isoworldremote::EmbarkTile * input, c_map_section *
     max_draw_x -= min_draw_x;
     max_draw_y -= min_draw_y;
     offset_x = min_draw_x;
-    offset_y = min_draw_y-input->world_z();
+    offset_y = min_draw_y-input->world_z()+1;
     sprite=al_create_bitmap(max_draw_x, max_draw_y);
     al_set_target_bitmap(sprite);
     al_set_blender(ALLEGRO_ADD, ALLEGRO_ONE, ALLEGRO_ZERO);
@@ -176,7 +177,9 @@ void DetailedTile::make_tile(isoworldremote::EmbarkTile * input, c_map_section *
                 tempx =  bind_to_range(tempx , al_get_bitmap_width(map_list.elevation_map_with_water));
                 tempy =  bind_to_range(tempy , al_get_bitmap_height(map_list.elevation_map_with_water));
 
-                ALLEGRO_COLOR pixel = al_get_pixel(map_list.elevation_map_with_water, tempx, tempy);
+                ALLEGRO_COLOR pixel;
+                if(tile_set->draw_water) pixel = al_get_pixel(map_list.elevation_map_with_water, tempx, tempy);
+                else pixel = al_get_pixel(map_list.elevation_map, tempx, tempy);
                 unsigned char red;
                 unsigned char green;
                 unsigned char blue;
@@ -193,10 +196,11 @@ void DetailedTile::make_tile(isoworldremote::EmbarkTile * input, c_map_section *
         }
     }
     heightmap.resize(48*48);
+    //get heights.
     for(int yy = 0; yy < 48; yy++) {
         for(int xx = 0; xx < 48; xx++) {
             for(int zz = max_z-1; zz >= 0; zz--) {
-                if(input->tile_layer(zz).mat_type_table(yy*48+xx) != AIR) {
+                if(!(input->tile_layer(zz).mat_type_table(yy*48+xx) == AIR || (input->tile_layer(zz).mat_type_table(yy*48+xx) == LIQUID && !(tile_set->draw_water)))) {
                     heightmap[yy*48+xx] = zz;
                     break;
                 }
@@ -210,15 +214,23 @@ void DetailedTile::make_tile(isoworldremote::EmbarkTile * input, c_map_section *
                 BasicMaterial current_mat = input->tile_layer(zz).mat_type_table(yy*48+xx);
                 int current_submat = input->tile_layer(zz).mat_subtype_table(yy*48+xx);
                 if(current_mat!= AIR) {
+                    if(current_mat == LIQUID && !tile_set->draw_water)
+                        continue;
                     BasicMaterial upper_mat = AIR;
                     BasicMaterial side_mat = AIR;
                     if(zz+1 < max_z)
                         upper_mat = input->tile_layer(zz+1).mat_type_table(yy*48+xx);
-                    if((zz+1 < max_z) && (xx > 0) && upper_mat == AIR)
+                    if((zz+1 < max_z) && (xx > 0) && upper_mat == AIR || (upper_mat == LIQUID && !tile_set->draw_water))
                         upper_mat = input->tile_layer(zz+1).mat_type_table(yy*48+xx-1);
                     if(xx+1 < 48)
                         side_mat = input->tile_layer(zz).mat_type_table(yy*48+xx+1);
-                    ALLEGRO_COLOR materialcolor = color_list.get_color(current_mat, current_submat);
+                    ALLEGRO_COLOR materialcolor;
+                    if(tile_set->draw_mode == NORMAL)
+                        materialcolor = color_list.get_color(current_mat, current_submat);
+                    else if (tile_set->draw_mode == MAX_ELEVATION)
+                        materialcolor = tile_set->get_palette_color(tile_set->elevation_palette, get_height(xx,yy)+world_z);
+                    else if (tile_set->draw_mode == CURRENT_ELEVATION)
+                        materialcolor = tile_set->get_palette_color(tile_set->elevation_palette, zz+world_z);
                     ALLEGRO_COLOR light, med, dark;
                     if(zz >= heightmap[yy*48+xx])
                         light = surfacelight[yy*48+xx];
@@ -234,8 +246,19 @@ void DetailedTile::make_tile(isoworldremote::EmbarkTile * input, c_map_section *
                             materialcolor = al_map_rgb(255,64,0);
                             light=med=dark=al_map_rgb(255,255,255);
                         }
-                        else
-                            materialcolor = al_map_rgb(128,128,255);
+                        else {
+                            if(tile_set->water_depth_palette >= 0) {
+                                int depth = 0;
+                                for(int i = 0; i <= zz; i++){
+                                    if(input->tile_layer(zz-i).mat_type_table(yy*48+xx) != LIQUID) {
+                                        depth = i-1;
+                                        break;
+                                    }
+                                }
+                                materialcolor = tile_set->get_palette_color(tile_set->water_depth_palette, depth);
+                            }
+                            else materialcolor = al_map_rgb(128,128,255);
+                        }
                         break;
                     default:
                         break;
@@ -243,9 +266,9 @@ void DetailedTile::make_tile(isoworldremote::EmbarkTile * input, c_map_section *
                     float drawx = xx;
                     float drawy = yy;
                     section->pointToSprite(&drawx, &drawy, zz);
-                    if(upper_mat == AIR)
+                    if(upper_mat == AIR || (upper_mat == LIQUID && !tile_set->draw_water))
                         al_put_pixel(drawx-min_draw_x, drawy-min_draw_y, multiply(light, materialcolor));
-                    else if(side_mat == AIR)
+                    else if(side_mat == AIR || (side_mat == LIQUID && !tile_set->draw_water))
                         al_put_pixel(drawx-min_draw_x, drawy-min_draw_y, multiply(dark, materialcolor));
                     else
                         al_put_pixel(drawx-min_draw_x, drawy-min_draw_y, multiply(med, materialcolor));

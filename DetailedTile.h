@@ -5,6 +5,7 @@
 #include "isoworldremote.pb.h"
 
 class c_map_section;
+class TileSet;
 
 class DetailedTile {
     ALLEGRO_BITMAP * sprite;
@@ -24,7 +25,7 @@ public:
     char season;
     DetailedTile();
     ~DetailedTile();
-    void make_tile(isoworldremote::EmbarkTile * input, c_map_section * section);
+    void make_tile(isoworldremote::EmbarkTile * input, c_map_section * section, TileSet * tile_set);
     void draw(int x, int y);
 };
 

@@ -4,7 +4,15 @@
 #include <vector>
 #include "c_tile.h"
 #include "s_map_block.h"
-#include "DetailedTile.h"
+
+class DetailedTile;
+
+enum DetailDrawMode {
+    NORMAL,
+    MAX_ELEVATION,
+    CURRENT_ELEVATION,
+};
+
 
 class TileSet
 {
@@ -27,4 +35,10 @@ public:
 	int tile_width;
 	int tile_height;
 	int snap_height;
+
+    //variables controlling how the detailed tiles are drawn.
+    DetailDrawMode draw_mode;
+    int elevation_palette;
+    int water_depth_palette;
+    bool draw_water;
 };

@@ -28,6 +28,22 @@ void TileSet::load_ini(ALLEGRO_PATH * path)
 	tile_height = get_config_int(config, "TILESET_PROPERTIES", "tile_height");
 	snap_height = get_config_int(config, "TILESET_PROPERTIES", "snap_height");
 
+    snap_height = get_config_int(config, "DETAILED_TILES", "elevation_palette", -1);
+    water_depth_palette = get_config_int(config, "DETAILED_TILES", "water_depth_palette_index", -1);
+
+    if(const char * mode = al_get_config_value(config, "DETAILED_TILES", "draw_mode")) {
+        if(strcmp(mode, "normal") == 0) draw_mode = NORMAL;
+        if(strcmp(mode, "max_elevation") == 0) draw_mode = MAX_ELEVATION;
+        if(strcmp(mode, "current_elevation") == 0) draw_mode = CURRENT_ELEVATION;
+    }
+    else draw_mode = NORMAL;
+
+    if(const char * water = al_get_config_value(config, "DETAILED_TILES", "skip_water")) {
+        if(strcmp(water, "yes") == 0) draw_water = false;
+        if(strcmp(water, "no") == 0) draw_water = true;
+    }
+    else draw_water = true;
+
 	const char * file = al_get_config_value(config, "TILESET_PROPERTIES", "grid_tile");
 	if(file)
 	{
@@ -80,7 +96,7 @@ void TileSet::load_ini(ALLEGRO_PATH * path)
 			al_close_directory(fs_dir);
 		}
 		al_destroy_fs_entry(fs_dir);
-		sort(tile_set.begin(), tile_set.end());
+		std::sort(tile_set.begin(), tile_set.end());
 	}
 }
 

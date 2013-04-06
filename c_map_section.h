@@ -5,6 +5,7 @@
 #include "c_tile.h"
 #include "TileSet.h"
 #include "s_map_block.h"
+#include "isoworldremote.pb.h"
 
 class c_map_section
 {

@@ -1128,6 +1128,6 @@ void c_map_section::make_tile(isoworldremote::EmbarkTile * input, isoworldremote
     tile->valid = true;
     tile->year = region->current_year();
     tile->season = region->current_season();
-    tile->make_tile(input, this);
+    tile->make_tile(input, this, &(tileset_list[current_tileset]));
 
 }
