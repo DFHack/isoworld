@@ -40,7 +40,7 @@ IF(UNIX)
 				${CMAKE_CURRENT_SOURCE_DIR}/allegro-osx/include
 			)
 			install(DIRECTORY allegro-osx/lib/
-					DESTINATION "stonesense/deplibs"
+					DESTINATION "hack/libs"
 					PATTERN "CVS" EXCLUDE
 					PATTERN ".svn" EXCLUDE)
 		ELSE()
@@ -57,11 +57,11 @@ IF(UNIX)
 	#linux
 		OPTION(STONESENSE_INTERNAL_SO "Link with prebuilt internal allegro libs and headers." ON)
 		IF(STONESENSE_INTERNAL_SO)
-			FILE(DOWNLOAD http://dethware.org/dfhack/download/allegro509.tar.bz2
-						  ${stonesense_SOURCE_DIR}/allegro509.tar.bz2
-						  EXPECTED_MD5 09e3ef4eb0a35ee8fef68aed0bc1458b)
-			execute_process(COMMAND tar xf ${stonesense_SOURCE_DIR}/allegro509.tar.bz2
-							WORKING_DIRECTORY ${stonesense_SOURCE_DIR})
+			FILE(DOWNLOAD http://dethware.org/dfhack/download/allegro509b.tar.bz2
+						  ${CMAKE_CURRENT_SOURCE_DIR}/allegro509b.tar.bz2
+						  EXPECTED_MD5 74ead5d95a83a03a301cdc76fa0a3df8)
+			execute_process(COMMAND tar xf ${CMAKE_CURRENT_SOURCE_DIR}/allegro509b.tar.bz2
+							WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
 			SET(PROJECT_LIBS
 				${CMAKE_CURRENT_SOURCE_DIR}/allegro/lib/liballegro.so.5.0
 				${CMAKE_CURRENT_SOURCE_DIR}/allegro/lib/liballegro_primitives.so.5.0
@@ -77,7 +77,7 @@ IF(UNIX)
 				${CMAKE_CURRENT_SOURCE_DIR}/allegro/include
 			)
 			install(DIRECTORY allegro/lib/
-					DESTINATION "stonesense/deplibs"
+					DESTINATION "hack/libs"
 					PATTERN "CVS" EXCLUDE
 					PATTERN ".svn" EXCLUDE)
 		ELSE()
@@ -95,11 +95,11 @@ IF(UNIX)
 	ENDIF()
 # windows
 ELSE(UNIX)
-    FILE(DOWNLOAD http://dethware.org/dfhack/download/allegrow509.tar.gz
-                  ${stonesense_SOURCE_DIR}/allegrow509.tar.gz
-                  EXPECTED_MD5 8303d7026eb7c59cac9b7e329f34b559)
-    execute_process(COMMAND ${CMAKE_COMMAND} -E tar xzf ${stonesense_SOURCE_DIR}/allegrow509.tar.gz
-                    WORKING_DIRECTORY ${stonesense_SOURCE_DIR})
+    FILE(DOWNLOAD http://dethware.org/dfhack/download/allegrow509b.tar.gz
+                  ${CMAKE_CURRENT_SOURCE_DIR}/allegrow509b.tar.gz
+                  EXPECTED_MD5 55b7e37ece699f02192346883ba38677)
+    execute_process(COMMAND ${CMAKE_COMMAND} -E tar xzf ${CMAKE_CURRENT_SOURCE_DIR}/allegrow509b.tar.gz
+                    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
     ADD_DEFINITIONS("-DALLEGRO_STATICLINK")
     SET(PROJECT_LIBS
 		kernel32.lib
