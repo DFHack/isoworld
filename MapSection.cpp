@@ -1,4 +1,4 @@
-#include "c_map_section.h"
+#include "MapSection.h"
 #include "UserConfig.h"
 #include "common.h"
 #include <cmath>
@@ -171,7 +171,7 @@ bool approx_f(float a, float b, float accuracy)
 	return (abs(a-b) <= accuracy);
 }
 
-void c_map_section::pointToScreen(int *inx, int *iny)
+void MapSection::pointToScreen(int *inx, int *iny)
 {
 	int offx = board_center_x;
 	int offy = board_top_y;
@@ -185,7 +185,7 @@ void c_map_section::pointToScreen(int *inx, int *iny)
 	*inx=x;*iny=y;
 }
 
-void c_map_section::pointToSprite(float *inx, float *iny, int inz)
+void MapSection::pointToSprite(float *inx, float *iny, int inz)
 {
     float offx = 0;
     float offy = -inz-tileset_list.at(current_tileset).tile_height;
@@ -198,7 +198,7 @@ void c_map_section::pointToSprite(float *inx, float *iny, int inz)
     *inx=floor(x+0.5f); *iny = floor(y+0.5f);
 }
 
-c_map_section::c_map_section(void)
+MapSection::MapSection(void)
 {
 	block_array = 0;
 
@@ -211,12 +211,12 @@ c_map_section::c_map_section(void)
 	current_tileset = 0;
 }
 
-c_map_section::~c_map_section(void)
+MapSection::~MapSection(void)
 {
 	clear_tiles();
 }
 
-bool c_map_section::set_size(int x, int y)
+bool MapSection::set_size(int x, int y)
 {
 	unsigned int total_needed = x*y;
 	board_width = x;
@@ -240,12 +240,12 @@ bool c_map_section::set_size(int x, int y)
 	return true;
 }
 
-void c_map_section::clear_tiles(void)
+void MapSection::clear_tiles(void)
 {
 	delete[] block_array;
 	num_tiles = 0;
 }
-void c_map_section::flood_fill(c_tile *tile, int height)
+void MapSection::flood_fill(c_tile *tile, int height)
 {
 	for (unsigned int i = 0; i < (board_width * board_height); i++)
 	{
@@ -257,7 +257,7 @@ void c_map_section::flood_fill(c_tile *tile, int height)
 	}
 }
 
-unsigned int c_map_section::coords_to_index(int x, int y)
+unsigned int MapSection::coords_to_index(int x, int y)
 {
 	if(x < 0) x=0;
 	if(y < 0) y=0;
@@ -266,7 +266,7 @@ unsigned int c_map_section::coords_to_index(int x, int y)
 	return x + (board_width * y);
 }
 
-void c_map_section::draw(int inx, int iny)
+void MapSection::draw(int inx, int iny)
 {
 	clock_t start_time = clock();
 	al_hold_bitmap_drawing(true);
@@ -324,7 +324,7 @@ void c_map_section::draw(int inx, int iny)
 	draw_time = clock() - start_time;
 }
 
-void c_map_section::load_heights(ALLEGRO_BITMAP * heightmap)
+void MapSection::load_heights(ALLEGRO_BITMAP * heightmap)
 {
 	for (unsigned int y = 0; y < board_width; y++)
 	{
@@ -359,7 +359,7 @@ void c_map_section::load_heights(ALLEGRO_BITMAP * heightmap)
 	}
 }
 
-void c_map_section::generate_noise(void)
+void MapSection::generate_noise(void)
 {
 	for (unsigned int y = 0; y < board_width; y++)
 	{
@@ -373,7 +373,7 @@ void c_map_section::generate_noise(void)
 	}
 }
 
-void c_map_section::load_level(ALLEGRO_BITMAP * levelmap, int level)
+void MapSection::load_level(ALLEGRO_BITMAP * levelmap, int level)
 {
 	for (unsigned int y = 0; y < board_width; y++)
 	{
@@ -403,7 +403,7 @@ void c_map_section::load_level(ALLEGRO_BITMAP * levelmap, int level)
 	}
 }
 
-void c_map_section::load_water_level(ALLEGRO_BITMAP * watermap)
+void MapSection::load_water_level(ALLEGRO_BITMAP * watermap)
 {
 	for (unsigned int y = 0; y < board_width; y++)
 	{
@@ -448,7 +448,7 @@ void c_map_section::load_water_level(ALLEGRO_BITMAP * watermap)
 	}
 }
 
-void c_map_section::load_biome_tiles(s_maplist * maplist)
+void MapSection::load_biome_tiles(s_maplist * maplist)
 {
 	for (unsigned int y = 0; y < board_width; y++)
 	{
@@ -707,7 +707,7 @@ void c_map_section::load_biome_tiles(s_maplist * maplist)
 		}
 	}
 }
-void c_map_section::load_structure_tiles(ALLEGRO_BITMAP * structuremap)
+void MapSection::load_structure_tiles(ALLEGRO_BITMAP * structuremap)
 {
 	for (unsigned int y = 0; y < board_width; y++)
 	{
@@ -816,7 +816,7 @@ void c_map_section::load_structure_tiles(ALLEGRO_BITMAP * structuremap)
 		}
 	}
 }
-void c_map_section::load_colors(ALLEGRO_BITMAP * colormap)
+void MapSection::load_colors(ALLEGRO_BITMAP * colormap)
 {
 	for (unsigned int y = 0; y < board_width; y++)
 	{
@@ -842,7 +842,7 @@ void c_map_section::load_colors(ALLEGRO_BITMAP * colormap)
 
 
 
-void c_map_section::propogate_tiles(s_maplist * maplist)
+void MapSection::propogate_tiles(s_maplist * maplist)
 {
 	clock_t start_time = clock();
 	load_heights(maplist->elevation_map);
@@ -873,14 +873,14 @@ void c_map_section::propogate_tiles(s_maplist * maplist)
 	tile_fetch_time = clock() - prop_start_time;
 }
 
-void c_map_section::increment_tileset(void)
+void MapSection::increment_tileset(void)
 {
 	current_tileset ++;
 	if(current_tileset >= tileset_list.size())
 		current_tileset = 0;
 }
 
-void c_map_section::load_tilesets(const char * index_file)
+void MapSection::load_tilesets(const char * index_file)
 {
 	ALLEGRO_CONFIG * config = 0;
 
@@ -908,14 +908,14 @@ void c_map_section::load_tilesets(const char * index_file)
 	al_destroy_path(key);
 }
 
-int c_map_section::snap_height(int in)
+int MapSection::snap_height(int in)
 {
 	if(tileset_list.at(current_tileset).snap_height <= 1)
 		return in;
 	return (in - (in % tileset_list.at(current_tileset).snap_height));
 }
 
-void c_map_section::generate_special_tile_borders()
+void MapSection::generate_special_tile_borders()
 {
 	for (unsigned int y = 0; y < board_width; y++)
 	{
@@ -1047,7 +1047,7 @@ void c_map_section::generate_special_tile_borders()
 }
 
 
-double c_map_section::get_average_heights(int distance, int x, int y)
+double MapSection::get_average_heights(int distance, int x, int y)
 {
 	if(distance < 1)
 		return 0;
@@ -1070,7 +1070,7 @@ double c_map_section::get_average_heights(int distance, int x, int y)
 	return max((result/count), 0.0);
 }
 
-void c_map_section::generate_ambient_lighting()
+void MapSection::generate_ambient_lighting()
 {
 	for (unsigned int y = 0; y < board_height; y++)
 	{
@@ -1095,7 +1095,7 @@ void c_map_section::generate_ambient_lighting()
 }
 
 
-void c_map_section::draw_debug_info()
+void MapSection::draw_debug_info()
 {
 	ALLEGRO_COLOR color = al_map_rgb(255,255,255);
 
@@ -1106,7 +1106,7 @@ void c_map_section::draw_debug_info()
 	al_draw_textf(user_config.font, color, user_config.res_x, y += al_get_font_line_height(user_config.font), ALLEGRO_ALIGN_RIGHT, "special_object: %s", get_structure_string(block_array[coords_to_index(board_width/2, board_height/2)].structure));
 }
 
-bool c_map_section::query_tile(isoworldremote::MapReply * reply, int local_x, int local_y) {
+bool MapSection::query_tile(isoworldremote::MapReply * reply, int local_x, int local_y) {
     if(!tileset_list[current_tileset].rendered_map){
         return true;
     }
@@ -1119,7 +1119,7 @@ bool c_map_section::query_tile(isoworldremote::MapReply * reply, int local_x, in
     return true;
 }
 
-void c_map_section::make_tile(isoworldremote::EmbarkTile * input, isoworldremote::MapReply * region){
+void MapSection::make_tile(isoworldremote::EmbarkTile * input, isoworldremote::MapReply * region){
     if(!tileset_list[current_tileset].rendered_map){
         tileset_list[current_tileset].rendered_map = new DetailedMap(al_get_bitmap_width(map_list.elevation_map), al_get_bitmap_height(map_list.elevation_map));;
     }

@@ -4,7 +4,7 @@
 #include <string>
 #include "isoworldremote.pb.h"
 
-class c_map_section;
+class MapSection;
 class TileSet;
 
 class DetailedTile {
@@ -25,7 +25,7 @@ public:
     char season;
     DetailedTile();
     ~DetailedTile();
-    void make_tile(isoworldremote::EmbarkTile * input, c_map_section * section, TileSet * tile_set);
+    void make_tile(isoworldremote::EmbarkTile * input, MapSection * section, TileSet * tile_set);
     void draw(int x, int y);
 };
 

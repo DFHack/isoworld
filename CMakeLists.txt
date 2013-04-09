@@ -7,7 +7,7 @@ SET(PROJECT_SRCS
 	UserConfig.cpp
 	ColorList.cpp
 	c_imagelist.cpp
-	c_map_section.cpp
+	MapSection.cpp
 	c_minimap.cpp
 	c_tile.cpp
 	TileSet.cpp
@@ -57,15 +57,17 @@ IF(UNIX)
 	#linux
 		OPTION(STONESENSE_INTERNAL_SO "Link with prebuilt internal allegro libs and headers." ON)
 		IF(STONESENSE_INTERNAL_SO)
-			FILE(DOWNLOAD http://cloud.github.com/downloads/peterix/stonesense/allegro.tar.bz2
-						  ${CMAKE_CURRENT_SOURCE_DIR}/allegro.tar.bz2
-						  EXPECTED_MD5 11ce22e71db4a0886eac3af220eef032)
-			execute_process(COMMAND tar xf ${CMAKE_CURRENT_SOURCE_DIR}/allegro.tar.bz2
-							WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
+			FILE(DOWNLOAD http://dethware.org/dfhack/download/allegro509.tar.bz2
+						  ${stonesense_SOURCE_DIR}/allegro509.tar.bz2
+						  EXPECTED_MD5 09e3ef4eb0a35ee8fef68aed0bc1458b)
+			execute_process(COMMAND tar xf ${stonesense_SOURCE_DIR}/allegro509.tar.bz2
+							WORKING_DIRECTORY ${stonesense_SOURCE_DIR})
 			SET(PROJECT_LIBS
 				${CMAKE_CURRENT_SOURCE_DIR}/allegro/lib/liballegro.so.5.0
 				${CMAKE_CURRENT_SOURCE_DIR}/allegro/lib/liballegro_primitives.so.5.0
 				${CMAKE_CURRENT_SOURCE_DIR}/allegro/lib/liballegro_font.so.5.0
+				${CMAKE_CURRENT_SOURCE_DIR}/allegro/lib/liballegro_color.so.5.0
+				${CMAKE_CURRENT_SOURCE_DIR}/allegro/lib/liballegro_dialog.so.5.0
 				${CMAKE_CURRENT_SOURCE_DIR}/allegro/lib/liballegro_image.so.5.0
 				${CMAKE_CURRENT_SOURCE_DIR}/allegro/lib/liballegro_ttf.so.5.0
 				${PROJECT_LIBS}
@@ -83,6 +85,8 @@ IF(UNIX)
 				allegro
 				allegro_primitives
 				allegro_font
+				allegro_color
+				allegro_dialog
 				allegro_image
 				allegro_ttf
 				${PROJECT_LIBS}
@@ -129,8 +133,16 @@ ELSE(UNIX)
         ${CMAKE_CURRENT_SOURCE_DIR}/allegro/lib
     )
 ENDIF(UNIX)
+# Tell CMake the source won't be available until build time.
+SET_SOURCE_FILES_PROPERTIES(${CMAKE_CURRENT_SOURCE_DIR}/../proto/isoworldremote.pb.cc PROPERTIES GENERATED 1)
+
 SET(PROJECT_SRCS ${PROJECT_SRCS} ${CMAKE_CURRENT_SOURCE_DIR}/../proto/isoworldremote.pb.cc)
+
+
 ADD_EXECUTABLE(isoworld ${PROJECT_SRCS})
+
+# Make sure the source is generated before the executable builds.
+ADD_DEPENDENCIES(isoworld generate_proto)
 
 TARGET_LINK_LIBRARIES(isoworld protobuf-lite dfhack-client ${PROJECT_LIBS})
 
@@ -140,7 +152,7 @@ install(DIRECTORY resources/
         PATTERN "CVS" EXCLUDE
         PATTERN ".svn" EXCLUDE)
 # install readme
-install(FILES README.txt DESTINATION isoworld)
+install(FILES Readme.txt DESTINATION isoworld)
 install(TARGETS isoworld
 		LIBRARY DESTINATION ${DFHACK_LIBRARY_DESTINATION}
         RUNTIME DESTINATION ${DFHACK_LIBRARY_DESTINATION})

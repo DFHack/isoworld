@@ -9,7 +9,7 @@
 #include "common.h"
 #include "common.c"
 #include "c_tile.h"
-#include "c_map_section.h"
+#include "MapSection.h"
 #include "UserConfig.h"
 #include "console.h"
 #include "c_minimap.h"
@@ -355,7 +355,7 @@ int main(void)
 	}
 	al_start_timer(timer);
     al_start_timer(network_timer);
-	c_map_section test_map;
+	MapSection test_map;
 
 	test_map.set_size(user_config.map_width, user_config.map_height);
 

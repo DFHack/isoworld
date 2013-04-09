@@ -1,5 +1,6 @@
 #include "TileSet.h"
 #include "UserConfig.h"
+#include "DetailedTile.h"
 
 TileSet::TileSet(void)
 {

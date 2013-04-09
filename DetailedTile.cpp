@@ -1,6 +1,6 @@
 #include "DetailedTile.h"
 #include "isoworldremote.pb.h"
-#include "c_map_section.h"
+#include "MapSection.h"
 #include "UserConfig.h"
 #include "ColorList.h"
 #include "TileSet.h"
@@ -133,7 +133,7 @@ void DetailedTile::draw(int draw_x, int draw_y){
         al_draw_bitmap(sprite, draw_x+offset_x, draw_y+offset_y, 0);
 }
 
-void DetailedTile::make_tile(isoworldremote::EmbarkTile * input, c_map_section * section, TileSet * tile_set) {
+void DetailedTile::make_tile(isoworldremote::EmbarkTile * input, MapSection * section, TileSet * tile_set) {
     ALLEGRO_STATE state_backup;
     al_store_state(&state_backup, ALLEGRO_STATE_ALL);
     int max_z = input->tile_layer_size();

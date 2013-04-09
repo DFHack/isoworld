@@ -7,7 +7,7 @@
 #include "s_map_block.h"
 #include "isoworldremote.pb.h"
 
-class c_map_section
+class MapSection
 {
 	s_map_block * block_array;
 
@@ -50,6 +50,6 @@ public:
 	int snap_height(int in);
 	double get_average_heights(int distance, int x, int y);
 	unsigned int coords_to_index(int x, int y);
-	c_map_section(void);
-	~c_map_section(void);
+	MapSection(void);
+	~MapSection(void);
 };
