@@ -192,6 +192,9 @@ void populate_filenames(string input, s_pathlist * paths)
 	}
     //save the resulting name to a gobal
     current_save = input;
+    if(current_save.rfind("--") < std::string::npos) { //get rid of the double dash.
+        current_save.erase(current_save.find_last_of("-"), std::string::npos); // -16014.bmp
+    }
     current_save.erase(current_save.find_last_of("-"), std::string::npos); // -16014.bmp
     current_save.erase(current_save.find_last_of("-"), std::string::npos); // -250
     log_printf("Loaded up %s\n", current_save.c_str());
@@ -503,7 +506,7 @@ int main(void)
 			}
 		}
 		if (event.type == ALLEGRO_EVENT_MOUSE_BUTTON_DOWN) {
-			log_printf("Mouse clicked at %d,%d.\n", event.mouse.x, event.mouse.y);
+			//log_printf("Mouse clicked at %d,%d.\n", event.mouse.x, event.mouse.y);
 			if(event.mouse.button == 2)
 			{
 				rightmove = true;
