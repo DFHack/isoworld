@@ -37,6 +37,7 @@ public:
 	int snap_height;
 
     //variables controlling how the detailed tiles are drawn.
+    std::string tileset_folder;
     DetailDrawMode draw_mode;
     int elevation_palette;
     int water_depth_palette;

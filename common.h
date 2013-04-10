@@ -64,4 +64,6 @@ extern s_pathlist path_list;
 
 extern s_maplist map_list;
 
+extern std::string current_save;
+
 int bind_to_range(int number, int range);

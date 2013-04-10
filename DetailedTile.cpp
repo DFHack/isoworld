@@ -4,6 +4,7 @@
 #include "UserConfig.h"
 #include "ColorList.h"
 #include "TileSet.h"
+#include <sstream>
 
 using namespace isoworldremote;
 
@@ -137,9 +138,9 @@ void DetailedTile::make_tile(isoworldremote::EmbarkTile * input, MapSection * se
     ALLEGRO_STATE state_backup;
     al_store_state(&state_backup, ALLEGRO_STATE_ALL);
     int max_z = input->tile_layer_size();
-    int world_x = input->world_x();
-    int world_y = input->world_y();
-    int world_z = input->world_z();
+    world_x = input->world_x();
+    world_y = input->world_y();
+    world_z = input->world_z();
     int max_draw_x, min_draw_x, max_draw_y, min_draw_y;
     //following is to get the bounds of all the junk.
     float tempx = 0.0f;
@@ -278,6 +279,7 @@ void DetailedTile::make_tile(isoworldremote::EmbarkTile * input, MapSection * se
     }
     al_unlock_bitmap(sprite);
     al_restore_state(&state_backup);
+    save_tile(path_list.elevation_map, tile_set);
 }
 
 
@@ -373,4 +375,95 @@ vector<ALLEGRO_COLOR> DetailedTile::generate_ambient_lighting(vector<int> * heig
         }
     }
     return output;
+}
+
+void DetailedTile::save_tile(ALLEGRO_PATH * base_path, TileSet * tile_set) {
+    ALLEGRO_PATH * tile_path = al_clone_path(base_path);
+
+    stringstream buffer;
+
+    al_append_path_component(tile_path, "data");
+    al_append_path_component(tile_path, "save");
+    al_append_path_component(tile_path, current_save.c_str());
+    al_append_path_component(tile_path, "isoworld");
+    buffer.str(std::string());
+    buffer << world_x;
+    al_append_path_component(tile_path, buffer.str().c_str());
+    buffer.str(std::string());
+    buffer << world_y;
+    al_append_path_component(tile_path, buffer.str().c_str());
+    al_set_path_filename(tile_path, "");
+    al_make_directory(al_path_cstr(tile_path, ALLEGRO_NATIVE_PATH_SEP));
+    buffer.str(std::string());
+    buffer << offset_x << "," << offset_y << "," << tile_set->tileset_folder << ".png";
+    al_set_path_filename(tile_path, buffer.str().c_str());
+    if(al_save_bitmap(al_path_cstr(tile_path, ALLEGRO_NATIVE_PATH_SEP), sprite))
+        log_printf("Saved tile at path: %s\n", al_path_cstr(tile_path, ALLEGRO_NATIVE_PATH_SEP));
+    else log_printf("Could not save tile at path: %s\n", al_path_cstr(tile_path, ALLEGRO_NATIVE_PATH_SEP));
+    al_destroy_path(tile_path);
+}
+
+void DetailedTile::load_tile(const char * filename, int inx, int iny) {
+    sprite = al_load_bitmap(filename);
+    offset_x = inx;
+    offset_y = iny;
+    valid = true;
+}
+
+void load_detailed_tiles(ALLEGRO_PATH * base_path, MapSection * section) {
+    ALLEGRO_PATH * tile_path = al_clone_path(base_path);
+    al_set_path_filename(tile_path, "");
+    al_append_path_component(tile_path, "data");
+    al_append_path_component(tile_path, "save");
+    al_append_path_component(tile_path, current_save.c_str());
+    al_append_path_component(tile_path, "isoworld");
+
+    //search through the dir for folders.
+    ALLEGRO_FS_ENTRY * base_folder = al_create_fs_entry(al_path_cstr(tile_path, ALLEGRO_NATIVE_PATH_SEP));
+    if(al_open_directory(base_folder)) {
+        ALLEGRO_FS_ENTRY * x_folder = 0;
+        while(x_folder = al_read_directory(base_folder)) {
+            if(al_open_directory(x_folder)) {
+                ALLEGRO_FS_ENTRY * y_folder = 0;
+                while(y_folder = al_read_directory(x_folder)) {
+                    if(al_open_directory(y_folder)) {
+                        ALLEGRO_FS_ENTRY * image_file = 0;
+                        while(image_file = al_read_directory(y_folder)) {
+                            ALLEGRO_PATH * image_path = al_create_path(al_get_fs_entry_name(image_file));
+                            int world_x = atoi(al_get_path_component(image_path, -2));
+                            int world_y = atoi(al_get_path_component(image_path, -1));
+                            string filename = al_get_path_filename(image_path);
+                            int first_comma = filename.find(",");
+                            int second_comma = filename.find(",", first_comma+1);
+                            int last_pariod = filename.rfind(".");
+                            int offset_x = atoi(filename.substr(0, first_comma).c_str());
+                            int offset_y = atoi(filename.substr(first_comma+1, second_comma-first_comma-1).c_str());
+                            string tileset_name = filename.substr(second_comma+1, last_pariod-second_comma-1);
+                            int tileset_index = -1;
+                            for(int i = 0; i < section->tileset_list.size(); i++) {
+                                if(section->tileset_list[i].tileset_folder == tileset_name) {
+                                    tileset_index = i;
+                                    break;
+                                }
+                            }
+                            if(tileset_index >= 0) {
+                                if(!section->tileset_list[tileset_index].rendered_map){
+                                    section->tileset_list[tileset_index].rendered_map = new DetailedMap(al_get_bitmap_width(map_list.elevation_map), al_get_bitmap_height(map_list.elevation_map));;
+                                }
+                                DetailedTile * tile = section->tileset_list[tileset_index].rendered_map->new_tile(world_x, world_y);
+                                tile->load_tile( al_get_fs_entry_name(image_file), offset_x, offset_y);
+                            }
+                            //log_printf("%s\n", tileset_name.c_str());
+                            al_destroy_path(image_path);
+                            al_destroy_fs_entry(image_file);
+                        }
+                    }
+                    al_destroy_fs_entry(y_folder);
+                }
+            }
+            al_destroy_fs_entry(x_folder);
+        }
+    }
+    al_destroy_fs_entry(base_folder);
+    al_destroy_path(tile_path);
 }

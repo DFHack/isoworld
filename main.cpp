@@ -366,6 +366,8 @@ int main(void)
 	test_map.board_center_x = 0;
 	test_map.board_top_y = 0;
 
+    load_detailed_tiles(path_list.elevation_map, &test_map);
+
     DFHack::color_ostream_wrapper out(cout);
 
     bool connected_to_df = 0;

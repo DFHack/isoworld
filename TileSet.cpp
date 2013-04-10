@@ -24,6 +24,8 @@ void TileSet::load_ini(ALLEGRO_PATH * path)
 	config = al_load_config_file(al_path_cstr(path, ALLEGRO_NATIVE_PATH_SEP));
 	if(!config)
 		return;
+    tileset_folder = al_get_path_tail(path);
+    log_printf("loading tileset from: %s\n", tileset_folder.c_str());
 
 	tile_width = get_config_int(config, "TILESET_PROPERTIES", "tile_width");
 	tile_height = get_config_int(config, "TILESET_PROPERTIES", "tile_height");
