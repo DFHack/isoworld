@@ -5,6 +5,7 @@ include_directories (${CMAKE_SOURCE_DIR})
 
 SET(PROJECT_SRCS
 	UserConfig.cpp
+	UserInterface.cpp
 	ColorList.cpp
 	c_imagelist.cpp
 	MapSection.cpp
@@ -122,15 +123,19 @@ ELSE(UNIX)
 		glu32.lib
 		gdiplus.lib
 		shlwapi.lib
+		agui.lib
+		agui_allegro5.lib
         $(NOINHERIT)
        )
     include_directories (
         ${include_directories}
         ${CMAKE_CURRENT_SOURCE_DIR}/allegro/include
+        ${CMAKE_CURRENT_SOURCE_DIR}/agui/include
     )
     LINK_DIRECTORIES(
         ${LINK_DIRECTORIES}
         ${CMAKE_CURRENT_SOURCE_DIR}/allegro/lib
+        ${CMAKE_CURRENT_SOURCE_DIR}/agui/lib
     )
 ENDIF(UNIX)
 # Tell CMake the source won't be available until build time.
