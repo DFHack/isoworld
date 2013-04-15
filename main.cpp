@@ -378,6 +378,10 @@ int main(void)
 		abort_example("Error creating display\n");
 		return 1;
 	}
+    ALLEGRO_BITMAP * isoicon = al_load_bitmap("isoworld/isoWorld.png");
+    al_set_display_icon(display, isoicon);
+    al_set_window_title(display, "IsoWorld");
+
 	log_printf("success.\n");
 
 	log_printf("Loading font '%s'...", "isoworld/DejaVuSans.ttf");

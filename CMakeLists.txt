@@ -127,6 +127,7 @@ ELSE(UNIX)
 		agui_allegro5.lib
         $(NOINHERIT)
        )
+	SET(PROJECT_SRCS ${PROJECT_SRCS} IsoWorld.rc)
     include_directories (
         ${include_directories}
         ${CMAKE_CURRENT_SOURCE_DIR}/allegro/include
