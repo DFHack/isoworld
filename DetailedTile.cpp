@@ -417,7 +417,7 @@ void load_detailed_tiles(ALLEGRO_PATH * base_path, MapSection * section) {
     al_append_path_component(tile_path, "save");
     al_append_path_component(tile_path, current_save.c_str());
     al_append_path_component(tile_path, "isoworld");
-
+    log_printf("Loading detailed tiles from \"%s\"\n", al_path_cstr(tile_path, ALLEGRO_NATIVE_PATH_SEP));
     //search through the dir for folders.
     ALLEGRO_FS_ENTRY * base_folder = al_create_fs_entry(al_path_cstr(tile_path, ALLEGRO_NATIVE_PATH_SEP));
     if(al_open_directory(base_folder)) {

@@ -1,5 +1,7 @@
 #include "UserInterface.h"
 #include "console.h"
+#include "MapSection.h"
+
 agui::Gui *gui = NULL;
 agui::Allegro5Input* inputHandler = NULL;
 agui::Allegro5Graphics* graphicsHandler = NULL;
@@ -16,19 +18,38 @@ void ConnectActionListener::actionPerformed(const agui::ActionEvent &evt) {
 void LoadActionListener::actionPerformed(const agui::ActionEvent &evt) {
     start_load_dialog();
 }
+void TilesetActionListener::actionPerformed(const agui::ActionEvent &evt) {
+    agui::DropDown * drop_down = dynamic_cast<agui::DropDown*>(evt.getSource());
+    mapsection->current_tileset = drop_down->getSelectedIndex();
+}
+
+void FollowActionListener::actionPerformed(const agui::ActionEvent &evt) {
+    center_on_loaded_map = !center_on_loaded_map;
+}
 
 MainScreen::MainScreen(agui::Gui *guiInstance) {
         mGui = guiInstance;
         mGui->add(&flow);
         flow.add(&connect_button);
-        connect_button.setSize(100,40);
+        connect_button.setSize(100,30);
         connect_button.setText("Connect");
         connect_button.addActionListener(&connect_action);
 
         flow.add(&load_button);
-        load_button.setSize(80,40);
+        load_button.setSize(80,30);
         load_button.setText("Load Map");
         load_button.addActionListener(&load_action);
+
+        flow.add(&follow_button);
+        follow_button.setSize(80,30);
+        follow_button.setText("Follow");
+        follow_button.addActionListener(&follow_action);
+
+        flow.add(&tileset_selector);
+        tileset_selector.setSize(100,30);
+        tileset_selector.setText("Tileset");
+        tileset_selector.addActionListener(&tile_set_swap_action);
+        tileset_selector.setResizeToWidestItem(true);
 
         last_connection_status = 0;
 
@@ -36,13 +57,19 @@ MainScreen::MainScreen(agui::Gui *guiInstance) {
 
 void MainScreen::UpdateText() {
     if(last_connection_status != (connection_state!=NULL)){
-    if((connection_state!=NULL))
-        connect_button.setText("Disconnect");
-    else
-        connect_button.setText("Connect");
-    last_connection_status = (connection_state!=NULL);
+        if((connection_state!=NULL))
+            connect_button.setText("Disconnect");
+        else
+            connect_button.setText("Connect");
+        last_connection_status = (connection_state!=NULL);
     }
-
+    if(last_follow !=center_on_loaded_map) {
+        if(center_on_loaded_map)
+            follow_button.setText("Unfollow");
+        else
+            follow_button.setText("Follow");
+        last_follow = center_on_loaded_map;
+    }
 }
 
 void initializeAgui()
@@ -105,4 +132,12 @@ void render_gui()
     main_screen->UpdateText();
     gui->render();
 
+}
+
+void MainScreen::UpdateTilesetList(MapSection * mapsection) {
+    for(int i = 0; i < mapsection->tileset_list.size(); i++) {
+        tileset_selector.addItem(mapsection->tileset_list[i].tileset_folder);
+    }
+    tileset_selector.setSelectedIndex(mapsection->current_tileset);
+    tile_set_swap_action.mapsection = mapsection;
 }

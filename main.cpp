@@ -79,6 +79,9 @@ AsyncDialog* cur_dialog;
 AsyncDialog* old_dialog;
 
 std::string current_save;
+
+bool center_on_loaded_map;
+
 /* Our thread to show the native file dialog. */
 static void *async_file_dialog_thread_func(ALLEGRO_THREAD *thread, void *arg)
 {
@@ -412,6 +415,7 @@ int main(void)
 	minimap.reload();
 
 	test_map.load_tilesets("isoworld/tilesets.ini");
+    main_screen->UpdateTilesetList(&test_map);
 
 	test_map.board_center_x = 0;
 	test_map.board_top_y = 0;
@@ -495,10 +499,6 @@ int main(void)
 			else if (event.keyboard.keycode == ALLEGRO_KEY_D && !cur_dialog)
 			{
 				user_config.debugmode = !user_config.debugmode;
-			}
-			else if (event.keyboard.keycode == ALLEGRO_KEY_SPACE && !cur_dialog)
-			{
-				test_map.increment_tileset();
 			}
 		}
 
@@ -613,6 +613,10 @@ int main(void)
                     }
                     if(connection_state->EmbarkInfoCall(&connection_state->net_request, &connection_state->net_reply) == DFHack::command_result::CR_OK) {
                         if(connection_state->net_reply.available()) {
+                            if(center_on_loaded_map) {
+                                user_config.map_x = connection_state->net_reply.region_x() + (connection_state->net_reply.region_size_x() / 2) - (user_config.map_width / 2);
+                                user_config.map_y = connection_state->net_reply.region_y() + (connection_state->net_reply.region_size_y() / 2) - (user_config.map_height / 2);
+                            }
                             for(int yy = 0; yy < connection_state->net_reply.region_size_y(); yy++) {
                                 for(int xx = 0; xx < connection_state->net_reply.region_size_x(); xx++) {
                                     if(!test_map.query_tile(&connection_state->net_reply, xx, yy))
@@ -664,6 +668,11 @@ EXIT_LOOP: ;
 				{
 					show_files_list(old_dialog->file_dialog, user_config.font, info);
 					old_dialog->newimages = 0;
+                    for(int i=0;i<test_map.tileset_list.size();i++){
+                        delete test_map.tileset_list[test_map.current_tileset].rendered_map;
+                        test_map.tileset_list[test_map.current_tileset].rendered_map = NULL;
+                    }
+                    load_detailed_tiles(path_list.elevation_map, &test_map);
 				}
 			}
 			test_map.propogate_tiles(&map_list);

@@ -92,3 +92,4 @@ struct ConnectionState {
 };
 
 extern ConnectionState *connection_state;
+extern bool center_on_loaded_map;
