@@ -1,8 +1,10 @@
 #include "DetailedTile.h"
 #include "isoworldremote.pb.h"
-#include "c_map_section.h"
+#include "MapSection.h"
 #include "UserConfig.h"
 #include "ColorList.h"
+#include "TileSet.h"
+#include <sstream>
 
 using namespace isoworldremote;
 
@@ -15,8 +17,8 @@ ALLEGRO_COLOR multiply(ALLEGRO_COLOR a, ALLEGRO_COLOR b) {
     a.r *= b.r;
     return a;
 }
-//ab
-//cd
+//ac
+//bd
 double interpolate(double a, double c, double b, double d, double x, double y) {
     if(x > 1)
         x=1;
@@ -33,29 +35,87 @@ double interpolate(double a, double c, double b, double d, double x, double y) {
         (d*x*y);
 }
 
+//surrounding_heights[0][0],                                (surrounding_heights[0][0] + surrounding_heights[1][0])/2,  surrounding_heights[1][0],      (surrounding_heights[1][0] + surrounding_heights[2][0])/2,  surrounding_heights[2][0],
+//(surrounding_heights[0][0] +surrounding_heights[0][1])/2, heightmap[0*48+0],                                          heightmap[0*48+23],             heightmap[0*48+47],                                         (surrounding_heights[2][0] +surrounding_heights[2][1])/2,
+//surrounding_heights[0][1],                                heightmap[23*48+0],                                         heightmap[23*48+23],            heightmap[23*48+47],                                        surrounding_heights[2][1],
+//(surrounding_heights[0][1] +surrounding_heights[0][2])/2, heightmap[47*48+0],                                         heightmap[47*48+23],            heightmap[47*48+47],                                        (surrounding_heights[2][1] +surrounding_heights[2][2])/2,
+//surrounding_heights[0][2],                                (surrounding_heights[0][2] + surrounding_heights[1][2])/2,  surrounding_heights[1][2],      (surrounding_heights[1][2] + surrounding_heights[2][2])/2,  surrounding_heights[2][2],
+
 double DetailedTile::get_height(int x, int y) {
+    //center square
     if(x >= 0 && y >= 0 && x < 48 && y < 48)
         return heightmap[y*48+x];
-    if(x < 24 && y < 24)
+    //top row
+    if(x < 0 && y < 0)
         return interpolate(
-        surrounding_heights[0][0], surrounding_heights[1][0],
-        surrounding_heights[0][1], surrounding_heights[1][1],
-        (double)(x+24)/48.0, (double)(y+24)/48.0);
-    else if(x >= 24 && y < 24)
+        surrounding_heights[0][0] , (surrounding_heights[0][0] + surrounding_heights[1][0])/2,
+        (surrounding_heights[0][0] + surrounding_heights[0][1])/2 , heightmap[0*48+0],
+        (double)(x+24)/24.0, (double)(y+24)/24.0);
+    if(x >= 0 && x < 24 && y < 0)
         return interpolate(
-        surrounding_heights[1][0], surrounding_heights[2][0],
-        surrounding_heights[1][1], surrounding_heights[2][1],
-        (double)(x-24)/48.0, (double)(y+24)/48.0);
-    else if(x < 24 && y >= 24)
+        (surrounding_heights[0][0] + surrounding_heights[1][0])/2, surrounding_heights[1][0],
+        heightmap[0*48+0] , heightmap[0*48+24],
+        (double)(x+0)/24.0, (double)(y+24)/24.0);
+    if(x >= 24 && x < 48 && y < 0)
         return interpolate(
-        surrounding_heights[0][1], surrounding_heights[1][1],
-        surrounding_heights[0][2], surrounding_heights[1][2],
-        (double)(x+24)/48.0, (double)(y-24)/48.0);
-    else if(x >= 24 && y >= 24)
+        surrounding_heights[1][0] , (surrounding_heights[1][0] + surrounding_heights[2][0])/2,
+        heightmap[0*48+24] , heightmap[0*48+47],
+        (double)(x-24)/24.0, (double)(y+24)/24.0);
+    if(x >= 48 && y < 0)
         return interpolate(
-        surrounding_heights[1][1], surrounding_heights[2][1],
-        surrounding_heights[1][2], surrounding_heights[2][2],
-        (double)(x-24)/48.0, (double)(y-24)/48.0);
+        (surrounding_heights[1][0] + surrounding_heights[2][0])/2, surrounding_heights[2][0] , 
+        heightmap[0*48+47] , (surrounding_heights[2][0] + surrounding_heights[2][1])/2,
+        (double)(x-48)/24.0, (double)(y+24)/24.0);
+
+        //upper middle
+    if(x < 0 && y >= 0 && y < 24)
+        return interpolate(
+        (surrounding_heights[0][0] + surrounding_heights[0][1])/2 , heightmap[0*48+0],
+        surrounding_heights[0][1],                                heightmap[23*48+0],
+        (double)(x+24)/24.0, (double)(y+0)/24.0);
+
+
+    if(x >= 48 && y >= 0 && y < 24)
+        return interpolate(
+        heightmap[0*48+24] , (surrounding_heights[2][0] + surrounding_heights[2][1])/2,
+        heightmap[23*48+47],                                        surrounding_heights[2][1],
+        (double)(x-48)/24.0, (double)(y+0)/24.0);
+
+        //lower middle
+    if(x < 0 && y >= 24 && y < 48)
+        return interpolate(
+        surrounding_heights[0][1],                                heightmap[24*48+0],
+        (surrounding_heights[0][1] +surrounding_heights[0][2])/2, heightmap[47*48+0],
+        (double)(x+24)/24.0, (double)(y-24)/24.0);
+
+
+    if(x >= 48 && y >= 24 && y < 48)
+        return interpolate(
+        heightmap[23*48+47],                                        surrounding_heights[2][1],
+        heightmap[47*48+47],                                        (surrounding_heights[2][1] +surrounding_heights[2][2])/2,
+        (double)(x-48)/24.0, (double)(y-24)/24.0);
+
+    //bottom row
+    if(x < 0 && y >= 48)
+        return interpolate(
+        (surrounding_heights[0][1] +surrounding_heights[0][2])/2, heightmap[47*48+0],
+        surrounding_heights[0][2],                                (surrounding_heights[0][2] + surrounding_heights[1][2])/2,
+        (double)(x+24)/24.0, (double)(y-48)/24.0);
+    if(x >= 0 && x < 24 && y >= 48)
+        return interpolate(
+        heightmap[47*48+0],                                         heightmap[47*48+23],
+        (surrounding_heights[0][2] + surrounding_heights[1][2])/2,  surrounding_heights[1][2],
+        (double)(x+0)/24.0, (double)(y-48)/24.0);
+    if(x >= 24 && x < 48 && y >= 48)
+        return interpolate(
+        heightmap[47*48+23],            heightmap[47*48+47],
+        surrounding_heights[1][2],      (surrounding_heights[1][2] + surrounding_heights[2][2])/2,
+        (double)(x-24)/24.0, (double)(y-48)/24.0);
+    if(x >= 48 && y >= 48)
+        return interpolate(
+        heightmap[47*48+47],                                        (surrounding_heights[2][1] +surrounding_heights[2][2])/2, 
+        (surrounding_heights[1][2] + surrounding_heights[2][2])/2,  surrounding_heights[2][2],
+        (double)(x-48)/24.0, (double)(y-48)/24.0);
     return 0;
 }
 
@@ -74,13 +134,13 @@ void DetailedTile::draw(int draw_x, int draw_y){
         al_draw_bitmap(sprite, draw_x+offset_x, draw_y+offset_y, 0);
 }
 
-void DetailedTile::make_tile(isoworldremote::EmbarkTile * input, c_map_section * section) {
+void DetailedTile::make_tile(isoworldremote::EmbarkTile * input, MapSection * section, TileSet * tile_set) {
     ALLEGRO_STATE state_backup;
     al_store_state(&state_backup, ALLEGRO_STATE_ALL);
     int max_z = input->tile_layer_size();
-    int world_x = input->world_x();
-    int world_y = input->world_y();
-    int world_z = input->world_z();
+    world_x = input->world_x();
+    world_y = input->world_y();
+    world_z = input->world_z();
     int max_draw_x, min_draw_x, max_draw_y, min_draw_y;
     //following is to get the bounds of all the junk.
     float tempx = 0.0f;
@@ -102,7 +162,7 @@ void DetailedTile::make_tile(isoworldremote::EmbarkTile * input, c_map_section *
     max_draw_x -= min_draw_x;
     max_draw_y -= min_draw_y;
     offset_x = min_draw_x;
-    offset_y = min_draw_y-input->world_z();
+    offset_y = min_draw_y-input->world_z()+1;
     sprite=al_create_bitmap(max_draw_x, max_draw_y);
     al_set_target_bitmap(sprite);
     al_set_blender(ALLEGRO_ADD, ALLEGRO_ONE, ALLEGRO_ZERO);
@@ -118,7 +178,9 @@ void DetailedTile::make_tile(isoworldremote::EmbarkTile * input, c_map_section *
                 tempx =  bind_to_range(tempx , al_get_bitmap_width(map_list.elevation_map_with_water));
                 tempy =  bind_to_range(tempy , al_get_bitmap_height(map_list.elevation_map_with_water));
 
-                ALLEGRO_COLOR pixel = al_get_pixel(map_list.elevation_map_with_water, tempx, tempy);
+                ALLEGRO_COLOR pixel;
+                if(tile_set->draw_water) pixel = al_get_pixel(map_list.elevation_map_with_water, tempx, tempy);
+                else pixel = al_get_pixel(map_list.elevation_map, tempx, tempy);
                 unsigned char red;
                 unsigned char green;
                 unsigned char blue;
@@ -135,10 +197,11 @@ void DetailedTile::make_tile(isoworldremote::EmbarkTile * input, c_map_section *
         }
     }
     heightmap.resize(48*48);
+    //get heights.
     for(int yy = 0; yy < 48; yy++) {
         for(int xx = 0; xx < 48; xx++) {
             for(int zz = max_z-1; zz >= 0; zz--) {
-                if(input->tile_layer(zz).mat_type_table(yy*48+xx) != AIR) {
+                if(!(input->tile_layer(zz).mat_type_table(yy*48+xx) == AIR || (input->tile_layer(zz).mat_type_table(yy*48+xx) == LIQUID && !(tile_set->draw_water)))) {
                     heightmap[yy*48+xx] = zz;
                     break;
                 }
@@ -152,15 +215,23 @@ void DetailedTile::make_tile(isoworldremote::EmbarkTile * input, c_map_section *
                 BasicMaterial current_mat = input->tile_layer(zz).mat_type_table(yy*48+xx);
                 int current_submat = input->tile_layer(zz).mat_subtype_table(yy*48+xx);
                 if(current_mat!= AIR) {
+                    if(current_mat == LIQUID && !tile_set->draw_water)
+                        continue;
                     BasicMaterial upper_mat = AIR;
                     BasicMaterial side_mat = AIR;
                     if(zz+1 < max_z)
                         upper_mat = input->tile_layer(zz+1).mat_type_table(yy*48+xx);
-                    if((zz+1 < max_z) && (xx > 0) && upper_mat == AIR)
+                    if((zz+1 < max_z) && (xx > 0) && upper_mat == AIR || (upper_mat == LIQUID && !tile_set->draw_water))
                         upper_mat = input->tile_layer(zz+1).mat_type_table(yy*48+xx-1);
                     if(xx+1 < 48)
                         side_mat = input->tile_layer(zz).mat_type_table(yy*48+xx+1);
-                    ALLEGRO_COLOR materialcolor = color_list.get_color(current_mat, current_submat);
+                    ALLEGRO_COLOR materialcolor;
+                    if(tile_set->draw_mode == NORMAL)
+                        materialcolor = color_list.get_color(current_mat, current_submat);
+                    else if (tile_set->draw_mode == MAX_ELEVATION)
+                        materialcolor = tile_set->get_palette_color(tile_set->elevation_palette, get_height(xx,yy)+world_z);
+                    else if (tile_set->draw_mode == CURRENT_ELEVATION)
+                        materialcolor = tile_set->get_palette_color(tile_set->elevation_palette, zz+world_z);
                     ALLEGRO_COLOR light, med, dark;
                     if(zz >= heightmap[yy*48+xx])
                         light = surfacelight[yy*48+xx];
@@ -172,12 +243,23 @@ void DetailedTile::make_tile(isoworldremote::EmbarkTile * input, c_map_section *
                     case INORGANIC:
                         break;
                     case LIQUID:
-                        if(current_submat == 2){
+                        if(current_submat == MAGMA){
                             materialcolor = al_map_rgb(255,64,0);
                             light=med=dark=al_map_rgb(255,255,255);
                         }
-                        else
-                            materialcolor = al_map_rgb(128,128,255);
+                        else {
+                            if(tile_set->water_depth_palette >= 0) {
+                                int depth = 0;
+                                for(int i = 0; i <= zz; i++){
+                                    if(input->tile_layer(zz-i).mat_type_table(yy*48+xx) != LIQUID) {
+                                        depth = i-1;
+                                        break;
+                                    }
+                                }
+                                materialcolor = tile_set->get_palette_color(tile_set->water_depth_palette, depth);
+                            }
+                            else materialcolor = al_map_rgb(128,128,255);
+                        }
                         break;
                     default:
                         break;
@@ -185,9 +267,9 @@ void DetailedTile::make_tile(isoworldremote::EmbarkTile * input, c_map_section *
                     float drawx = xx;
                     float drawy = yy;
                     section->pointToSprite(&drawx, &drawy, zz);
-                    if(upper_mat == AIR)
+                    if(upper_mat == AIR || (upper_mat == LIQUID && !tile_set->draw_water))
                         al_put_pixel(drawx-min_draw_x, drawy-min_draw_y, multiply(light, materialcolor));
-                    else if(side_mat == AIR)
+                    else if(side_mat == AIR || (side_mat == LIQUID && !tile_set->draw_water))
                         al_put_pixel(drawx-min_draw_x, drawy-min_draw_y, multiply(dark, materialcolor));
                     else
                         al_put_pixel(drawx-min_draw_x, drawy-min_draw_y, multiply(med, materialcolor));
@@ -197,6 +279,7 @@ void DetailedTile::make_tile(isoworldremote::EmbarkTile * input, c_map_section *
     }
     al_unlock_bitmap(sprite);
     al_restore_state(&state_backup);
+    save_tile(path_list.elevation_map, tile_set);
 }
 
 
@@ -205,6 +288,7 @@ DetailedMap::DetailedMap(unsigned int in_width, unsigned int in_height) {
     width = in_width;
     height = in_height;
     tile_map.resize(width*height, -1);
+    tile_list.size();
 }
 
 DetailedMap::~DetailedMap() {
@@ -291,4 +375,95 @@ vector<ALLEGRO_COLOR> DetailedTile::generate_ambient_lighting(vector<int> * heig
         }
     }
     return output;
+}
+
+void DetailedTile::save_tile(ALLEGRO_PATH * base_path, TileSet * tile_set) {
+    ALLEGRO_PATH * tile_path = al_clone_path(base_path);
+
+    stringstream buffer;
+
+    al_append_path_component(tile_path, "data");
+    al_append_path_component(tile_path, "save");
+    al_append_path_component(tile_path, current_save.c_str());
+    al_append_path_component(tile_path, "isoworld");
+    buffer.str(std::string());
+    buffer << world_x;
+    al_append_path_component(tile_path, buffer.str().c_str());
+    buffer.str(std::string());
+    buffer << world_y;
+    al_append_path_component(tile_path, buffer.str().c_str());
+    al_set_path_filename(tile_path, "");
+    al_make_directory(al_path_cstr(tile_path, ALLEGRO_NATIVE_PATH_SEP));
+    buffer.str(std::string());
+    buffer << offset_x << "," << offset_y << "," << tile_set->tileset_folder << ".png";
+    al_set_path_filename(tile_path, buffer.str().c_str());
+    if(al_save_bitmap(al_path_cstr(tile_path, ALLEGRO_NATIVE_PATH_SEP), sprite))
+        log_printf("Saved tile at path: %s\n", al_path_cstr(tile_path, ALLEGRO_NATIVE_PATH_SEP));
+    else log_printf("Could not save tile at path: %s\n", al_path_cstr(tile_path, ALLEGRO_NATIVE_PATH_SEP));
+    al_destroy_path(tile_path);
+}
+
+void DetailedTile::load_tile(const char * filename, int inx, int iny) {
+    sprite = al_load_bitmap(filename);
+    offset_x = inx;
+    offset_y = iny;
+    valid = true;
+}
+
+void load_detailed_tiles(ALLEGRO_PATH * base_path, MapSection * section) {
+    ALLEGRO_PATH * tile_path = al_clone_path(base_path);
+    al_set_path_filename(tile_path, "");
+    al_append_path_component(tile_path, "data");
+    al_append_path_component(tile_path, "save");
+    al_append_path_component(tile_path, current_save.c_str());
+    al_append_path_component(tile_path, "isoworld");
+    log_printf("Loading detailed tiles from \"%s\"\n", al_path_cstr(tile_path, ALLEGRO_NATIVE_PATH_SEP));
+    //search through the dir for folders.
+    ALLEGRO_FS_ENTRY * base_folder = al_create_fs_entry(al_path_cstr(tile_path, ALLEGRO_NATIVE_PATH_SEP));
+    if(al_open_directory(base_folder)) {
+        ALLEGRO_FS_ENTRY * x_folder = 0;
+        while(x_folder = al_read_directory(base_folder)) {
+            if(al_open_directory(x_folder)) {
+                ALLEGRO_FS_ENTRY * y_folder = 0;
+                while(y_folder = al_read_directory(x_folder)) {
+                    if(al_open_directory(y_folder)) {
+                        ALLEGRO_FS_ENTRY * image_file = 0;
+                        while(image_file = al_read_directory(y_folder)) {
+                            ALLEGRO_PATH * image_path = al_create_path(al_get_fs_entry_name(image_file));
+                            int world_x = atoi(al_get_path_component(image_path, -2));
+                            int world_y = atoi(al_get_path_component(image_path, -1));
+                            string filename = al_get_path_filename(image_path);
+                            int first_comma = filename.find(",");
+                            int second_comma = filename.find(",", first_comma+1);
+                            int last_pariod = filename.rfind(".");
+                            int offset_x = atoi(filename.substr(0, first_comma).c_str());
+                            int offset_y = atoi(filename.substr(first_comma+1, second_comma-first_comma-1).c_str());
+                            string tileset_name = filename.substr(second_comma+1, last_pariod-second_comma-1);
+                            int tileset_index = -1;
+                            for(int i = 0; i < section->tileset_list.size(); i++) {
+                                if(section->tileset_list[i].tileset_folder == tileset_name) {
+                                    tileset_index = i;
+                                    break;
+                                }
+                            }
+                            if(tileset_index >= 0) {
+                                if(!section->tileset_list[tileset_index].rendered_map){
+                                    section->tileset_list[tileset_index].rendered_map = new DetailedMap(al_get_bitmap_width(map_list.elevation_map), al_get_bitmap_height(map_list.elevation_map));;
+                                }
+                                DetailedTile * tile = section->tileset_list[tileset_index].rendered_map->new_tile(world_x, world_y);
+                                tile->load_tile( al_get_fs_entry_name(image_file), offset_x, offset_y);
+                            }
+                            //log_printf("%s\n", tileset_name.c_str());
+                            al_destroy_path(image_path);
+                            al_destroy_fs_entry(image_file);
+                        }
+                    }
+                    al_destroy_fs_entry(y_folder);
+                }
+            }
+            al_destroy_fs_entry(x_folder);
+        }
+    }
+    al_destroy_fs_entry(base_folder);
+    al_destroy_path(tile_path);
 }

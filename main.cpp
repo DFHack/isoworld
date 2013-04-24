@@ -1,23 +1,13 @@
-/*
-*    Example program for the Allegro library.
-*
-*    The native file dialog addon only supports a blocking interface.  This
-*    example makes the blocking call from another thread, using a user event
-*    source to communicate back to the main program.
-*/
-
 #include "common.h"
 #include "common.c"
 #include "c_tile.h"
-#include "c_map_section.h"
+#include "MapSection.h"
 #include "UserConfig.h"
 #include "console.h"
 #include "c_minimap.h"
-#include "c_tileset.h"
-#include "isoworldremote.pb.h"
-#include "RemoteClient.h"
 #include "DetailedTile.h"
 #include "ColorList.h"
+#include "UserInterface.h"
 
 //Needed for writing the protobuff stuff to a file.
 #include <fstream>
@@ -81,7 +71,17 @@ c_imagelist imagelist;
 
 ColorList color_list;
 
+ALLEGRO_DISPLAY *display;
+ALLEGRO_TIMER *timer;
+ALLEGRO_TIMER *network_timer;
+ALLEGRO_EVENT_QUEUE *allegro_queue;
+AsyncDialog* cur_dialog;
+AsyncDialog* old_dialog;
+
 std::string current_save;
+
+bool center_on_loaded_map;
+
 /* Our thread to show the native file dialog. */
 static void *async_file_dialog_thread_func(ALLEGRO_THREAD *thread, void *arg)
 {
@@ -135,6 +135,55 @@ static void stop_async_dialog(AsyncDialog *data)
 		free(data);
 	}
 }
+void start_load_dialog() {
+        if (!cur_dialog) {
+        const char *last_path = NULL;
+        /* If available, use the path from the last dialog as
+        * initial path for the new one.
+        */
+        if (old_dialog) {
+            last_path = al_get_native_file_dialog_path(
+                old_dialog->file_dialog, 0);
+        }
+        cur_dialog = spawn_async_file_dialog(display, last_path);
+        al_register_event_source(allegro_queue, &cur_dialog->event_source);
+    }
+}
+
+
+ConnectionState::ConnectionState() {
+    df_network_out = new DFHack::color_ostream_wrapper(cout);
+    network_client = new DFHack::RemoteClient(df_network_out);
+    is_connected = network_client->connect();
+    if(!is_connected) return;
+    EmbarkInfoCall.bind(network_client, "GetEmbarkInfo", "isoworldremote");
+    EmbarkTileCall.bind(network_client, "GetEmbarkTile", "isoworldremote");
+    MaterialInfoCall.bind(network_client, "GetRawNames", "isoworldremote");
+    net_request.set_save_folder(current_save);
+    EmbarkInfoCall(&net_request, &net_reply);
+}
+
+ConnectionState::~ConnectionState() {
+    network_client->disconnect();
+    delete network_client;
+    delete df_network_out;
+}
+
+ConnectionState *connection_state = NULL;
+
+void toggle_df_connection() {
+    if(connection_state) {
+        delete connection_state;
+        connection_state = NULL;
+    }
+    else {
+        connection_state = new ConnectionState;
+        if(!connection_state->is_connected){
+            delete connection_state;
+            connection_state = NULL;
+        }
+    }
+}
 
 void destroy_bitmaps(s_maplist * maps)
 {
@@ -142,7 +191,6 @@ void destroy_bitmaps(s_maplist * maps)
 	al_destroy_bitmap(maps->elevation_map_with_water);
 	al_destroy_bitmap(maps->biome_map);
 	al_destroy_bitmap(maps->structure_map);
-    delete maps->rendered_map;
 }
 
 void load_bitmaps(s_pathlist * paths, s_maplist * maps)
@@ -154,8 +202,6 @@ void load_bitmaps(s_pathlist * paths, s_maplist * maps)
 	maps->elevation_map_with_water = al_load_bitmap(al_path_cstr(paths->elevation_map_with_water, ALLEGRO_NATIVE_PATH_SEP));
 	maps->biome_map = al_load_bitmap(al_path_cstr(paths->biome_map, ALLEGRO_NATIVE_PATH_SEP));
 	maps->structure_map = al_load_bitmap(al_path_cstr(paths->structure_map, ALLEGRO_NATIVE_PATH_SEP));
-
-    maps->rendered_map = new DetailedMap(al_get_bitmap_width(maps->elevation_map), al_get_bitmap_height(maps->elevation_map));
 
 	al_set_new_bitmap_flags(backup);
 }
@@ -196,6 +242,9 @@ void populate_filenames(string input, s_pathlist * paths)
 	}
     //save the resulting name to a gobal
     current_save = input;
+    if(current_save.rfind("--") < std::string::npos) { //get rid of the double dash.
+        current_save.erase(current_save.find_last_of("-"), std::string::npos); // -16014.bmp
+    }
     current_save.erase(current_save.find_last_of("-"), std::string::npos); // -16014.bmp
     current_save.erase(current_save.find_last_of("-"), std::string::npos); // -250
     log_printf("Loaded up %s\n", current_save.c_str());
@@ -285,13 +334,9 @@ int bind_to_range(int number, int range)
 
 int main(void)
 {
-	ALLEGRO_DISPLAY *display;
-	ALLEGRO_TIMER *timer;
-    ALLEGRO_TIMER *network_timer;
-	ALLEGRO_EVENT_QUEUE *queue;
 	ALLEGRO_COLOR background, active, inactive, info;
-	AsyncDialog *old_dialog = NULL;
-	AsyncDialog *cur_dialog = NULL;
+	old_dialog = NULL;
+	cur_dialog = NULL;
 	bool redraw = false;
 	bool close_log = false;
 	bool message_log = true;
@@ -347,52 +392,35 @@ int main(void)
 	timer = al_create_timer(1.0 / 30);
     network_timer = al_create_timer(1.0);
 	log_printf("Starting main loop.\n");
-	queue = al_create_event_queue();
-	al_register_event_source(queue, al_get_keyboard_event_source());
-	al_register_event_source(queue, al_get_mouse_event_source());
-	al_register_event_source(queue, al_get_display_event_source(display));
-	al_register_event_source(queue, al_get_timer_event_source(timer));
-	al_register_event_source(queue, al_get_timer_event_source(network_timer));
+	allegro_queue = al_create_event_queue();
+	al_register_event_source(allegro_queue, al_get_keyboard_event_source());
+	al_register_event_source(allegro_queue, al_get_mouse_event_source());
+	al_register_event_source(allegro_queue, al_get_display_event_source(display));
+	al_register_event_source(allegro_queue, al_get_timer_event_source(timer));
+	al_register_event_source(allegro_queue, al_get_timer_event_source(network_timer));
 	if (textlog) {
-		al_register_event_source(queue, al_get_native_text_log_event_source(
+		al_register_event_source(allegro_queue, al_get_native_text_log_event_source(
 			textlog));
 	}
 	al_start_timer(timer);
     al_start_timer(network_timer);
-	c_map_section test_map;
+
+    initializeAgui();
+    add_widgets();
+
+	MapSection test_map;
 
 	test_map.set_size(user_config.map_width, user_config.map_height);
 
 	minimap.reload();
 
 	test_map.load_tilesets("isoworld/tilesets.ini");
+    main_screen->UpdateTilesetList(&test_map);
 
 	test_map.board_center_x = 0;
 	test_map.board_top_y = 0;
 
-    DFHack::color_ostream_wrapper out(cout);
-
-    bool connected_to_df = 0;
-    //Now attempt to connect to DF.
-    DFHack::RemoteClient client(&out);
-    connected_to_df = client.connect();
-    using namespace isoworldremote;
-    MapRequest net_request;
-    MapReply net_reply;
-    TileRequest net_tile_request;
-    EmbarkTile net_embark_tile;
-    RawNames net_material_names;
-    DFHack::RemoteFunction<MapRequest, MapReply> EmbarkInfoCall;
-    DFHack::RemoteFunction<MapRequest, RawNames> MaterialInfoCall;
-    DFHack::RemoteFunction<TileRequest, EmbarkTile> EmbarkTileCall;
-    if(connected_to_df) {
-        EmbarkInfoCall.bind(&client, "GetEmbarkInfo", "isoworldremote");
-        EmbarkTileCall.bind(&client, "GetEmbarkTile", "isoworldremote");
-        MaterialInfoCall.bind(&client, "GetRawNames", "isoworldremote");
-        net_request.set_save_folder(current_save);
-        EmbarkInfoCall(&net_request, &net_reply);
-    }
-
+    load_detailed_tiles(path_list.elevation_map, &test_map);
 
 	int selection = 0;
 
@@ -411,7 +439,10 @@ int main(void)
 		float h = al_get_display_height(display);
 		float w = al_get_display_width(display);
 		ALLEGRO_EVENT event;
-		al_wait_for_event(queue, &event);
+		al_wait_for_event(allegro_queue, &event);
+
+        //Let Agui process the event
+        inputHandler->processEvent(event);
 
 		if (event.type == ALLEGRO_EVENT_DISPLAY_CLOSE && !cur_dialog)
 			break;
@@ -469,10 +500,6 @@ int main(void)
 			{
 				user_config.debugmode = !user_config.debugmode;
 			}
-			else if (event.keyboard.keycode == ALLEGRO_KEY_SPACE && !cur_dialog)
-			{
-				test_map.increment_tileset();
-			}
 		}
 
 		/* When a mouse button is pressed, and no native dialog is
@@ -505,7 +532,7 @@ int main(void)
 			}
 		}
 		if (event.type == ALLEGRO_EVENT_MOUSE_BUTTON_DOWN) {
-			log_printf("Mouse clicked at %d,%d.\n", event.mouse.x, event.mouse.y);
+			//log_printf("Mouse clicked at %d,%d.\n", event.mouse.x, event.mouse.y);
 			if(event.mouse.button == 2)
 			{
 				rightmove = true;
@@ -528,7 +555,7 @@ int main(void)
 					if (message_log) {
 						textlog = al_open_native_text_log("Log", 0);
 						if (textlog) {
-							al_register_event_source(queue,
+							al_register_event_source(allegro_queue,
 								al_get_native_text_log_event_source(textlog));
 						}
 					}
@@ -537,24 +564,12 @@ int main(void)
 					}
 				}
 			}
-			else if (!cur_dialog) {
-				const char *last_path = NULL;
-				/* If available, use the path from the last dialog as
-				* initial path for the new one.
-				*/
-				if (old_dialog) {
-					last_path = al_get_native_file_dialog_path(
-						old_dialog->file_dialog, 0);
-				}
-				cur_dialog = spawn_async_file_dialog(display, last_path);
-				al_register_event_source(queue, &cur_dialog->event_source);
-			}
 		}
 		/* We receive this event from the other thread when the dialog is
 		* closed.
 		*/
 		if (event.type == ASYNC_DIALOG_EVENT1) {
-			al_unregister_event_source(queue, &cur_dialog->event_source);
+			al_unregister_event_source(allegro_queue, &cur_dialog->event_source);
 
 			/* If files were selected, we replace the old files list.
 			* Otherwise the dialog was cancelled, and we keep the old results.
@@ -578,55 +593,70 @@ int main(void)
             if(event.timer.source == timer)
                 redraw = true;
             else if(event.timer.source == network_timer) {
-                if(connected_to_df) {
+                if(connection_state) {
                     al_stop_timer(network_timer); //wait at least a second between the end of load and the start of the next, not between the start and start.
-                    net_request.set_save_folder(current_save);
+                    connection_state->net_request.set_save_folder(current_save);
                     if(!color_list.has_names){
-                        MaterialInfoCall(&net_request, &net_material_names);
-                        if(net_material_names.available()) {
-                            color_list.import_names(&net_material_names);
-                            if(!color_list.has_colors)
-                                color_list.import_colors("isoworld/material_colors.ini");
-                        }
-                    }
-                    EmbarkInfoCall(&net_request, &net_reply);
-                    if(net_reply.available()) {
-                        for(int yy = 0; yy < net_reply.region_size_y(); yy++) {
-                            for(int xx = 0; xx < net_reply.region_size_x(); xx++) {
-                                DetailedTile * tile = map_list.rendered_map->get_tile(net_reply.region_x()+xx, net_reply.region_y()+yy);
-                                if(!tile)
-                                    tile = map_list.rendered_map->new_tile(net_reply.region_x()+xx, net_reply.region_y()+yy);
-                                if(tile) {
-                                    if(tile->year == net_reply.current_year()) {
-                                        if(tile->season == net_reply.current_season())
-                                            continue;
-                                    }
+                        if(connection_state->MaterialInfoCall(&connection_state->net_request, &connection_state->net_material_names) == DFHack::command_result::CR_OK) {
+                            if(connection_state->net_material_names.available()) {
+                                color_list.import_names(&connection_state->net_material_names);
+                                if(!color_list.has_colors) {
+                                    color_list.import_colors("isoworld/material_colors.ini");
                                 }
-                                net_tile_request.set_want_x(xx);
-                                net_tile_request.set_want_y(yy);
-                                EmbarkTileCall(&net_tile_request, &net_embark_tile);
-                                if(!net_embark_tile.is_valid())
-                                    continue;
-                                tile->valid = true;
-                                tile->year = net_reply.current_year();
-                                tile->season = net_reply.current_season();
-                                tile->make_tile(&net_embark_tile, &test_map);
-                                goto EXIT_LOOP;
                             }
                         }
-EXIT_LOOP: ;
+                        else {
+                            delete connection_state;
+                            connection_state = NULL;
+                            goto EXIT_LOOP;
+                        }
                     }
+                    if(connection_state->EmbarkInfoCall(&connection_state->net_request, &connection_state->net_reply) == DFHack::command_result::CR_OK) {
+                        if(connection_state->net_reply.available()) {
+                            if(center_on_loaded_map) {
+                                user_config.map_x = connection_state->net_reply.region_x() + (connection_state->net_reply.region_size_x() / 2) - (user_config.map_width / 2);
+                                user_config.map_y = connection_state->net_reply.region_y() + (connection_state->net_reply.region_size_y() / 2) - (user_config.map_height / 2);
+                            }
+                            for(int yy = 0; yy < connection_state->net_reply.region_size_y(); yy++) {
+                                for(int xx = 0; xx < connection_state->net_reply.region_size_x(); xx++) {
+                                    if(!test_map.query_tile(&connection_state->net_reply, xx, yy))
+                                        continue;
+                                    connection_state->net_tile_request.set_want_x(xx);
+                                    connection_state->net_tile_request.set_want_y(yy);
+                                    if(connection_state->EmbarkTileCall(&connection_state->net_tile_request, &connection_state->net_embark_tile) == DFHack::command_result::CR_OK) {
+                                        if(!connection_state->net_embark_tile.is_valid())
+                                            continue;
+                                        test_map.make_tile(&connection_state->net_embark_tile, &connection_state->net_reply);
+                                        goto EXIT_LOOP;
+                                    }
+                                    else {
+                                        delete connection_state;
+                                        connection_state = NULL;
+                                        goto EXIT_LOOP;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    else {
+                        delete connection_state;
+                        connection_state = NULL;
+                        goto EXIT_LOOP;
+                    }
+EXIT_LOOP: ;
                     al_start_timer(network_timer);
                 }
             }
         }
-		if (event.type == ALLEGRO_EVENT_DISPLAY_RESIZE) {
+        if (event.type == ALLEGRO_EVENT_DISPLAY_RESIZE) {
 			al_acknowledge_resize(event.display.source);
 			user_config.res_x = al_get_display_width(display);
 			user_config.res_y = al_get_display_height(display);
+            //Resize Agui
+            gui->resizeToDisplay();
 			redraw = true;
 		}
-		if (redraw && al_is_event_queue_empty(queue)) {
+		if (redraw && al_is_event_queue_empty(allegro_queue)) {
 			float x = al_get_display_width(display) / 2;
 			float y = 0;
 			redraw = false;
@@ -638,11 +668,15 @@ EXIT_LOOP: ;
 				{
 					show_files_list(old_dialog->file_dialog, user_config.font, info);
 					old_dialog->newimages = 0;
+                    for(int i=0;i<test_map.tileset_list.size();i++){
+                        delete test_map.tileset_list[test_map.current_tileset].rendered_map;
+                        test_map.tileset_list[test_map.current_tileset].rendered_map = NULL;
+                    }
+                    load_detailed_tiles(path_list.elevation_map, &test_map);
 				}
 			}
 			test_map.propogate_tiles(&map_list);
 			test_map.draw(al_get_display_width(display) / 2, (al_get_display_height(display) / 2) + user_config.map_shift);
-			al_draw_textf(user_config.font, cur_dialog ? inactive : active, x, y, ALLEGRO_ALIGN_CENTRE, "Open");
 			minimap.draw();
 			if(user_config.debugmode)
 			{
@@ -651,13 +685,15 @@ EXIT_LOOP: ;
 				al_draw_textf(user_config.font, cur_dialog ? inactive : active, 0, y + al_get_font_line_height(user_config.font), ALLEGRO_ALIGN_LEFT, "Load Time: %dms", test_map.load_time);
 				al_draw_textf(user_config.font, cur_dialog ? inactive : active, 0, y + al_get_font_line_height(user_config.font)*2, ALLEGRO_ALIGN_LEFT, "Fetch Time: %dms", test_map.tile_fetch_time);
 			}
+            gui->logic();
+            render_gui();
 			al_flip_display();
 		}
 
 		if (close_log && textlog) {
 			close_log = false;
 			message_log = false;
-			al_unregister_event_source(queue,
+			al_unregister_event_source(allegro_queue,
 				al_get_native_text_log_event_source(textlog));
 			al_close_native_text_log(textlog);
 			textlog = NULL;
@@ -665,15 +701,17 @@ EXIT_LOOP: ;
 	}
 
 	log_printf("Exiting.\n");
-    if(connected_to_df)
-        client.disconnect();
+    if(connection_state) {
+        delete connection_state;
+        connection_state = NULL;
+    }
 
 	imagelist.unload_bitmaps();
 
 	user_config.save_values();
 	user_config.save_file();
 
-	al_destroy_event_queue(queue);
+	al_destroy_event_queue(allegro_queue);
 
 	stop_async_dialog(old_dialog);
 	stop_async_dialog(cur_dialog);

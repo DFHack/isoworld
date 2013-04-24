@@ -43,7 +43,6 @@ struct s_maplist
 	//ALLEGRO_BITMAP * vegetation_map;
 	//ALLEGRO_BITMAP * evil_map;
 	//ALLEGRO_BITMAP * salinity_map;
-    DetailedMap * rendered_map;
 	s_maplist(void);
 };
 
@@ -65,4 +64,32 @@ extern s_pathlist path_list;
 
 extern s_maplist map_list;
 
+extern std::string current_save;
+
 int bind_to_range(int number, int range);
+
+void start_load_dialog();
+void toggle_df_connection();
+
+#include "isoworldremote.pb.h"
+#include "RemoteClient.h"
+
+struct ConnectionState {
+    bool is_connected;
+    isoworldremote::MapRequest net_request;
+    isoworldremote::MapReply net_reply;
+    isoworldremote::TileRequest net_tile_request;
+    isoworldremote::EmbarkTile net_embark_tile;
+    isoworldremote::RawNames net_material_names;
+    DFHack::RemoteFunction<isoworldremote::MapRequest, isoworldremote::MapReply> EmbarkInfoCall;
+    DFHack::RemoteFunction<isoworldremote::MapRequest, isoworldremote::RawNames> MaterialInfoCall;
+    DFHack::RemoteFunction<isoworldremote::TileRequest, isoworldremote::EmbarkTile> EmbarkTileCall;
+    DFHack::color_ostream_wrapper * df_network_out;
+    DFHack::RemoteClient * network_client;
+
+    ConnectionState();
+    ~ConnectionState();
+};
+
+extern ConnectionState *connection_state;
+extern bool center_on_loaded_map;

@@ -5,12 +5,13 @@ include_directories (${CMAKE_SOURCE_DIR})
 
 SET(PROJECT_SRCS
 	UserConfig.cpp
+	UserInterface.cpp
 	ColorList.cpp
 	c_imagelist.cpp
-	c_map_section.cpp
+	MapSection.cpp
 	c_minimap.cpp
 	c_tile.cpp
-	c_tileset.cpp
+	TileSet.cpp
 	DetailedTile.cpp
 	common.c
 	console.cpp
@@ -95,11 +96,12 @@ IF(UNIX)
 	ENDIF()
 # windows
 ELSE(UNIX)
-    FILE(DOWNLOAD http://dethware.org/dfhack/download/allegrow509b.tar.gz
-                  ${CMAKE_CURRENT_SOURCE_DIR}/allegrow509b.tar.gz
-                  EXPECTED_MD5 55b7e37ece699f02192346883ba38677)
-    execute_process(COMMAND ${CMAKE_COMMAND} -E tar xzf ${CMAKE_CURRENT_SOURCE_DIR}/allegrow509b.tar.gz
-                    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
+
+#    FILE(DOWNLOAD http://dethware.org/dfhack/download/allegrow509b.tar.gz
+#                  ${CMAKE_CURRENT_SOURCE_DIR}/allegrow509b.tar.gz
+#                  EXPECTED_MD5 55b7e37ece699f02192346883ba38677)
+#    execute_process(COMMAND ${CMAKE_COMMAND} -E tar xzf ${CMAKE_CURRENT_SOURCE_DIR}/allegrow509b.tar.gz
+#                    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
     ADD_DEFINITIONS("-DALLEGRO_STATICLINK")
     SET(PROJECT_LIBS
 		kernel32.lib
@@ -112,30 +114,35 @@ ELSE(UNIX)
 		uuid.lib
 		comdlg32.lib
 		advapi32.lib
-		allegro-static.lib
-		allegro_primitives-static.lib
-		allegro_font-static.lib
-		allegro_color-static.lib
-		allegro_dialog-static.lib
-		allegro_image-static.lib
-		allegro_ttf-static.lib
-		freetype-static.lib
+		allegro-5.0.7-monolith-static-md.lib
+		dumb-0.9.3-static-md.lib
+		freetype-2.4.8-static-md.lib
+		libFLAC-1.2.1-static-md.lib
+		libogg-1.2.1-static-md.lib
+		libvorbis-1.3.2-static-md.lib
+		libvorbisfile-1.3.2-static-md.lib
+		openal-1.14-static-md.lib
+		zlib-1.2.5-static-md.lib
 		winmm.lib
 		psapi.lib
 		opengl32.lib
 		glu32.lib
 		gdiplus.lib
 		shlwapi.lib
-		$(NOINHERIT)
-	)
-	include_directories (
-		${include_directories}
-		${CMAKE_CURRENT_SOURCE_DIR}/allegrow/include
-	)
-	LINK_DIRECTORIES(
-		${LINK_DIRECTORIES}
-		${CMAKE_CURRENT_SOURCE_DIR}/allegrow/lib
-	)
+		agui.lib
+		agui_allegro5.lib
+        $(NOINHERIT)
+       )
+    include_directories (
+        ${include_directories}
+        ${CMAKE_CURRENT_SOURCE_DIR}/allegro/include
+        ${CMAKE_CURRENT_SOURCE_DIR}/agui/include
+    )
+    LINK_DIRECTORIES(
+        ${LINK_DIRECTORIES}
+        ${CMAKE_CURRENT_SOURCE_DIR}/allegro/lib
+        ${CMAKE_CURRENT_SOURCE_DIR}/agui/lib
+    )
 ENDIF(UNIX)
 # Tell CMake the source won't be available until build time.
 SET_SOURCE_FILES_PROPERTIES(${CMAKE_CURRENT_SOURCE_DIR}/../proto/isoworldremote.pb.cc PROPERTIES GENERATED 1)
@@ -158,5 +165,5 @@ install(DIRECTORY resources/
 # install readme
 install(FILES Readme.txt DESTINATION isoworld)
 install(TARGETS isoworld
-		LIBRARY DESTINATION isoworld
-        RUNTIME DESTINATION isoworld)
+		LIBRARY DESTINATION ${DFHACK_LIBRARY_DESTINATION}
+        RUNTIME DESTINATION ${DFHACK_LIBRARY_DESTINATION})

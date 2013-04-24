@@ -4,7 +4,8 @@
 #include <string>
 #include "isoworldremote.pb.h"
 
-class c_map_section;
+class MapSection;
+class TileSet;
 
 class DetailedTile {
     ALLEGRO_BITMAP * sprite;
@@ -18,14 +19,20 @@ class DetailedTile {
     vector<int> heightmap;
     double get_height(int x, int y);
     int surrounding_heights[3][3];
+    int world_x;
+    int world_y;
+    int world_z;
 public:
     bool valid;
     int year;
     char season;
     DetailedTile();
     ~DetailedTile();
-    void make_tile(isoworldremote::EmbarkTile * input, c_map_section * section);
+    void make_tile(isoworldremote::EmbarkTile * input, MapSection * section, TileSet * tile_set);
     void draw(int x, int y);
+    //ALLEGRO_BITMAP * get_sprite() {return sprite;}
+    void save_tile(ALLEGRO_PATH * base_path, TileSet * tile_set);
+    void load_tile(const char * filepath, int inx, int iny);
 };
 
 class DetailedMap {
@@ -43,6 +50,9 @@ public:
     DetailedTile * get_tile(unsigned int x, unsigned int y);
     DetailedTile * new_tile(unsigned int x, unsigned int y);
 
+
     DetailedMap(unsigned int width, unsigned int height);
     ~DetailedMap();
 };
+
+void load_detailed_tiles(ALLEGRO_PATH * base_path, MapSection * section);
