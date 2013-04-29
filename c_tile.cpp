@@ -161,7 +161,16 @@ void draw_sprite(TileSet * tileset, s_sprite sprite, s_map_block * block, float 
 		color = mix_colors(sprite.color, block->light);
 		break;
 	case COLOR_BIOME:
-		color = mix_colors(block->color, block->light);
+		color = mix_colors(block->biome_color, block->light);
+		break;
+	case COLOR_COMBINED:
+		color = mix_colors(block->combined_color, block->light);
+		break;
+	case COLOR_STRUCTURE:
+		color = mix_colors(block->structure_color, block->light);
+		break;
+	case COLOR_TRADE:
+		color = mix_colors(block->trade_color, block->light);
 		break;
 	case COLOR_PALETTE:
 		switch(sprite.color_source)
@@ -171,6 +180,27 @@ void draw_sprite(TileSet * tileset, s_sprite sprite, s_map_block * block, float 
 			break;
 		case SOURCE_DEPTH:
 			color = mix_colors(tileset->get_palette_color(sprite.palette_number,block->water_height-block->height), block->light);
+			break;
+		case SOURCE_TEMPERATURE:
+			color = mix_colors(tileset->get_palette_color(sprite.palette_number,block->levels[SOURCE_TEMPERATURE]), block->light);
+			break;
+		case SOURCE_RAINFALL:
+			color = mix_colors(tileset->get_palette_color(sprite.palette_number,block->levels[SOURCE_RAINFALL]), block->light);
+			break;
+		case SOURCE_DRAINAGE:
+			color = mix_colors(tileset->get_palette_color(sprite.palette_number,block->levels[SOURCE_DRAINAGE]), block->light);
+			break;
+		case SOURCE_SAVAGERY:
+			color = mix_colors(tileset->get_palette_color(sprite.palette_number,block->levels[SOURCE_SAVAGERY]), block->light);
+			break;
+		case SOURCE_VOLCANISM:
+			color = mix_colors(tileset->get_palette_color(sprite.palette_number,block->levels[SOURCE_VOLCANISM]), block->light);
+			break;
+		case SOURCE_EVIL:
+			color = mix_colors(tileset->get_palette_color(sprite.palette_number,block->levels[SOURCE_EVIL]), block->light);
+			break;
+		case SOURCE_SALINITY:
+			color = mix_colors(tileset->get_palette_color(sprite.palette_number,block->levels[SOURCE_SALINITY]), block->light);
 			break;
 		default:
 			color = block->light;
@@ -200,6 +230,12 @@ e_color_by get_color_selector(const char * text)
 		return COLOR_INI;
 	if(strcmp(text, "biome_map") == 0)
 		return COLOR_BIOME;
+	if(strcmp(text, "combined_biome_map") == 0)
+		return COLOR_COMBINED;
+	if(strcmp(text, "trade_map") == 0)
+		return COLOR_TRADE;
+	if(strcmp(text, "structure_map") == 0)
+		return COLOR_STRUCTURE;
 	if(strcmp(text, "palette") == 0)
 		return COLOR_PALETTE;
 	return COLOR_NONE;
@@ -211,6 +247,20 @@ e_color_source get_color_source(const char * text)
 		return SOURCE_ELEV;
 	if(strcmp(text, "water_depth") == 0)
 		return SOURCE_DEPTH;
+	if(strcmp(text, "temperature") == 0)
+		return SOURCE_TEMPERATURE;
+	if(strcmp(text, "rainfall") == 0)
+		return SOURCE_RAINFALL;
+	if(strcmp(text, "drainage") == 0)
+		return SOURCE_DRAINAGE;
+	if(strcmp(text, "savagery") == 0)
+		return SOURCE_SAVAGERY;
+	if(strcmp(text, "volcanism") == 0)
+		return SOURCE_VOLCANISM;
+	if(strcmp(text, "evil") == 0)
+		return SOURCE_EVIL;
+	if(strcmp(text, "salinity") == 0)
+		return SOURCE_SALINITY;
 	return SOURCE_ELEV;
 }
 

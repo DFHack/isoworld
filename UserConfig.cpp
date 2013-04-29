@@ -47,8 +47,8 @@ UserConfig::UserConfig(void)
 	res_y = 480;
 	map_x = 0;
 	map_y = 0;
-	map_width = 50;
-	map_height = 50;
+	map_width = 128;
+	map_height = 128;
 	map_shift = 100;
 	map_autoload = 1;
 	default_config = al_create_config();

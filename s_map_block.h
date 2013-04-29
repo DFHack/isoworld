@@ -79,10 +79,13 @@ struct s_map_block
 {
 	int height;
 	int water_height;
-	unsigned char levels[8];
+	unsigned char levels[7];
 	c_tile * sprite;
 	c_tile * structure_sprite;
-	ALLEGRO_COLOR color;
+	ALLEGRO_COLOR biome_color;
+	ALLEGRO_COLOR combined_color;
+	ALLEGRO_COLOR structure_color;
+	ALLEGRO_COLOR trade_color;
 	terrain_type terrain;
 	structure_type structure;
 	unsigned char terrain_borders[TERRAIN_COUNT];
