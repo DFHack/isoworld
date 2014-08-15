@@ -17,32 +17,36 @@ class DetailedMap;
 struct s_pathlist
 {
 	ALLEGRO_PATH * biome_map;
+	ALLEGRO_PATH * combined_biome_map;
 	ALLEGRO_PATH * elevation_map;
 	ALLEGRO_PATH * elevation_map_with_water;
 	ALLEGRO_PATH * structure_map;
-	//ALLEGRO_PATH * temperature_map;
-	//ALLEGRO_PATH * rainfall_map;
-	//ALLEGRO_PATH * drainage_map;
-	//ALLEGRO_PATH * savagery_map;
-	//ALLEGRO_PATH * volcanism_map;
-	//ALLEGRO_PATH * vegetation_map;
-	//ALLEGRO_PATH * evil_map;
-	//ALLEGRO_PATH * salinity_map;
+	ALLEGRO_PATH * trade_map;
+	ALLEGRO_PATH * temperature_map;
+	ALLEGRO_PATH * rainfall_map;
+	ALLEGRO_PATH * drainage_map;
+	ALLEGRO_PATH * savagery_map;
+	ALLEGRO_PATH * volcanism_map;
+	ALLEGRO_PATH * vegetation_map;
+	ALLEGRO_PATH * evil_map;
+	ALLEGRO_PATH * salinity_map;
 };
 struct s_maplist
 {
 	ALLEGRO_BITMAP * biome_map;
+	ALLEGRO_BITMAP * combined_biome_map;
 	ALLEGRO_BITMAP * elevation_map;
 	ALLEGRO_BITMAP * elevation_map_with_water;
 	ALLEGRO_BITMAP * structure_map;
-	//ALLEGRO_BITMAP * temperature_map;
-	//ALLEGRO_BITMAP * rainfall_map;
-	//ALLEGRO_BITMAP * drainage_map;
-	//ALLEGRO_BITMAP * savagery_map;
-	//ALLEGRO_BITMAP * volcanism_map;
-	//ALLEGRO_BITMAP * vegetation_map;
-	//ALLEGRO_BITMAP * evil_map;
-	//ALLEGRO_BITMAP * salinity_map;
+	ALLEGRO_BITMAP * temperature_map;
+	ALLEGRO_BITMAP * rainfall_map;
+	ALLEGRO_BITMAP * drainage_map;
+	ALLEGRO_BITMAP * savagery_map;
+	ALLEGRO_BITMAP * volcanism_map;
+	ALLEGRO_BITMAP * vegetation_map;
+	ALLEGRO_BITMAP * evil_map;
+	ALLEGRO_BITMAP * salinity_map;
+    ALLEGRO_BITMAP * trade_map;
 	s_maplist(void);
 };
 

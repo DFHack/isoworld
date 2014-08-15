@@ -411,6 +411,8 @@ void DetailedTile::load_tile(const char * filename, int inx, int iny) {
 }
 
 void load_detailed_tiles(ALLEGRO_PATH * base_path, MapSection * section) {
+    if(!base_path || !section)
+        return;
     ALLEGRO_PATH * tile_path = al_clone_path(base_path);
     al_set_path_filename(tile_path, "");
     al_append_path_component(tile_path, "data");

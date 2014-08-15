@@ -228,14 +228,7 @@ bool MapSection::set_size(int x, int y)
 
 	num_tiles = total_needed;
 
-	for(unsigned int i = 0; i < num_tiles; i++)
-	{
-		block_array[i].color = al_map_rgb(255,255,255);
-		block_array[i].height = 0;
-		block_array[i].sprite = 0;
-		block_array[i].terrain = TERRAIN_NONE;
-		block_array[i].structure = STRUCTURE_NONE;
-	}
+	flood_fill(NULL, 0);
 
 	return true;
 }
@@ -251,7 +244,10 @@ void MapSection::flood_fill(c_tile *tile, int height)
 	{
 		block_array[i].height = height;
 		block_array[i].sprite = tile;
-		block_array[i].color = al_map_rgb(255,255,255);
+		block_array[i].biome_color = al_map_rgb(255,255,255);
+		block_array[i].combined_color = al_map_rgb(255,255,255);
+		block_array[i].structure_color = al_map_rgb(255,255,255);
+		block_array[i].trade_color = al_map_rgb(255,255,255);
 		block_array[i].terrain = TERRAIN_NONE;
 		block_array[i].structure = STRUCTURE_NONE;
 	}
@@ -469,7 +465,7 @@ void MapSection::load_biome_tiles(s_maplist * maplist)
 				al_unmap_rgb(pixel_elw, &red, &green, &blue);
 				unsigned char cR, cG, cB;
 				float R,G,B;
-				al_unmap_rgb(block_array[index].color, &cR, &cG, &cB);
+				al_unmap_rgb(block_array[index].biome_color, &cR, &cG, &cB);
 				R=cR;
 				G=cG;
 				B=cB;
@@ -816,26 +812,32 @@ void MapSection::load_structure_tiles(ALLEGRO_BITMAP * structuremap)
 		}
 	}
 }
-void MapSection::load_colors(ALLEGRO_BITMAP * colormap)
+
+ALLEGRO_COLOR get_color(ALLEGRO_BITMAP * input, int x, int y) {
+			if(input)
+			{
+				int tempx = x + user_config.map_x;
+				int tempy = y + user_config.map_y;
+
+				tempx =  bind_to_range(tempx , al_get_bitmap_width(input));
+				tempy =  bind_to_range(tempy , al_get_bitmap_height(input));
+
+				return al_get_pixel(input, tempx, tempy);
+			}
+			else return al_map_rgb(255,255,255);
+}
+
+void MapSection::load_colors(s_maplist * map_list)
 {
 	for (unsigned int y = 0; y < board_width; y++)
 	{
 		for (unsigned int x = 0; x < board_height; x++)
 		{
 			unsigned int index = x + (board_width * y);
-			if(colormap)
-			{
-				int tempx = x + user_config.map_x;
-				int tempy = y + user_config.map_y;
-
-				tempx =  bind_to_range(tempx , al_get_bitmap_width(colormap));
-				tempy =  bind_to_range(tempy , al_get_bitmap_height(colormap));
-
-				block_array[index].color = al_get_pixel(colormap, tempx, tempy);
-
-			}
-			else block_array[index].color = al_map_rgb(255,255,255);
-
+			block_array[index].biome_color = get_color(map_list->biome_map, x,y);
+			block_array[index].combined_color = get_color(map_list->combined_biome_map, x,y);
+			block_array[index].structure_color = get_color(map_list->structure_map, x,y);
+			block_array[index].trade_color = get_color(map_list->trade_map, x,y);
 		}
 	}
 }
@@ -846,8 +848,15 @@ void MapSection::propogate_tiles(s_maplist * maplist)
 {
 	clock_t start_time = clock();
 	load_heights(maplist->elevation_map);
-	load_colors(maplist->biome_map);
+	load_colors(maplist);
 	load_water_level(maplist->elevation_map_with_water);
+    load_level(maplist->temperature_map, SOURCE_TEMPERATURE);
+    load_level(maplist->rainfall_map, SOURCE_RAINFALL);
+    load_level(maplist->drainage_map, SOURCE_DRAINAGE);
+    load_level(maplist->savagery_map, SOURCE_SAVAGERY);
+    load_level(maplist->volcanism_map, SOURCE_VOLCANISM);
+    load_level(maplist->evil_map, SOURCE_EVIL);
+    load_level(maplist->salinity_map, SOURCE_SALINITY);
 	load_biome_tiles(maplist);
 	load_structure_tiles(maplist->structure_map);
 	generate_special_tile_borders();
