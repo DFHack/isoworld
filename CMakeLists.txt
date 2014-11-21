@@ -71,17 +71,32 @@ IF(UNIX)
 				${CMAKE_CURRENT_SOURCE_DIR}/allegro/lib/liballegro_dialog.so.5.0
 				${CMAKE_CURRENT_SOURCE_DIR}/allegro/lib/liballegro_image.so.5.0
 				${CMAKE_CURRENT_SOURCE_DIR}/allegro/lib/liballegro_ttf.so.5.0
+				agui
+				agui_allegro5
 				${PROJECT_LIBS}
 			)
 			include_directories (
 				${include_directories}
 				${CMAKE_CURRENT_SOURCE_DIR}/allegro/include
+				${CMAKE_CURRENT_SOURCE_DIR}/agui/include
+			)
+			LINK_DIRECTORIES(
+				${LINK_DIRECTORIES}
+				${CMAKE_CURRENT_SOURCE_DIR}/agui/lib
 			)
 			install(DIRECTORY allegro/lib/
 					DESTINATION "hack/libs"
 					PATTERN "CVS" EXCLUDE
 					PATTERN ".svn" EXCLUDE)
 		ELSE()
+			include_directories (
+				${include_directories}
+				${CMAKE_CURRENT_SOURCE_DIR}/agui/include
+			)
+			LINK_DIRECTORIES(
+				${LINK_DIRECTORIES}
+				${CMAKE_CURRENT_SOURCE_DIR}/agui/lib
+			)
 			SET(PROJECT_LIBS
 				allegro
 				allegro_primitives
@@ -90,6 +105,8 @@ IF(UNIX)
 				allegro_dialog
 				allegro_image
 				allegro_ttf
+				agui
+				agui_allegro5
 				${PROJECT_LIBS}
 			)
 		ENDIF()
