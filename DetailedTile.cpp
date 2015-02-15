@@ -28,7 +28,7 @@ double interpolate(double a, double c, double b, double d, double x, double y) {
         y=1;
     if(y < 0)
         y=0;
-    return 
+    return
         (a*(1-x)*(1-y))+
         (c*x*(1-y))+
         (b*(1-x)*y)+
@@ -63,7 +63,7 @@ double DetailedTile::get_height(int x, int y) {
         (double)(x-24)/24.0, (double)(y+24)/24.0);
     if(x >= 48 && y < 0)
         return interpolate(
-        (surrounding_heights[1][0] + surrounding_heights[2][0])/2, surrounding_heights[2][0] , 
+        (surrounding_heights[1][0] + surrounding_heights[2][0])/2, surrounding_heights[2][0] ,
         heightmap[0*48+47] , (surrounding_heights[2][0] + surrounding_heights[2][1])/2,
         (double)(x-48)/24.0, (double)(y+24)/24.0);
 
@@ -113,7 +113,7 @@ double DetailedTile::get_height(int x, int y) {
         (double)(x-24)/24.0, (double)(y-48)/24.0);
     if(x >= 48 && y >= 48)
         return interpolate(
-        heightmap[47*48+47],                                        (surrounding_heights[2][1] +surrounding_heights[2][2])/2, 
+        heightmap[47*48+47],                                        (surrounding_heights[2][1] +surrounding_heights[2][2])/2,
         (surrounding_heights[1][2] + surrounding_heights[2][2])/2,  surrounding_heights[2][2],
         (double)(x-48)/24.0, (double)(y-48)/24.0);
     return 0;

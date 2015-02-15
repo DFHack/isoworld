@@ -266,7 +266,7 @@ void populate_filenames(string input, s_pathlist * paths)
     current_save.erase(current_save.find_last_of("-"), std::string::npos); // -16014.bmp
     current_save.erase(current_save.find_last_of("-"), std::string::npos); // -250
     log_printf("Loaded up %s\n", current_save.c_str());
-    //and now it's time to fill out the list of image paths	
+    //and now it's time to fill out the list of image paths
     paths->biome_map = al_clone_path(base_path);
     sprintf(buffer, "world_graphic-bm-%s", input.c_str());
     al_set_path_filename(paths->biome_map, buffer);
@@ -484,7 +484,7 @@ int main(void)
             {
                 if(al_key_down(&keys, ALLEGRO_KEY_LSHIFT) || al_key_down(&keys, ALLEGRO_KEY_RSHIFT))
                     user_config.map_y-=10;
-                else 
+                else
                     user_config.map_y--;
                 continue;
             }
@@ -492,7 +492,7 @@ int main(void)
             {
                 if(al_key_down(&keys, ALLEGRO_KEY_LSHIFT) || al_key_down(&keys, ALLEGRO_KEY_RSHIFT))
                     user_config.map_y+=10;
-                else 
+                else
                     user_config.map_y++;
                 continue;
             }
@@ -500,7 +500,7 @@ int main(void)
             {
                 if(al_key_down(&keys, ALLEGRO_KEY_LSHIFT) || al_key_down(&keys, ALLEGRO_KEY_RSHIFT))
                     user_config.map_x+=10;
-                else 
+                else
                     user_config.map_x++;
                 continue;
             }
@@ -508,7 +508,7 @@ int main(void)
             {
                 if(al_key_down(&keys, ALLEGRO_KEY_LSHIFT) || al_key_down(&keys, ALLEGRO_KEY_RSHIFT))
                     user_config.map_x-=10;
-                else 
+                else
                     user_config.map_x--;
                 continue;
             }
@@ -737,7 +737,7 @@ EXIT_LOOP: ;
             textlog = NULL;
         }
 
-        
+
         //Let Agui process the event last, because fuck Agui
         inputHandler->processEvent(event);
 
