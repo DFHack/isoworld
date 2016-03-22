@@ -230,7 +230,113 @@ void populate_filenames(string input, s_pathlist * paths)
     input = al_get_path_filename(base_path);
 
     //fisrt we gotta make sure this is, in fact, an exported DF map
-    if(input.compare(0, 14, "world_graphic-") != 0) return;
+    if (input.compare(0, 14, "world_graphic-") != 0)
+    {
+        //it isn't the old style naming. Now we check if it's new new one.
+        size_t pos = input.find_last_of(".");
+        string extension = input.substr(pos);
+        string baseName = input.substr(0, pos);
+        pos = baseName.find_last_of("-");
+        string type = baseName.substr(pos);
+        baseName = baseName.substr(0, pos);
+
+        if (!(
+            type.compare("-bm") == 0
+            || type.compare("-detailed") == 0
+            || type.compare("-dip") == 0
+            || type.compare("-drn") == 0
+            || type.compare("-el") == 0
+            || type.compare("-elw") == 0
+            || type.compare("-evil") == 0
+            || type.compare("-hyd") == 0
+            || type.compare("-nob") == 0
+            || type.compare("-rain") == 0
+            || type.compare("-sal") == 0
+            || type.compare("-sav") == 0
+            || type.compare("-str") == 0
+            || type.compare("-tmp") == 0
+            || type.compare("-trd") == 0
+            || type.compare("-veg") == 0
+            || type.compare("-vol") == 0
+            ))
+        {
+            log_printf("Map name isn't a recognizable format");
+            return;
+        }
+        pos = baseName.length() - 12;
+        string date = baseName.substr(pos);
+        baseName = baseName.substr(0, pos);
+
+        current_save = baseName;
+
+        log_printf("Loaded up %s\n", current_save.c_str());
+
+        //and now it's time to fill out the list of image paths
+
+        char buffer[256];
+
+
+        paths->biome_map = al_clone_path(base_path);
+        sprintf(buffer, "%s%s-bm%s", baseName.c_str(), date.c_str(), extension.c_str());
+        al_set_path_filename(paths->biome_map, buffer);
+
+        paths->combined_biome_map = al_clone_path(base_path);
+        sprintf(buffer, "%s%s-detailed%s", baseName.c_str(), date.c_str(), extension.c_str());
+        al_set_path_filename(paths->combined_biome_map, buffer);
+
+        paths->elevation_map = al_clone_path(base_path);
+        sprintf(buffer, "%s%s-el%s", baseName.c_str(), date.c_str(), extension.c_str());
+        al_set_path_filename(paths->elevation_map, buffer);
+
+        paths->elevation_map_with_water = al_clone_path(base_path);
+        sprintf(buffer, "%s%s-elw%s", baseName.c_str(), date.c_str(), extension.c_str());
+        al_set_path_filename(paths->elevation_map_with_water, buffer);
+
+        paths->structure_map = al_clone_path(base_path);
+        sprintf(buffer, "%s%s-str%s", baseName.c_str(), date.c_str(), extension.c_str());
+        al_set_path_filename(paths->structure_map, buffer);
+
+        paths->trade_map = al_clone_path(base_path);
+        sprintf(buffer, "%s%s-trd%s", baseName.c_str(), date.c_str(), extension.c_str());
+        al_set_path_filename(paths->trade_map, buffer);
+
+        paths->temperature_map = al_clone_path(base_path);
+        sprintf(buffer, "%s%s-tmp%s", baseName.c_str(), date.c_str(), extension.c_str());
+        al_set_path_filename(paths->temperature_map, buffer);
+
+        paths->rainfall_map = al_clone_path(base_path);
+        sprintf(buffer, "%s%s-rain%s", baseName.c_str(), date.c_str(), extension.c_str());
+        al_set_path_filename(paths->rainfall_map, buffer);
+
+        paths->drainage_map = al_clone_path(base_path);
+        sprintf(buffer, "%s%s-drn%s", baseName.c_str(), date.c_str(), extension.c_str());
+        al_set_path_filename(paths->drainage_map, buffer);
+
+        paths->savagery_map = al_clone_path(base_path);
+        sprintf(buffer, "%s%s-sav%s", baseName.c_str(), date.c_str(), extension.c_str());
+        al_set_path_filename(paths->savagery_map, buffer);
+
+        paths->volcanism_map = al_clone_path(base_path);
+        sprintf(buffer, "%s%s-vol%s", baseName.c_str(), date.c_str(), extension.c_str());
+        al_set_path_filename(paths->volcanism_map, buffer);
+
+        paths->vegetation_map = al_clone_path(base_path);
+        sprintf(buffer, "%s%s-veg%s", baseName.c_str(), date.c_str(), extension.c_str());
+        al_set_path_filename(paths->vegetation_map, buffer);
+
+        paths->evil_map = al_clone_path(base_path);
+        sprintf(buffer, "%s%s-evil%s", baseName.c_str(), date.c_str(), extension.c_str());
+        al_set_path_filename(paths->evil_map, buffer);
+
+        paths->salinity_map = al_clone_path(base_path);
+        sprintf(buffer, "%s%s-sal%s", baseName.c_str(), date.c_str(), extension.c_str());
+        al_set_path_filename(paths->salinity_map, buffer);
+
+        al_destroy_path(base_path);
+
+        user_config.map_path = al_path_cstr(paths->biome_map, ALLEGRO_NATIVE_PATH_SEP);
+        return;
+    }
 
     //now we get rid of all the junk in the beginning, to get the name of the fort.
     input.erase(0, 14);
