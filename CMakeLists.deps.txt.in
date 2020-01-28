@@ -2,6 +2,10 @@ cmake_minimum_required(VERSION 2.8.12)
 
 project(isoworld-deps NONE)
 
+IF(UNIX)
+    SET(extra_cflags -Wno-unused-function)
+ENDIF()
+
 include(ExternalProject)
 ExternalProject_Add(allegro
     SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/allegro
@@ -9,7 +13,7 @@ ExternalProject_Add(allegro
     CMAKE_ARGS
         -DCMAKE_BUILD_TYPE=Release
         -DCMAKE_INSTALL_PREFIX=${CMAKE_CURRENT_BINARY_DIR}/deps
-        -DCMAKE_C_FLAGS=-Wno-unused-function
+        -DCMAKE_C_FLAGS=$${extra_cflags}
         -DSHARED=0
         -DWANT_ALLOW_SSE=0
         -DWANT_DOCS=0
