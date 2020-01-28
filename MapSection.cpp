@@ -116,6 +116,8 @@ const char * get_terrain_string(terrain_type input)
         return "tropical_beach";
     case TERRAIN_BEACH_ARCT:
         return "arctic_beach";
+    case TERRAIN_COUNT:
+        break;
     }
     return "ERROR";
 }
@@ -163,6 +165,8 @@ const char* get_structure_string(structure_type input)
         return "river";
     case STRUCTURE_BROOK:
         return "brook";
+    case STRUCTURE_COUNT:
+        break;
     }
     return "ERROR";
 }

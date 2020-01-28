@@ -424,6 +424,9 @@ int get_offset(e_offset_type type, char borders, s_map_block * block, unsigned c
 {
     switch(type)
     {
+    case OFFSET_NONE:
+    case OFFSET_COUNT:
+        break;
     case OFFSET_SIXTEEN:
         return get_border_offset_sixteen(borders);
     case OFFSET_PATH:
