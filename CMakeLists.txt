@@ -1,7 +1,16 @@
 PROJECT (isoworld)
 SET(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/CMake/Modules)
 
-include_directories (${CMAKE_SOURCE_DIR})
+INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR})
+INCLUDE_DIRECTORIES(
+	SYSTEM
+	${CMAKE_CURRENT_SOURCE_DIR}/allegro/include
+	${CMAKE_CURRENT_SOURCE_DIR}/agui/include
+)
+LINK_DIRECTORIES(
+	${CMAKE_CURRENT_SOURCE_DIR}/allegro/lib
+	${CMAKE_CURRENT_SOURCE_DIR}/agui/lib
+)
 
 SET(PROJECT_SRCS
 	UserConfig.cpp
@@ -37,7 +46,7 @@ IF(UNIX)
 				${PROJECT_LIBS}
 			)
 			include_directories (
-				${include_directories}
+				SYSTEM
 				${CMAKE_CURRENT_SOURCE_DIR}/allegro-osx/include
 			)
 			install(DIRECTORY allegro-osx/lib/
@@ -72,10 +81,6 @@ IF(UNIX)
 				${CMAKE_CURRENT_SOURCE_DIR}/allegro/lib/liballegro_image.so.5.0
 				${CMAKE_CURRENT_SOURCE_DIR}/allegro/lib/liballegro_ttf.so.5.0
 				${PROJECT_LIBS}
-			)
-			include_directories (
-				${include_directories}
-				${CMAKE_CURRENT_SOURCE_DIR}/allegro/include
 			)
 			install(DIRECTORY allegro/lib/
 					DESTINATION "hack/libs"
@@ -131,19 +136,9 @@ ELSE(UNIX)
 		shlwapi.lib
 		agui.lib
 		agui_allegro5.lib
-        $(NOINHERIT)
-       )
+		$(NOINHERIT)
+	   )
 	SET(PROJECT_SRCS ${PROJECT_SRCS} IsoWorld.rc)
-    include_directories (
-        ${include_directories}
-        ${CMAKE_CURRENT_SOURCE_DIR}/allegro/include
-        ${CMAKE_CURRENT_SOURCE_DIR}/agui/include
-    )
-    LINK_DIRECTORIES(
-        ${LINK_DIRECTORIES}
-        ${CMAKE_CURRENT_SOURCE_DIR}/allegro/lib
-        ${CMAKE_CURRENT_SOURCE_DIR}/agui/lib
-    )
 ENDIF(UNIX)
 # Tell CMake the source won't be available until build time.
 SET_SOURCE_FILES_PROPERTIES(${CMAKE_CURRENT_SOURCE_DIR}/../proto/isoworldremote.pb.cc PROPERTIES GENERATED 1)
