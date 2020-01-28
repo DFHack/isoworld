@@ -5,6 +5,7 @@
 #include "ColorList.h"
 #include "TileSet.h"
 #include <sstream>
+#include <cmath>
 
 using namespace isoworldremote;
 
@@ -221,17 +222,18 @@ void DetailedTile::make_tile(isoworldremote::EmbarkTile * input, MapSection * se
                     BasicMaterial side_mat = AIR;
                     if(zz+1 < max_z)
                         upper_mat = input->tile_layer(zz+1).mat_type_table(yy*48+xx);
-                    if((zz+1 < max_z) && (xx > 0) && upper_mat == AIR || (upper_mat == LIQUID && !tile_set->draw_water))
+                    if(((zz+1 < max_z) && (xx > 0) && upper_mat == AIR) || (upper_mat == LIQUID && !tile_set->draw_water))
                         upper_mat = input->tile_layer(zz+1).mat_type_table(yy*48+xx-1);
                     if(xx+1 < 48)
                         side_mat = input->tile_layer(zz).mat_type_table(yy*48+xx+1);
                     ALLEGRO_COLOR materialcolor;
-                    if(tile_set->draw_mode == NORMAL)
-                        materialcolor = color_list.get_color(current_mat, current_submat);
-                    else if (tile_set->draw_mode == MAX_ELEVATION)
+                    if (tile_set->draw_mode == MAX_ELEVATION)
                         materialcolor = tile_set->get_palette_color(tile_set->elevation_palette, get_height(xx,yy)+world_z);
                     else if (tile_set->draw_mode == CURRENT_ELEVATION)
                         materialcolor = tile_set->get_palette_color(tile_set->elevation_palette, zz+world_z);
+                    else
+                        materialcolor = color_list.get_color(current_mat, current_submat);
+
                     ALLEGRO_COLOR light, med, dark;
                     if(zz >= heightmap[yy*48+xx])
                         light = surfacelight[yy*48+xx];
@@ -424,13 +426,13 @@ void load_detailed_tiles(ALLEGRO_PATH * base_path, MapSection * section) {
     ALLEGRO_FS_ENTRY * base_folder = al_create_fs_entry(al_path_cstr(tile_path, ALLEGRO_NATIVE_PATH_SEP));
     if(al_open_directory(base_folder)) {
         ALLEGRO_FS_ENTRY * x_folder = 0;
-        while(x_folder = al_read_directory(base_folder)) {
+        while((x_folder = al_read_directory(base_folder))) {
             if(al_open_directory(x_folder)) {
                 ALLEGRO_FS_ENTRY * y_folder = 0;
-                while(y_folder = al_read_directory(x_folder)) {
+                while((y_folder = al_read_directory(x_folder))) {
                     if(al_open_directory(y_folder)) {
                         ALLEGRO_FS_ENTRY * image_file = 0;
-                        while(image_file = al_read_directory(y_folder)) {
+                        while((image_file = al_read_directory(y_folder))) {
                             ALLEGRO_PATH * image_path = al_create_path(al_get_fs_entry_name(image_file));
                             int world_x = atoi(al_get_path_component(image_path, -2));
                             int world_y = atoi(al_get_path_component(image_path, -1));
