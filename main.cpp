@@ -41,7 +41,7 @@ s_maplist::s_maplist(void)
 
 void saveScreenshot(){
     //get filename
-    char filename[20] ={0};
+    char filename[32] ={0};
     FILE* fp;
     int index = 1;
     //search for the first screenshot# that does not exist already
@@ -112,8 +112,7 @@ static AsyncDialog *spawn_async_file_dialog(ALLEGRO_DISPLAY *display,
     AsyncDialog *data = (AsyncDialog*)malloc(sizeof *data);
 
     data->file_dialog = al_create_native_file_dialog(
-        initial_path, "Choose files", NULL,
-        NULL);
+        initial_path, "Choose files", NULL, 0);
     al_init_user_event_source(&data->event_source);
     data->display = display;
     data->thread = al_create_thread(async_file_dialog_thread_func, data);
@@ -439,7 +438,7 @@ static void show_files_list(ALLEGRO_FILECHOOSER *dialog,
     const ALLEGRO_FONT *font, ALLEGRO_COLOR info)
 {
     int count = al_get_native_file_dialog_count(dialog);
-    if (count = 0) return;
+    if (count == 0) return;
 
     populate_filenames(al_get_native_file_dialog_path(dialog, 0), &path_list);
 
@@ -568,9 +567,6 @@ int main(void)
     int mousemove_start_y = 0;
     int mapmove_start_x = 0;
     int mapmove_start_y = 0;
-
-    ALLEGRO_COLOR unselected = al_map_rgb(255,255,255);
-    ALLEGRO_COLOR selected = al_map_rgb(128,128,128);
 
     ALLEGRO_KEYBOARD_STATE keys;
     while (1) {
@@ -825,9 +821,9 @@ EXIT_LOOP: ;
             if(user_config.debugmode)
             {
                 test_map.draw_debug_info();
-                al_draw_textf(user_config.font, cur_dialog ? inactive : active, 0, y, ALLEGRO_ALIGN_LEFT, "Drawtime: %dms", test_map.draw_time);
-                al_draw_textf(user_config.font, cur_dialog ? inactive : active, 0, y + al_get_font_line_height(user_config.font), ALLEGRO_ALIGN_LEFT, "Load Time: %dms", test_map.load_time);
-                al_draw_textf(user_config.font, cur_dialog ? inactive : active, 0, y + al_get_font_line_height(user_config.font)*2, ALLEGRO_ALIGN_LEFT, "Fetch Time: %dms", test_map.tile_fetch_time);
+                al_draw_textf(user_config.font, cur_dialog ? inactive : active, 0, y, ALLEGRO_ALIGN_LEFT, "Drawtime: %dms", int(test_map.draw_time));
+                al_draw_textf(user_config.font, cur_dialog ? inactive : active, 0, y + al_get_font_line_height(user_config.font), ALLEGRO_ALIGN_LEFT, "Load Time: %dms", int(test_map.load_time));
+                al_draw_textf(user_config.font, cur_dialog ? inactive : active, 0, y + al_get_font_line_height(user_config.font)*2, ALLEGRO_ALIGN_LEFT, "Fetch Time: %dms", int(test_map.tile_fetch_time));
             }
             gui->logic();
             render_gui();

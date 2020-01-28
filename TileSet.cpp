@@ -77,7 +77,7 @@ void TileSet::load_ini(ALLEGRO_PATH * path)
         if(al_open_directory(fs_dir))
         {
             ALLEGRO_FS_ENTRY * fs_tile;
-            while(fs_tile = al_read_directory(fs_dir))
+            while((fs_tile = al_read_directory(fs_dir)))
             {
                 ALLEGRO_PATH * tile_path = al_create_path(al_get_fs_entry_name(fs_tile));
                 if(strcmp(al_get_path_extension(tile_path), ".ini") == 0)

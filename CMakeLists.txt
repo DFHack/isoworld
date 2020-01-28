@@ -141,8 +141,7 @@ ELSE(UNIX)
 	SET(PROJECT_SRCS ${PROJECT_SRCS} IsoWorld.rc)
 ENDIF(UNIX)
 # Tell CMake the source won't be available until build time.
-SET_SOURCE_FILES_PROPERTIES(${CMAKE_CURRENT_SOURCE_DIR}/../proto/isoworldremote.pb.cc PROPERTIES GENERATED 1)
-
+SET_SOURCE_FILES_PROPERTIES(${CMAKE_CURRENT_SOURCE_DIR}/../proto/isoworldremote.pb.cc PROPERTIES GENERATED 1 COMPILE_FLAGS "-Wno-misleading-indentation")
 SET(PROJECT_SRCS ${PROJECT_SRCS} ${CMAKE_CURRENT_SOURCE_DIR}/../proto/isoworldremote.pb.cc)
 
 
