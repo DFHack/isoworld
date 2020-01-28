@@ -468,37 +468,39 @@ void MapSection::load_biome_tiles(s_maplist * maplist)
                 unsigned char blue;
                 al_unmap_rgb(pixel_elw, &red, &green, &blue);
                 unsigned char cR, cG, cB;
-                float R,G,B;
                 al_unmap_rgb(block_array[index].biome_color, &cR, &cG, &cB);
+#if 0
+                float R,G,B;
                 R=cR;
                 G=cG;
                 B=cB;
-                //if(
-                //    (cR == 180) &&
-                //    (cG == 167) &&
-                //    (cB == 20) &&
-                //    block_array[index].height > 99
-                //    )
-                //{
-                //    block_array[index].terrain = TERRAIN_BRIDGE;
-                //    block_array[index].height = blue;
-                //    block_array[index].water_height = blue;
-                //}
-                //else if(red == 0 && green == blue)
-                //{
-                //    if(block_array[index].color.g > 0.0001)
-                //        block_array[index].terrain = TERRAIN_STREAM;
-                //    else
-                //        block_array[index].terrain = TERRAIN_RIVER;
-                //    block_array[index].height = blue;
-                //    block_array[index].water_height = blue;
-                //}
-                //else if(red == 0 && green == 0)
-                //{
-                //    block_array[index].terrain = TERRAIN_OCEAN;
-                //    block_array[index].water_height = max(blue+25, 99);
-                //}
-                    if(
+                if(
+                    (cR == 180) &&
+                    (cG == 167) &&
+                    (cB == 20) &&
+                    block_array[index].height > 99
+                    )
+                {
+                    block_array[index].terrain = TERRAIN_BRIDGE;
+                    block_array[index].height = blue;
+                    block_array[index].water_height = blue;
+                }
+                else if(red == 0 && green == blue)
+                {
+                    if(block_array[index].color.g > 0.0001)
+                        block_array[index].terrain = TERRAIN_STREAM;
+                    else
+                        block_array[index].terrain = TERRAIN_RIVER;
+                    block_array[index].height = blue;
+                    block_array[index].water_height = blue;
+                }
+                else if(red == 0 && green == 0)
+                {
+                    block_array[index].terrain = TERRAIN_OCEAN;
+                    block_array[index].water_height = max(blue+25, 99);
+                }
+#endif
+                if(
                     (cR == 128) &&
                     (cG == 128) &&
                     (cB == 128) &&
