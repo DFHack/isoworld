@@ -351,7 +351,6 @@ void MapSection::load_heights(ALLEGRO_BITMAP * heightmap)
                 {
                     block_array[index].height = blue + 25;
                 }
-                block_array[index].height;
             }
             else block_array[index].height = 0;
             block_array[index].water_height = block_array[index].height;

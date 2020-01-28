@@ -32,7 +32,7 @@ public:
     void pointToSprite(float *inx, float *iny, int inz);
     void load_heights(ALLEGRO_BITMAP * heightmap);
     void load_water_level(ALLEGRO_BITMAP * watermap);
-    void MapSection::load_colors(s_maplist * map_list);
+    void load_colors(s_maplist * map_list);
     void load_level(ALLEGRO_BITMAP * levelmap, int level);
     void load_biome_tiles(s_maplist * maplist);
     void load_structure_tiles(ALLEGRO_BITMAP * structuremap);
