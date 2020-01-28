@@ -8,12 +8,12 @@ ENDIF()
 
 include(ExternalProject)
 ExternalProject_Add(allegro
-    SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/allegro
-    INSTALL_DIR ${CMAKE_CURRENT_BINARY_DIR}/deps
+    SOURCE_DIR @CMAKE_CURRENT_SOURCE_DIR@/allegro
+    INSTALL_DIR @CMAKE_CURRENT_BINARY_DIR@/deps
     CMAKE_ARGS
         -DCMAKE_BUILD_TYPE=Release
-        -DCMAKE_INSTALL_PREFIX=${CMAKE_CURRENT_BINARY_DIR}/deps
-        -DCMAKE_C_FLAGS=$${extra_cflags}
+        -DCMAKE_INSTALL_PREFIX=@CMAKE_CURRENT_BINARY_DIR@/deps
+        -DCMAKE_C_FLAGS=${extra_cflags}
         -DSHARED=0
         -DWANT_ALLOW_SSE=0
         -DWANT_DOCS=0

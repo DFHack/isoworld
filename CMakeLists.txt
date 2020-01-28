@@ -1,7 +1,7 @@
 PROJECT (isoworld)
 
 # hack to compile allegro at configure time
-configure_file(CMakeLists.deps.txt.in deps-build/CMakeLists.txt)
+configure_file(CMakeLists.deps.txt.in deps-build/CMakeLists.txt @ONLY)
 execute_process(COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" .
     WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/deps-build
     RESULT_VARIABLE deps_configure_result)
