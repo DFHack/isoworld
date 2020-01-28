@@ -680,7 +680,7 @@ void c_tile::load_ini(ALLEGRO_PATH * path)
     size_t cap_layers = get_config_int(config, "SPRITE", "cap_layers");
     for(size_t i = 0; i < cap_layers; i++)
     {
-        sprintf(buffer, "CAP_IMAGE_%d", i);
+        sprintf(buffer, "CAP_IMAGE_%d", int(i));
         temp = get_from_ini(config, buffer, path);
         if(temp.index >= 0)
             top_sprites.push_back(temp);
@@ -689,7 +689,7 @@ void c_tile::load_ini(ALLEGRO_PATH * path)
     size_t column_layers = get_config_int(config, "SPRITE", "column_layers");
     for(size_t i = 0; i < column_layers; i++)
     {
-        sprintf(buffer, "COLUMN_IMAGE_%d", i);
+        sprintf(buffer, "COLUMN_IMAGE_%d", int(i));
         temp = get_from_ini(config, buffer, path);
         if(temp.index >= 0)
             bottom_sprites.push_back(temp);
@@ -698,7 +698,7 @@ void c_tile::load_ini(ALLEGRO_PATH * path)
     size_t surface_layers = get_config_int(config, "SPRITE", "surface_layers");
     for(size_t i = 0; i < surface_layers; i++)
     {
-        sprintf(buffer, "SURFACE_IMAGE_%d", i);
+        sprintf(buffer, "SURFACE_IMAGE_%d", int(i));
         temp = get_from_ini(config, buffer, path);
         if(temp.index >= 0)
             surface_sprites.push_back(temp);
@@ -707,7 +707,7 @@ void c_tile::load_ini(ALLEGRO_PATH * path)
     size_t intermediate_layers = get_config_int(config, "SPRITE", "intermediate_layers");
     for(size_t i = 0; i < intermediate_layers; i++)
     {
-        sprintf(buffer, "INTERMEDIATE_IMAGE_%d", i);
+        sprintf(buffer, "INTERMEDIATE_IMAGE_%d", int(i));
         temp = get_from_ini(config, buffer, path);
         if(temp.index >= 0)
             intermediate_sprites.push_back(temp);
@@ -716,7 +716,7 @@ void c_tile::load_ini(ALLEGRO_PATH * path)
     size_t object_layers = get_config_int(config, "SPRITE", "object_layers");
     for(size_t i = 0; i < object_layers; i++)
     {
-        sprintf(buffer, "OBJECT_IMAGE_%d", i);
+        sprintf(buffer, "OBJECT_IMAGE_%d", int(i));
         temp = get_from_ini(config, buffer, path);
         if(temp.index >= 0)
             object_sprites.push_back(temp);

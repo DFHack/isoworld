@@ -906,7 +906,7 @@ void MapSection::load_tilesets(const char * index_file)
     char buffer[256];
     for(size_t i = 0; i < num_tiles; i++)
     {
-        sprintf(buffer, "tileset_%d", i);
+        sprintf(buffer, "tileset_%d", int(i));
         const char * file = al_get_config_value(config, "TILESETS", buffer);
         if(file)
         {
