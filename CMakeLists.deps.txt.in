@@ -1,0 +1,26 @@
+cmake_minimum_required(VERSION 2.8.12)
+
+project(isoworld-deps NONE)
+
+include(ExternalProject)
+ExternalProject_Add(allegro
+    SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/allegro
+    INSTALL_DIR ${CMAKE_CURRENT_BINARY_DIR}/deps
+    CMAKE_ARGS
+        -DCMAKE_BUILD_TYPE=Release
+        -DCMAKE_INSTALL_PREFIX=${CMAKE_CURRENT_BINARY_DIR}/deps
+        -DCMAKE_C_FLAGS=-Wno-unused-function
+        -DSHARED=0
+        -DWANT_ALLOW_SSE=0
+        -DWANT_DOCS=0
+        -DWANT_D3D=0
+        -DWANT_AUDIO=0
+        -DWANT_IMAGE_WEBP=0
+        -DWANT_MEMFILE=0
+        -DWANT_PHYSFS=0
+        -DWANT_VIDEO=0
+        -DWANT_RELEASE_LOGGING=0
+        -DWANT_DEMO=0
+        -DWANT_EXAMPLES=0
+        -DWANT_TESTS=0
+)

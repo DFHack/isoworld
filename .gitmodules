@@ -1,0 +1,7 @@
+[submodule "allegro"]
+	path = allegro
+	url = ../../liballeg/allegro5.git
+	branch = refs/tags/5.2.5.0
+[submodule "agui"]
+	path = agui
+	url = ../../jmasterx/Agui.git
