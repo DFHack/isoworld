@@ -301,7 +301,7 @@ void MapSection::draw(int inx, int iny)
                 tileset_list[current_tileset].rendered_map->get_tile(x + user_config.map_x, y + user_config.map_y)->draw(drawx, drawy);
             }
             else {
-                if(block_array[index].sprite > 0)
+                if(block_array[index].sprite)
                 {
                     block_array[index].sprite->draw(drawx, drawy, snap_height(block_array[index].height), snap_height(bottom_r), snap_height(block_array[index].water_height), &block_array[index], &(tileset_list[current_tileset]), 0, LAYER_BASE);
                     if(block_array[index].structure_sprite)
