@@ -41,7 +41,7 @@ s_maplist::s_maplist(void)
 
 void saveScreenshot(){
     //get filename
-    char filename[20] ={0};
+    char filename[32] ={0};
     FILE* fp;
     int index = 1;
     //search for the first screenshot# that does not exist already
@@ -112,8 +112,7 @@ static AsyncDialog *spawn_async_file_dialog(ALLEGRO_DISPLAY *display,
     AsyncDialog *data = (AsyncDialog*)malloc(sizeof *data);
 
     data->file_dialog = al_create_native_file_dialog(
-        initial_path, "Choose files", NULL,
-        NULL);
+        initial_path, "Choose files", NULL, 0);
     al_init_user_event_source(&data->event_source);
     data->display = display;
     data->thread = al_create_thread(async_file_dialog_thread_func, data);
@@ -206,114 +205,21 @@ void load_bitmaps(s_pathlist * paths, s_maplist * maps)
     destroy_bitmaps(maps);
     int backup = al_get_new_bitmap_flags();
     al_set_new_bitmap_flags(ALLEGRO_MEMORY_BITMAP | ALLEGRO_MIN_LINEAR);
-    if (paths->elevation_map)
     maps->elevation_map = al_load_bitmap(al_path_cstr(paths->elevation_map, ALLEGRO_NATIVE_PATH_SEP));
-    if (paths->elevation_map_with_water)
-        maps->elevation_map_with_water = al_load_bitmap(al_path_cstr(paths->elevation_map_with_water, ALLEGRO_NATIVE_PATH_SEP));
-    if (paths->biome_map)
-        maps->biome_map = al_load_bitmap(al_path_cstr(paths->biome_map, ALLEGRO_NATIVE_PATH_SEP));
-    if (paths->combined_biome_map)
-        maps->combined_biome_map = al_load_bitmap(al_path_cstr(paths->combined_biome_map, ALLEGRO_NATIVE_PATH_SEP));
-    if (paths->structure_map)
-        maps->structure_map = al_load_bitmap(al_path_cstr(paths->structure_map, ALLEGRO_NATIVE_PATH_SEP));
-    if (paths->trade_map)
-        maps->trade_map = al_load_bitmap(al_path_cstr(paths->trade_map, ALLEGRO_NATIVE_PATH_SEP));
-    if (paths->temperature_map)
-        maps->temperature_map = al_load_bitmap(al_path_cstr(paths->temperature_map, ALLEGRO_NATIVE_PATH_SEP));
-    if (paths->rainfall_map)
-        maps->rainfall_map = al_load_bitmap(al_path_cstr(paths->rainfall_map, ALLEGRO_NATIVE_PATH_SEP));
-    if (paths->drainage_map)
-        maps->drainage_map = al_load_bitmap(al_path_cstr(paths->drainage_map, ALLEGRO_NATIVE_PATH_SEP));
-    if (paths->savagery_map)
-        maps->savagery_map = al_load_bitmap(al_path_cstr(paths->savagery_map, ALLEGRO_NATIVE_PATH_SEP));
-    if (paths->volcanism_map)
-        maps->volcanism_map = al_load_bitmap(al_path_cstr(paths->volcanism_map, ALLEGRO_NATIVE_PATH_SEP));
-    if (paths->evil_map)
-        maps->evil_map = al_load_bitmap(al_path_cstr(paths->evil_map, ALLEGRO_NATIVE_PATH_SEP));
-    if (paths->salinity_map)
-        maps->salinity_map = al_load_bitmap(al_path_cstr(paths->salinity_map, ALLEGRO_NATIVE_PATH_SEP));
+    maps->elevation_map_with_water = al_load_bitmap(al_path_cstr(paths->elevation_map_with_water, ALLEGRO_NATIVE_PATH_SEP));
+    maps->biome_map = al_load_bitmap(al_path_cstr(paths->biome_map, ALLEGRO_NATIVE_PATH_SEP));
+    maps->combined_biome_map = al_load_bitmap(al_path_cstr(paths->combined_biome_map, ALLEGRO_NATIVE_PATH_SEP));
+    maps->structure_map = al_load_bitmap(al_path_cstr(paths->structure_map, ALLEGRO_NATIVE_PATH_SEP));
+    maps->trade_map = al_load_bitmap(al_path_cstr(paths->trade_map, ALLEGRO_NATIVE_PATH_SEP));
+    maps->temperature_map = al_load_bitmap(al_path_cstr(paths->temperature_map, ALLEGRO_NATIVE_PATH_SEP));
+    maps->rainfall_map = al_load_bitmap(al_path_cstr(paths->rainfall_map, ALLEGRO_NATIVE_PATH_SEP));
+    maps->drainage_map = al_load_bitmap(al_path_cstr(paths->drainage_map, ALLEGRO_NATIVE_PATH_SEP));
+    maps->savagery_map = al_load_bitmap(al_path_cstr(paths->savagery_map, ALLEGRO_NATIVE_PATH_SEP));
+    maps->volcanism_map = al_load_bitmap(al_path_cstr(paths->volcanism_map, ALLEGRO_NATIVE_PATH_SEP));
+    maps->evil_map = al_load_bitmap(al_path_cstr(paths->evil_map, ALLEGRO_NATIVE_PATH_SEP));
+    maps->salinity_map = al_load_bitmap(al_path_cstr(paths->salinity_map, ALLEGRO_NATIVE_PATH_SEP));
 
     al_set_new_bitmap_flags(backup);
-}
-
-void populate_new_filenames(ALLEGRO_PATH * base_path, string input, s_pathlist * paths)
-{
-    auto pos = input.find_last_of('.');
-    auto extension = input.substr(pos, std::string::npos);
-    cout << extension << endl;
-    pos = input.find_last_of('-');
-    if (pos > input.length())
-        return;
-    input.erase(pos);
-    //save the resulting name to a gobal
-    current_save = input;
-    current_save.erase(current_save.find_last_of("-"), std::string::npos); // -Day
-    current_save.erase(current_save.find_last_of("-"), std::string::npos); // -Month
-    current_save.erase(current_save.find_last_of("-"), std::string::npos); // -Year
-    log_printf("Loaded up %s\n", current_save.c_str());
-    //and now it's time to fill out the list of image paths	
-    char buffer[256];
-
-    paths->biome_map = al_clone_path(base_path);
-    sprintf(buffer, "%s-bm%s", input.c_str(), extension.c_str());
-    al_set_path_filename(paths->biome_map, buffer);
-
-    paths->combined_biome_map = al_clone_path(base_path);
-    sprintf(buffer, "%s-detailed%s", input.c_str(), extension.c_str());
-    al_set_path_filename(paths->combined_biome_map, buffer);
-
-    paths->elevation_map = al_clone_path(base_path);
-    sprintf(buffer, "%s-el%s", input.c_str(), extension.c_str());
-    al_set_path_filename(paths->elevation_map, buffer);
-
-    paths->elevation_map_with_water = al_clone_path(base_path);
-    sprintf(buffer, "%s-elw%s", input.c_str(), extension.c_str());
-    al_set_path_filename(paths->elevation_map_with_water, buffer);
-
-    paths->structure_map = al_clone_path(base_path);
-    sprintf(buffer, "%s-str%s", input.c_str(), extension.c_str());
-    al_set_path_filename(paths->structure_map, buffer);
-
-    paths->trade_map = al_clone_path(base_path);
-    sprintf(buffer, "%s-trd%s", input.c_str(), extension.c_str());
-    al_set_path_filename(paths->trade_map, buffer);
-
-    paths->temperature_map = al_clone_path(base_path);
-    sprintf(buffer, "%s-tmp%s", input.c_str(), extension.c_str());
-    al_set_path_filename(paths->temperature_map, buffer);
-
-    paths->rainfall_map = al_clone_path(base_path);
-    sprintf(buffer, "%s-rain%s", input.c_str(), extension.c_str());
-    al_set_path_filename(paths->rainfall_map, buffer);
-
-    paths->drainage_map = al_clone_path(base_path);
-    sprintf(buffer, "%s-drn%s", input.c_str(), extension.c_str());
-    al_set_path_filename(paths->drainage_map, buffer);
-
-    paths->savagery_map = al_clone_path(base_path);
-    sprintf(buffer, "%s-sav%s", input.c_str(), extension.c_str());
-    al_set_path_filename(paths->savagery_map, buffer);
-
-    paths->volcanism_map = al_clone_path(base_path);
-    sprintf(buffer, "%s-vol%s", input.c_str(), extension.c_str());
-    al_set_path_filename(paths->volcanism_map, buffer);
-
-    paths->vegetation_map = al_clone_path(base_path);
-    sprintf(buffer, "%s-veg%s", input.c_str(), extension.c_str());
-    al_set_path_filename(paths->vegetation_map, buffer);
-
-    paths->evil_map = al_clone_path(base_path);
-    sprintf(buffer, "%s-evil%s", input.c_str(), extension.c_str());
-    al_set_path_filename(paths->evil_map, buffer);
-
-    paths->salinity_map = al_clone_path(base_path);
-    sprintf(buffer, "%s-sal%s", input.c_str(), extension.c_str());
-    al_set_path_filename(paths->salinity_map, buffer);
-
-    al_destroy_path(base_path);
-
-    user_config.map_path = al_path_cstr(paths->biome_map, ALLEGRO_NATIVE_PATH_SEP);
-
 }
 
 void populate_filenames(string input, s_pathlist * paths)
@@ -325,7 +231,109 @@ void populate_filenames(string input, s_pathlist * paths)
     //fisrt we gotta make sure this is, in fact, an exported DF map
     if (input.compare(0, 14, "world_graphic-") != 0)
     {
-        populate_new_filenames(base_path, input, paths);
+        //it isn't the old style naming. Now we check if it's new new one.
+        size_t pos = input.find_last_of(".");
+        string extension = input.substr(pos);
+        string baseName = input.substr(0, pos);
+        pos = baseName.find_last_of("-");
+        string type = baseName.substr(pos);
+        baseName = baseName.substr(0, pos);
+
+        if (!(
+            type.compare("-bm") == 0
+            || type.compare("-detailed") == 0
+            || type.compare("-dip") == 0
+            || type.compare("-drn") == 0
+            || type.compare("-el") == 0
+            || type.compare("-elw") == 0
+            || type.compare("-evil") == 0
+            || type.compare("-hyd") == 0
+            || type.compare("-nob") == 0
+            || type.compare("-rain") == 0
+            || type.compare("-sal") == 0
+            || type.compare("-sav") == 0
+            || type.compare("-str") == 0
+            || type.compare("-tmp") == 0
+            || type.compare("-trd") == 0
+            || type.compare("-veg") == 0
+            || type.compare("-vol") == 0
+            ))
+        {
+            log_printf("Map name isn't a recognizable format");
+            return;
+        }
+        pos = baseName.length() - 12;
+        string date = baseName.substr(pos);
+        baseName = baseName.substr(0, pos);
+
+        current_save = baseName;
+
+        log_printf("Loaded up %s\n", current_save.c_str());
+
+        //and now it's time to fill out the list of image paths
+
+        char buffer[256];
+
+
+        paths->biome_map = al_clone_path(base_path);
+        sprintf(buffer, "%s%s-bm%s", baseName.c_str(), date.c_str(), extension.c_str());
+        al_set_path_filename(paths->biome_map, buffer);
+
+        paths->combined_biome_map = al_clone_path(base_path);
+        sprintf(buffer, "%s%s-detailed%s", baseName.c_str(), date.c_str(), extension.c_str());
+        al_set_path_filename(paths->combined_biome_map, buffer);
+
+        paths->elevation_map = al_clone_path(base_path);
+        sprintf(buffer, "%s%s-el%s", baseName.c_str(), date.c_str(), extension.c_str());
+        al_set_path_filename(paths->elevation_map, buffer);
+
+        paths->elevation_map_with_water = al_clone_path(base_path);
+        sprintf(buffer, "%s%s-elw%s", baseName.c_str(), date.c_str(), extension.c_str());
+        al_set_path_filename(paths->elevation_map_with_water, buffer);
+
+        paths->structure_map = al_clone_path(base_path);
+        sprintf(buffer, "%s%s-str%s", baseName.c_str(), date.c_str(), extension.c_str());
+        al_set_path_filename(paths->structure_map, buffer);
+
+        paths->trade_map = al_clone_path(base_path);
+        sprintf(buffer, "%s%s-trd%s", baseName.c_str(), date.c_str(), extension.c_str());
+        al_set_path_filename(paths->trade_map, buffer);
+
+        paths->temperature_map = al_clone_path(base_path);
+        sprintf(buffer, "%s%s-tmp%s", baseName.c_str(), date.c_str(), extension.c_str());
+        al_set_path_filename(paths->temperature_map, buffer);
+
+        paths->rainfall_map = al_clone_path(base_path);
+        sprintf(buffer, "%s%s-rain%s", baseName.c_str(), date.c_str(), extension.c_str());
+        al_set_path_filename(paths->rainfall_map, buffer);
+
+        paths->drainage_map = al_clone_path(base_path);
+        sprintf(buffer, "%s%s-drn%s", baseName.c_str(), date.c_str(), extension.c_str());
+        al_set_path_filename(paths->drainage_map, buffer);
+
+        paths->savagery_map = al_clone_path(base_path);
+        sprintf(buffer, "%s%s-sav%s", baseName.c_str(), date.c_str(), extension.c_str());
+        al_set_path_filename(paths->savagery_map, buffer);
+
+        paths->volcanism_map = al_clone_path(base_path);
+        sprintf(buffer, "%s%s-vol%s", baseName.c_str(), date.c_str(), extension.c_str());
+        al_set_path_filename(paths->volcanism_map, buffer);
+
+        paths->vegetation_map = al_clone_path(base_path);
+        sprintf(buffer, "%s%s-veg%s", baseName.c_str(), date.c_str(), extension.c_str());
+        al_set_path_filename(paths->vegetation_map, buffer);
+
+        paths->evil_map = al_clone_path(base_path);
+        sprintf(buffer, "%s%s-evil%s", baseName.c_str(), date.c_str(), extension.c_str());
+        al_set_path_filename(paths->evil_map, buffer);
+
+        paths->salinity_map = al_clone_path(base_path);
+        sprintf(buffer, "%s%s-sal%s", baseName.c_str(), date.c_str(), extension.c_str());
+        al_set_path_filename(paths->salinity_map, buffer);
+
+        al_destroy_path(base_path);
+
+        user_config.map_path = al_path_cstr(paths->biome_map, ALLEGRO_NATIVE_PATH_SEP);
         return;
     }
 
@@ -363,7 +371,7 @@ void populate_filenames(string input, s_pathlist * paths)
     current_save.erase(current_save.find_last_of("-"), std::string::npos); // -16014.bmp
     current_save.erase(current_save.find_last_of("-"), std::string::npos); // -250
     log_printf("Loaded up %s\n", current_save.c_str());
-    //and now it's time to fill out the list of image paths	
+    //and now it's time to fill out the list of image paths
     paths->biome_map = al_clone_path(base_path);
     sprintf(buffer, "world_graphic-bm-%s", input.c_str());
     al_set_path_filename(paths->biome_map, buffer);
@@ -430,7 +438,7 @@ static void show_files_list(ALLEGRO_FILECHOOSER *dialog,
     const ALLEGRO_FONT *font, ALLEGRO_COLOR info)
 {
     int count = al_get_native_file_dialog_count(dialog);
-    if (count = 0) return;
+    if (count == 0) return;
 
     populate_filenames(al_get_native_file_dialog_path(dialog, 0), &path_list);
 
@@ -560,9 +568,6 @@ int main(void)
     int mapmove_start_x = 0;
     int mapmove_start_y = 0;
 
-    ALLEGRO_COLOR unselected = al_map_rgb(255,255,255);
-    ALLEGRO_COLOR selected = al_map_rgb(128,128,128);
-
     ALLEGRO_KEYBOARD_STATE keys;
     while (1) {
         float h = al_get_display_height(display);
@@ -581,7 +586,7 @@ int main(void)
             {
                 if(al_key_down(&keys, ALLEGRO_KEY_LSHIFT) || al_key_down(&keys, ALLEGRO_KEY_RSHIFT))
                     user_config.map_y-=10;
-                else 
+                else
                     user_config.map_y--;
                 continue;
             }
@@ -589,7 +594,7 @@ int main(void)
             {
                 if(al_key_down(&keys, ALLEGRO_KEY_LSHIFT) || al_key_down(&keys, ALLEGRO_KEY_RSHIFT))
                     user_config.map_y+=10;
-                else 
+                else
                     user_config.map_y++;
                 continue;
             }
@@ -597,7 +602,7 @@ int main(void)
             {
                 if(al_key_down(&keys, ALLEGRO_KEY_LSHIFT) || al_key_down(&keys, ALLEGRO_KEY_RSHIFT))
                     user_config.map_x+=10;
-                else 
+                else
                     user_config.map_x++;
                 continue;
             }
@@ -605,7 +610,7 @@ int main(void)
             {
                 if(al_key_down(&keys, ALLEGRO_KEY_LSHIFT) || al_key_down(&keys, ALLEGRO_KEY_RSHIFT))
                     user_config.map_x-=10;
-                else 
+                else
                     user_config.map_x--;
                 continue;
             }
@@ -816,9 +821,9 @@ EXIT_LOOP: ;
             if(user_config.debugmode)
             {
                 test_map.draw_debug_info();
-                al_draw_textf(user_config.font, cur_dialog ? inactive : active, 0, y, ALLEGRO_ALIGN_LEFT, "Drawtime: %dms", test_map.draw_time);
-                al_draw_textf(user_config.font, cur_dialog ? inactive : active, 0, y + al_get_font_line_height(user_config.font), ALLEGRO_ALIGN_LEFT, "Load Time: %dms", test_map.load_time);
-                al_draw_textf(user_config.font, cur_dialog ? inactive : active, 0, y + al_get_font_line_height(user_config.font)*2, ALLEGRO_ALIGN_LEFT, "Fetch Time: %dms", test_map.tile_fetch_time);
+                al_draw_textf(user_config.font, cur_dialog ? inactive : active, 0, y, ALLEGRO_ALIGN_LEFT, "Drawtime: %dms", int(test_map.draw_time));
+                al_draw_textf(user_config.font, cur_dialog ? inactive : active, 0, y + al_get_font_line_height(user_config.font), ALLEGRO_ALIGN_LEFT, "Load Time: %dms", int(test_map.load_time));
+                al_draw_textf(user_config.font, cur_dialog ? inactive : active, 0, y + al_get_font_line_height(user_config.font)*2, ALLEGRO_ALIGN_LEFT, "Fetch Time: %dms", int(test_map.tile_fetch_time));
             }
             gui->logic();
             render_gui();
@@ -834,7 +839,7 @@ EXIT_LOOP: ;
             textlog = NULL;
         }
 
-        
+
         //Let Agui process the event last, because fuck Agui
         inputHandler->processEvent(event);
 
